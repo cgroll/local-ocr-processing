@@ -23,7 +23,7 @@ Das Ganze soll als konfigurierbare Pipeline in anderen Projekten wiederverwendba
 | # | Change | Inhalt |
 |---|---|---|
 | 1 | `select-document-dataset` | Datensatz recherchieren, Subset herunterladen, Manifest mit Quelle/Lizenz/Typ |
-| 2 | `define-models` | Modell-Registry für PyMuPDF, Layout, PP-OCRv6, VL-1.6, EmbeddingGemma 2: Versionen, VRAM, Laden/Entladen |
+| 2 ✓ | `define-models` | Modell-Registry für PyMuPDF, Layout, PP-OCRv6, VL-1.6, EmbeddingGemma 2: Versionen, VRAM, Laden/Entladen |
 | 3 | `parse-pipeline` | Seitenweise Parsing je Engine in ein einheitliches Zwischenformat, Subset-Lauf |
 | 4 | `visual-inspector` | HTML-Viewer: Original mit Layern vs. Rekonstruktion, Engine-Vergleich |
 | 5 | `configurable-routing` | Konfigurierbare Regeln, welche Engine welchen Blocktyp liefert (z. B. Tabellen: PyMuPDF vs. VL) |
@@ -64,13 +64,36 @@ uv run python -m docparse.dataset download
 
 Hinweise: Die Tags sind nur für 8 Dokumente von Hand geprüft. `page_range` umfasst bei den meisten Dokumenten die ersten 6 Seiten; bei Berichten und Scans ist das oft nur Vorspann. Bei geprüften Dokumenten ist er von Hand gesetzt (Spalte `notes`). Manche Hersteller (Analog Devices, ST, onsemi) blockieren automatische Downloads, dort PDF von Hand nach `data/raw/<id>/document.pdf` legen, `download` trägt dann Hash und Seitenzahl ein. Tests: `uv run pytest`.
 
+## Modelle
+
+Die Registry (`src/docparse/models/registry.py`, Überschreibungen in `models.toml`) führt die fünf Bausteine mit Version, Gerät und VRAM-Bedarf. Modelle werden einzeln über den `ModelManager` geladen und wieder freigegeben; ein Wächter verweigert Kombinationen, die nicht ins Budget (8192 MB abzüglich 512 MB Reserve) oder in den real freien GPU-Speicher passen.
+
+| Schlüssel | Modell | VRAM-Spitze (gemessen) | Laden / Inferenz |
+|---|---|---|---|
+| `pymupdf` | PyMuPDF | 0 MB (CPU) | – |
+| `layout` | PP-DocLayoutV3 | ~770 MB | 1–9 s / 0,8 s |
+| `ocr` | PP-OCRv6 (de) | ~1,4 GB | 2 s / 1,1 s |
+| `vl` | PaddleOCR-VL-1.6 | ~7,3 GB | 8 s / 3,6 s |
+| `embedding` | `google/embeddinggemma-2` (ohne Audio-Encoder, bf16) | ~0,9 GB | 6,5 s / 0,5 s |
+
+Messung mit einer Mini-Inferenz auf einer Seite; bei VL-1.6 wächst der Bedarf mit der Länge der Generierung, deshalb sind `max_new_tokens` (4096) und `timeout_s` (180) in der Registry gesetzt. VL-1.6 läuft im Smoke-Test in einem Kindprozess, damit ein hängender Lauf hart beendet werden kann. Nach der Freigabe bleiben höchstens ~200 MB (CUDA-Kontext) belegt.
+
+```bash
+uv run python -m docparse.models list              # Registry anzeigen
+uv run python -m docparse.models check vl ocr      # passt die Kombination ins Budget? (Exit 1 = nein)
+uv run python -m docparse.models smoke             # alle Modelle nacheinander laden, Mini-Inferenz, Zeiten und VRAM
+uv run python -m docparse.models smoke ocr layout  # nur ausgewählte
+```
+
+Beim ersten Lauf werden Gewichte geladen (Paddle nach `~/.paddlex`, EmbeddingGemma nach `~/.cache/huggingface`); `uv sync` lädt zudem mehrere GB CUDA-Wheels. Beides liegt nicht im Git.
+
 ## Setup
 
 ```bash
 uv sync
 ```
 
-Entwicklungsrechner: RTX 3070 Laptop (8 GB VRAM). VL-1.6 braucht ~6 GB, daneben keine weiteren GPU-Prozesse laufen lassen.
+Entwicklungsrechner: RTX 3070 Laptop (8 GB VRAM). VL-1.6 braucht ~7 GB, daneben keine weiteren GPU-Prozesse laufen lassen.
 
 ## Struktur (geplant)
 

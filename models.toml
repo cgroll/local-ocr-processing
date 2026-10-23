@@ -1,0 +1,10 @@
+# Overrides for the model registry (see src/docparse/models/registry.py).
+# Only `params` of known models and the VRAM budget can be set here.
+
+[budget]
+total_mb = 8192
+reserve_mb = 512
+
+[models.embedding.params]
+model_id = "google/embeddinggemma-2"
+dim = 768

@@ -10,10 +10,18 @@ dependencies = [
     "pandas",
     "pyarrow",
     "httpx>=0.28.1",
+    "paddlepaddle-gpu==3.3.1",
+    "paddleocr[doc-parser]>=3.7",
+    "sentence-transformers[image]>=6.1",
 ]
 
-# Model dependencies are added by the `define-models` change
-# (paddlepaddle-gpu from the paddle-cu126 index, paddleocr[doc-parser]>=3.7, embedding stack).
+[tool.uv.sources]
+paddlepaddle-gpu = { index = "paddle-cu126" }
+
+[[tool.uv.index]]
+name = "paddle-cu126"
+url = "https://www.paddlepaddle.org.cn/packages/stable/cu126/"
+explicit = true
 
 [build-system]
 requires = ["hatchling"]

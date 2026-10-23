@@ -21,7 +21,7 @@ Das Projekt enthält bisher nur die Datensatz-Pipeline (`src/docparse/dataset/`)
 
 **VRAM-Zahlen als Schätzung, Wächter prüft zusätzlich real.** `vram_mb` stammt aus den Messungen des Referenzprojekts (ocr 1500, layout ca. 500 vorläufig, vl 6200, embedding vorläufig, im Smoke-Test nachzumessen). Der Wächter vergleicht Summe der geladenen Modelle plus Kandidat mit dem Budget und fragt zusätzlich den freien Speicher der GPU ab (`nvidia-smi` über `pynvml`-freien Aufruf per `subprocess`, damit keine weitere Abhängigkeit nötig ist). Fremde Prozesse wie der TTS-Daemon im Referenzprojekt werden so erkannt.
 
-**Loader pro Baustein, gemeinsame Schnittstelle.** `ModelHandle` mit `load()`, `unload()`, `__enter__/__exit__`; je Baustein ein dünner Loader unter `src/docparse/models/loaders/`. Importe von Paddle und Embedding-Bibliothek passieren erst in `load()`, damit Registry und Tests ohne GPU und ohne installierte Gewichte laufen. Freigeben bedeutet Referenz löschen, `gc.collect()` und `paddle.device.cuda.empty_cache()`; bei Torch-Embeddings entsprechend `torch.cuda.empty_cache()`.
+**Loader pro Baustein, gemeinsame Schnittstelle.** `ModelHandle` mit `load()`, `unload()`, `__enter__/__exit__`; je Baustein ein dünner Loader in `src/docparse/models/loaders.py`. Importe von Paddle und Embedding-Bibliothek passieren erst in `load()`, damit Registry und Tests ohne GPU und ohne installierte Gewichte laufen. Freigeben bedeutet Referenz löschen, `gc.collect()` und `paddle.device.cuda.empty_cache()`; bei Torch-Embeddings entsprechend `torch.cuda.empty_cache()`.
 
 **Embedding-Stack: `sentence-transformers`.** EmbeddingGemma wird in der Regel darüber geladen. Die genaue Hugging-Face-ID für „EmbeddingGemma 2“ ist zum Zeitpunkt des Plans nicht verifiziert und steht deshalb in `models.toml` als Parameter; der erste Schritt der Umsetzung prüft die ID und die Token-Anforderung (Gemma-Lizenz kann Login verlangen). Ist sie nicht erreichbar, bleibt der Eintrag registriert und der Smoke-Test meldet ihn als Fehler, die anderen Modelle sind davon unberührt.
 
@@ -41,5 +41,5 @@ Das Projekt enthält bisher nur die Datensatz-Pipeline (`src/docparse/dataset/`)
 
 ## Open Questions
 
-- Exakte Hugging-Face-ID und Zugriffsbedingungen von EmbeddingGemma 2 (im ersten Umsetzungsschritt klären).
-- Ob PP-DocLayoutV3 allein ladbar ist oder nur über die VL-Pipeline; falls nur dort, wird `layout` als eigener Eintrag mit Hinweis geführt und über die Layout-Komponente der Pipeline geladen.
+- Geklärt (Umsetzung 1.1): `google/embeddinggemma-2`, Apache 2.0, ohne Login nutzbar, liegt im lokalen Hugging-Face-Cache. Multimodal (Text, Bild, Audio), 768 Dimensionen, über `sentence-transformers` ladbar; mit `config_kwargs={"audio_config": None}` entfällt der Audio-Encoder (ca. 440M statt 740M Parameter). Task-Präfixe über `prompt_name` (`Document`, `SearchQuery`).
+- Geklärt (Umsetzung 1.2): PP-DocLayoutV3 ist einzeln ladbar über `paddleocr.LayoutDetection(model_name="PP-DocLayoutV3")`. Für `vl` begrenzt `PaddleOCRVL.predict(max_new_tokens=...)` die Generierung, `markdown_ignore_labels=[]` erhält Kopf-/Fußzeilen.
