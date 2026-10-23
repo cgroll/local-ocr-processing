@@ -24,7 +24,7 @@ Das Ganze soll als konfigurierbare Pipeline in anderen Projekten wiederverwendba
 |---|---|---|
 | 1 | `select-document-dataset` | Datensatz recherchieren, Subset herunterladen, Manifest mit Quelle/Lizenz/Typ |
 | 2 ✓ | `define-models` | Modell-Registry für PyMuPDF, Layout, PP-OCRv6, VL-1.6, EmbeddingGemma 2: Versionen, VRAM, Laden/Entladen |
-| 3 | `parse-pipeline` | Seitenweise Parsing je Engine in ein einheitliches Zwischenformat, Subset-Lauf |
+| 3 ✓ | `parse-pipeline` | Seitenweise Parsing je Engine in ein einheitliches Zwischenformat, Subset-Lauf |
 | 4 | `visual-inspector` | HTML-Viewer: Original mit Layern vs. Rekonstruktion, Engine-Vergleich |
 | 5 | `configurable-routing` | Konfigurierbare Regeln, welche Engine welchen Blocktyp liefert (z. B. Tabellen: PyMuPDF vs. VL) |
 | 6 | `embedding-search` | Embeddings, Index, Volltext- und Vektorsuche |
@@ -86,6 +86,31 @@ uv run python -m docparse.models smoke ocr layout  # nur ausgewählte
 ```
 
 Beim ersten Lauf werden Gewichte geladen (Paddle nach `~/.paddlex`, EmbeddingGemma nach `~/.cache/huggingface`); `uv sync` lädt zudem mehrere GB CUDA-Wheels. Beides liegt nicht im Git.
+
+## Parsing
+
+`docparse.parse` schreibt pro Engine und Seite ein JSON in das gemeinsame Zwischenformat: `data/results/<engine>/<doc>/<page>.json` (Seitenzahl vierstellig, 1-basiert). Das Seitenbild liegt einmal mit 150 DPI unter `data/pages/<doc>/<page>.png`; **alle Koordinaten sind Pixel in diesem Bild** (Ursprung links oben). Ein Block hat `type` (`text`, `title`, `header`, `footer`, `table`, `figure`, `formula`, `chart`, `list`, `caption`, `line`, `image`, `drawing`, `other`), `label` (Original der Engine), `bbox`, `polygon`, `text`/`markdown`/`html`, `engine`, `confidence` (null, wenn die Engine keine liefert) und `order`.
+
+| Engine | liefert | Median pro Seite (405 Seiten) |
+|---|---|---|
+| `pymupdf` | Textblöcke, Bilder, gruppierte Vektorgrafiken, einfache Tabellen (HTML), keine Konfidenz | 0,3 s |
+| `layout` | typisierte Blöcke (PP-DocLayoutV3) mit Konfidenz, ohne Text | 0,1 s |
+| `ocr` | Textzeilen mit Polygon und Konfidenz (PP-OCRv6) | 0,9 s |
+| `vl` | typisierte Blöcke mit Markdown, Tabellen als HTML (PaddleOCR-VL-1.6) | 9,5 s (30 Seiten) |
+
+```bash
+uv run python -m docparse.parse run --engines pymupdf,layout,ocr   # alle Seiten laut Manifest, fortsetzbar
+uv run python -m docparse.parse run --engines vl --docs ds-lm317   # nur ein Dokument
+uv run python -m docparse.parse run --engines vl --limit 20        # höchstens 20 Seiten
+uv run python -m docparse.parse validate                           # Format und Boxen prüfen
+uv run python -m docparse.parse summary                            # Seiten, Fehler, Laufzeiten, Blockzahlen je Engine
+```
+
+Engines laufen nacheinander, jeweils mit einem geladenen Modell. Vorhandene `ok`-Ergebnisse werden übersprungen, Seiten mit Status `error` beim nächsten Lauf erneut versucht (`--force` rechnet alles neu). VL läuft in einem eigenen Prozess: überschreitet eine Seite `timeout_s` (180 s), wird der Prozess beendet, die Seite als Fehler gespeichert und mit einem frischen Prozess weitergemacht. Das passiert selten und ist meist nicht reproduzierbar (zwei Seiten im Teillauf liefen beim zweiten Versuch in 9 s und 17 s durch).
+
+**Stand:** `pymupdf`, `layout` und `ocr` liegen für alle 405 Seiten vor (0 Fehler, `validate` ohne Beanstandung). `vl` liegt für 30 Seiten aus 5 Dokumenten vor (LM317, NE555, ein Bitsavers-Scan, ein NASA-Bericht, eine GovDocs-Datei). Der Rest läuft mit `uv run python -m docparse.parse run --engines vl` und dauert grob 1,5 bis 3 Stunden (375 Seiten, Median ~10 s plus gelegentliche Timeouts).
+
+**Bewusste Entscheidungen:** Orientierungskorrektur und Entzerrung sind für OCR und VL aus, damit die Boxen zum Seitenbild passen; gedrehte Scans bleiben gedreht. pymupdf-Boxen werden auf die Seite beschnitten, Blöcke ganz außerhalb entfallen. Die Engines werden nicht zusammengeführt (Change `configurable-routing`), und OCR-Zeilen sind nicht den Layout-Blöcken zugeordnet.
 
 ## Setup
 

@@ -26,6 +26,6 @@
 ## 4. Subset-Lauf und Doku
 
 - [x] 4.1 Lauf aller Engines außer VL über den gesamten Datensatz. Ergebnis: Zusammenfassung zeigt 405 Seiten je Engine, Fehler sind begründet; `validate` meldet 0 Fehler.
-- [ ] 4.2 VL-Lauf über einen Teil des Datensatzes (mindestens ein Dokument je Gruppe, ca. 20 Seiten). Ergebnis: Zusammenfassung mit Laufzeiten und Timeouts; Beobachtungen zu weggelassenen Inhalten notiert.
-- [ ] 4.3 Gesamtlauf von VL über den Rest, falls Zeit erlaubt, sonst fortsetzbar dokumentieren. Ergebnis: Stand der Abdeckung im README.
-- [ ] 4.4 README um Abschnitt „Parsing" ergänzen (Format, Befehle, Laufzeiten) und Roadmap-Zeile 3 abhaken. Ergebnis: Abschnitt vorhanden.
+- [x] 4.2 VL-Lauf über einen Teil des Datensatzes (mindestens ein Dokument je Gruppe, ca. 20 Seiten). Ergebnis: Zusammenfassung mit Laufzeiten und Timeouts; Beobachtungen zu weggelassenen Inhalten notiert.
+- [x] 4.3 Gesamtlauf von VL über den Rest nicht abgewartet, sondern fortsetzbar dokumentiert (läuft separat, z. B. über Nacht). Ergebnis: Stand der Abdeckung und Befehl im README.
+- [x] 4.4 README um Abschnitt „Parsing" ergänzen (Format, Befehle, Laufzeiten) und Roadmap-Zeile 3 abhaken. Ergebnis: Abschnitt vorhanden.

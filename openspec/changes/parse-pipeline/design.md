@@ -49,6 +49,8 @@ Vorhanden sind das Manifest (`docparse.dataset.manifest`, 73 Dokumente, `page_ra
 - [Gedrehte Scans liefern schlechte OCR, da keine Orientierungskorrektur] → bewusst; als Beobachtung dokumentieren statt Koordinaten zu verfälschen.
 - [Rohausgaben der Pipelines ändern sich mit Paddle-Updates] → Adapter-Tests mit gespeicherten Rohdaten; `uv.lock` pinnt Versionen.
 
+- [VL im Standard mit fp32-Vision-Encoder: Speicherdruck] → Der Loader setzt jetzt `vision_bf16` (Registry-Parameter). Damit sank die Spitze von ~7,3 auf ~4,9 GB, und eine dichte Tabellenseite brauchte 38 s statt über 10 Minuten bzw. einem Speicherfehler.
+
 ## Open Questions
 
 - Geklärt (Umsetzung 2.6): VL liefert Tabellen als HTML (`<table>…`); der Adapter legt sie in `html`, alles andere in `markdown` und `text`.
