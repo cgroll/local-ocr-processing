@@ -39,9 +39,10 @@ def test_second_load_reuses_instance():
 def test_incompatible_combination_is_refused_and_keeps_loaded_model():
     m, loaders = manager()
     m.load("vl")
-    with pytest.raises(ModelLoadError, match=r"'ocr'.*\['vl'\].*MB needed, 7680 MB usable"):
-        m.load("ocr")
-    assert m.loaded == ["vl"] and loaders["ocr"].loads == 0
+    m.load("ocr")
+    with pytest.raises(ModelLoadError, match=r"'embedding'.*\['vl', 'ocr'\].*MB needed, 7680 MB usable"):
+        m.load("embedding")
+    assert m.loaded == ["vl", "ocr"] and loaders["embedding"].loads == 0
 
 
 def test_foreign_process_memory_is_reported():

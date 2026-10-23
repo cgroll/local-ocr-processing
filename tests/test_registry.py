@@ -57,10 +57,10 @@ def test_budget_override(tmp_path):
     assert Registry.load(cfg).budget.total_mb == 24000
 
 
-def test_vl_and_ocr_do_not_fit_together():
+def test_all_models_together_do_not_fit():
     reg = Registry.load(None)
-    fit = reg.fits(["vl", "ocr"])
-    assert not fit.ok and fit.needed_mb == reg.get("vl").vram_mb + reg.get("ocr").vram_mb
+    fit = reg.fits(reg.keys())
+    assert not fit.ok and fit.needed_mb == sum(s.vram_mb for s in reg.specs())
     assert fit.budget_mb == reg.budget.usable_mb
     assert "does not fit" in str(fit)
 

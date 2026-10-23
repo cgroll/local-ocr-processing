@@ -57,8 +57,8 @@ def default_specs() -> dict[str, ModelSpec]:
         ),
         # Includes its own PP-DocLayoutV3 instance, so `vl` and `layout` are not loaded together.
         ModelSpec(
-            "vl", "tables, formulas and charts as markdown/html", "PaddleOCR-VL-1.6", "gpu", 7600,
-            {"max_new_tokens": 4096, "timeout_s": 180, "markdown_ignore_labels": []},
+            "vl", "tables, formulas and charts as markdown/html", "PaddleOCR-VL-1.6", "gpu", 5500,
+            {"max_new_tokens": 2048, "timeout_s": 180, "markdown_ignore_labels": [], "vision_bf16": True},
         ),
         ModelSpec(
             "embedding", "text and image embeddings in one 768-dim space", "google/embeddinggemma-2", "gpu", 1100,

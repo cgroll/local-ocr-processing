@@ -51,4 +51,5 @@ Vorhanden sind das Manifest (`docparse.dataset.manifest`, 73 Dokumente, `page_ra
 
 ## Open Questions
 
-- Ob VL-Tabellen als `html` oder `markdown` am besten in `table`-Blöcken liegen (Entscheidung im Adapter-Task anhand echter Ausgabe; beide Felder bleiben im Format möglich).
+- Geklärt (Umsetzung 2.6): VL liefert Tabellen als HTML (`<table>…`); der Adapter legt sie in `html`, alles andere in `markdown` und `text`.
+- Beobachtung (Umsetzung 2.1): Auf dichten Tabellenseiten (z. B. `ds-lm317` Seite 4 und 6) erzeugt VL-1.6 sehr langsam Token für Token (CPU-gebunden, GPU-Auslastung nahe 0 %) und läuft bei 2048 neuen Token in einen GPU-Speicherfehler. Das ist die in der Registry vorgesehene Situation; Seiten-Timeout und Worker-Neustart (Task 3.4) fangen sie ab, solche Seiten werden `error`-Ergebnisse.

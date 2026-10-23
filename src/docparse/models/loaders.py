@@ -33,6 +33,14 @@ class LayoutLoader(_Base):
 class VlLoader(_Base):
     def load(self, spec: ModelSpec):
         from paddleocr import PaddleOCRVL
+
+        if spec.params["vision_bf16"]:
+            # Keep the vision encoder in bf16 too (default fp32): without the headroom, long generations
+            # on an 8 GB card thrash the allocator or run out of memory and take minutes per page.
+            from paddlex.inference.models.doc_vlm.modeling.paddleocr_vl._paddleocr_vl import (
+                PaddleOCRVLForConditionalGeneration,
+            )
+            PaddleOCRVLForConditionalGeneration._keep_in_fp32_modules = None
         return PaddleOCRVL(markdown_ignore_labels=spec.params["markdown_ignore_labels"])
 
 

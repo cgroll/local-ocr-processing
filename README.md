@@ -73,10 +73,10 @@ Die Registry (`src/docparse/models/registry.py`, Überschreibungen in `models.to
 | `pymupdf` | PyMuPDF | 0 MB (CPU) | – |
 | `layout` | PP-DocLayoutV3 | ~770 MB | 1–9 s / 0,8 s |
 | `ocr` | PP-OCRv6 (de) | ~1,4 GB | 2 s / 1,1 s |
-| `vl` | PaddleOCR-VL-1.6 | ~7,3 GB | 8 s / 3,6 s |
+| `vl` | PaddleOCR-VL-1.6 (Vision-Encoder in bf16) | ~4,9 GB | 8–17 s / 4–40 s |
 | `embedding` | `google/embeddinggemma-2` (ohne Audio-Encoder, bf16) | ~0,9 GB | 6,5 s / 0,5 s |
 
-Messung mit einer Mini-Inferenz auf einer Seite; bei VL-1.6 wächst der Bedarf mit der Länge der Generierung, deshalb sind `max_new_tokens` (4096) und `timeout_s` (180) in der Registry gesetzt. VL-1.6 läuft im Smoke-Test in einem Kindprozess, damit ein hängender Lauf hart beendet werden kann. Nach der Freigabe bleiben höchstens ~200 MB (CUDA-Kontext) belegt.
+Messung mit einer Mini-Inferenz auf einer Seite; bei VL-1.6 wächst der Bedarf mit der Länge der Generierung. Mit fp32-Vision-Encoder (Paddle-Standard) lag die Spitze bei ~7,3 GB, und lange Generierungen liefen auf dichten Tabellenseiten in Speicherdruck (Minuten pro Seite oder Speicherfehler); `vision_bf16` behebt das (dichte Tabellenseite: 38 s statt über 10 min). Deshalb sind `max_new_tokens` (2048) und `timeout_s` (180) in der Registry gesetzt. VL-1.6 läuft im Smoke-Test in einem Kindprozess, damit ein hängender Lauf hart beendet werden kann. Nach der Freigabe bleiben höchstens ~200 MB (CUDA-Kontext) belegt.
 
 ```bash
 uv run python -m docparse.models list              # Registry anzeigen
@@ -93,7 +93,7 @@ Beim ersten Lauf werden Gewichte geladen (Paddle nach `~/.paddlex`, EmbeddingGem
 uv sync
 ```
 
-Entwicklungsrechner: RTX 3070 Laptop (8 GB VRAM). VL-1.6 braucht ~7 GB, daneben keine weiteren GPU-Prozesse laufen lassen.
+Entwicklungsrechner: RTX 3070 Laptop (8 GB VRAM). VL-1.6 braucht ~5 GB, daneben keine weiteren GPU-Prozesse laufen lassen.
 
 ## Struktur (geplant)
 

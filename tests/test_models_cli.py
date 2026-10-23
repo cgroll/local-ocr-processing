@@ -10,7 +10,7 @@ def test_list_runs_without_gpu(capsys):
 
 def test_check_exit_codes(capsys):
     assert main(["check", "ocr", "layout"]) == 0
-    assert main(["check", "vl", "ocr"]) == 1
+    assert main(["check", "vl", "ocr", "layout", "embedding"]) == 1
     assert "does not fit" in capsys.readouterr().out
 
 
