@@ -1,0 +1,14 @@
+# Scanned manuals and schematics of old DEC computers from Bitsavers (picked by hand from the
+# directory listings; sizes 1-7 MB). Rights status is unclear: marked unknown, local use only.
+#! group=scan rights=unknown rights_source="bitsavers.org, rights status unclear, local use only" id_prefix=bs
+https://bitsavers.org/pdf/dec/pdp8/disc/DEC-08-HRKA-D_RK8_Schem_Dec70.pdf | schematic;diagram | RK8 disk schematics
+https://bitsavers.org/pdf/dec/pdp8/disc/RL8A_Schematics.pdf | schematic;diagram | RL8A schematics
+https://bitsavers.org/pdf/dec/pdp8/pdp8/PDP-8_Memory_Schematics_Jun70.pdf | schematic;diagram | PDP-8 memory schematics
+https://bitsavers.org/pdf/dec/pdp8/pdp8/PDP-8_Processor_Schematics_Jun70.pdf | schematic;diagram | PDP-8 processor schematics
+https://bitsavers.org/pdf/dec/pdp8/pdp8a/KC8-A_schem.pdf | schematic;diagram | KC8-A schematics
+https://bitsavers.org/pdf/dec/pdp8/pdp8e/MP00075_LA8_Field_Mainteneace_Print_Set.pdf | schematic;diagram | LA8 field maintenance print set
+https://bitsavers.org/pdf/dec/pdp8/pdp8a/EK-MS8CD-TM-001_MS8-C_MOS_Memory_Technical_Manual_Sep80.pdf | schematic;table;diagram | MS8-C memory technical manual
+https://bitsavers.org/pdf/dec/pdp8/omnibus/EK-KL8JA-TM-001_KL8-JA_Technical_Manual_Aug77.pdf | schematic;table;diagram | KL8-JA technical manual
+https://bitsavers.org/pdf/dec/pdp11/minc/MP00652_MNC11_Schematics_Jul78.pdf | schematic;diagram | MINC-11 schematics
+https://bitsavers.org/pdf/dec/pdp8/pdp8/F-831F_PDP-8_Interface_Manual_May65.pdf | diagram;table;plain-text | PDP-8 interface manual
+https://bitsavers.org/pdf/dec/pdp8/disc/DEC-00-DF32-D_maint_Jul72.pdf | schematic;table;diagram | DF32 maintenance manual

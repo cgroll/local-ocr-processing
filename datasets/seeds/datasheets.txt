@@ -1,0 +1,26 @@
+# Vendor datasheets (native PDFs with tables, block diagrams, application circuits).
+# Rights: vendor copyright; local use only, never committed or published.
+# Tags are a first guess; they are checked by eye in task 4.4.
+#! group=datasheet rights=vendor-copyright rights_source="vendor-hosted datasheet, local use only" id_prefix=ds
+https://www.ti.com/lit/ds/symlink/lm317.pdf | table;schematic;diagram | LM317 adjustable regulator (TI)
+https://www.ti.com/lit/ds/symlink/ne555.pdf | table;schematic;diagram | NE555 timer (TI)
+https://www.ti.com/lit/ds/symlink/lm358.pdf | table;schematic;diagram | LM358 dual op amp (TI)
+https://www.ti.com/lit/ds/symlink/tps5430.pdf | table;schematic;diagram | TPS5430 buck converter (TI)
+https://www.ti.com/lit/ds/symlink/lm2596.pdf | table;schematic;diagram | LM2596 buck regulator (TI)
+https://www.ti.com/lit/ds/symlink/ads1115.pdf | table;diagram | ADS1115 ADC (TI)
+https://www.ti.com/lit/ds/symlink/ina219.pdf | table;schematic;diagram | INA219 current monitor (TI)
+https://www.ti.com/lit/ds/symlink/sn74hc595.pdf | table;diagram | SN74HC595 shift register (TI)
+https://www.ti.com/lit/ds/symlink/tl431.pdf | table;schematic;diagram | TL431 shunt reference (TI)
+https://www.ti.com/lit/ds/symlink/lm393.pdf | table;schematic | LM393 comparator (TI)
+https://www.ti.com/lit/ds/symlink/ucc28180.pdf | table;schematic;diagram | UCC28180 PFC controller (TI)
+https://www.ti.com/lit/ds/symlink/drv8825.pdf | table;schematic;diagram | DRV8825 stepper driver (TI)
+https://www.ti.com/lit/ds/symlink/opa2134.pdf | table;schematic;diagram | OPA2134 audio op amp (TI)
+https://www.ti.com/lit/ds/symlink/tlv9062.pdf | table;schematic;diagram | TLV9062 op amp (TI)
+https://www.infineon.com/dgdl/Infineon-IRF540N-DataSheet-v01_01-EN.pdf | table;diagram | IRF540N MOSFET (Infineon)
+https://ww1.microchip.com/downloads/aemDocuments/documents/MCU08/ProductDocuments/DataSheets/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061B.pdf | table;diagram;schematic | ATmega328P microcontroller (Microchip)
+https://www.vishay.com/docs/91021/irf540.pdf | table;diagram | IRF540 MOSFET (Vishay)
+https://www.diodes.com/assets/Datasheets/AP2112.pdf | table;diagram;schematic | AP2112 LDO regulator (Diodes Inc.)
+https://www.ti.com/lit/ds/symlink/lm324.pdf | table;schematic;diagram | LM324 quad op amp (TI)
+https://www.ti.com/lit/ds/symlink/lm741.pdf | table;schematic | LM741 op amp (TI)
+https://www.ti.com/lit/ds/symlink/ne5532.pdf | table;schematic;diagram | NE5532 dual audio op amp (TI)
+https://www.ti.com/lit/ds/symlink/tps62130.pdf | table;schematic;diagram | TPS62130 buck converter (TI)

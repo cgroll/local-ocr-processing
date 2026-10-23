@@ -1,0 +1,14 @@
+schema: spec-driven
+
+context: |
+  Lokale Dokument-Parsing-Pipeline (PyMuPDF, PP-DocLayoutV3, PP-OCRv6, PaddleOCR-VL-1.6)
+  mit HTML-Viewer zur visuellen Prüfung und semantischer Suche (EmbeddingGemma 2).
+  Hardware: RTX 3070 Laptop, 8 GB VRAM; Modelle nacheinander laden, nicht parallel.
+  Artefakte (proposal, design, specs, tasks) auf Deutsch schreiben, Code auf Englisch.
+  Roadmap der Changes steht in README.md.
+
+rules:
+  proposal:
+    - Nicht-Ziele ausdrücklich nennen
+  tasks:
+    - Kleine, einzeln prüfbare Schritte; Ergebnis jedes Schritts benennen
