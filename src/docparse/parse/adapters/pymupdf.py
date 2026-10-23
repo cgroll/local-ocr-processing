@@ -12,6 +12,9 @@ MAX_DRAWINGS = 200  # a page with more clusters is mostly hatching; keep the lar
 
 
 def to_blocks(page: pymupdf.Page, to_pixels: pymupdf.Matrix) -> list[Block]:
+    """Blocks of one page; boxes are clipped to the page image (scans and drawings often reach beyond the page); blocks outside the page are dropped."""
+    bounds = pymupdf.Rect(page.rect) * page.derotation_matrix * to_pixels  # page.rect is rotated, block coordinates are not
+    bounds.normalize()
     blocks: list[Block] = []
     table_rects: list[pymupdf.Rect] = []
 
@@ -41,9 +44,13 @@ def to_blocks(page: pymupdf.Page, to_pixels: pymupdf.Matrix) -> list[Block]:
     for rect in _drawing_clusters(page):
         blocks.append(Block(type="drawing", label="drawing", bbox=rect_to_pixels(rect, to_pixels), engine="pymupdf"))
 
-    for i, b in enumerate(blocks):
-        b.order = i
-    return blocks
+    visible = []
+    for b in blocks:
+        b.bbox = [max(b.bbox[0], bounds.x0), max(b.bbox[1], bounds.y0), min(b.bbox[2], bounds.x1), min(b.bbox[3], bounds.y1)]
+        if b.bbox[0] <= b.bbox[2] and b.bbox[1] <= b.bbox[3]:  # blocks entirely off the page are dropped
+            b.order = len(visible)
+            visible.append(b)
+    return visible
 
 
 def _rows_to_html(rows: list[list[str | None]]) -> str:

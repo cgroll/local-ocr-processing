@@ -126,3 +126,43 @@ def test_pymupdf_scanned_page_has_only_an_image(tmp_path):
     with pymupdf.open(tmp_path / "s.pdf") as doc:
         blocks = pm_adapter.to_blocks(doc[0], rp.to_pixels)
     assert [b.type for b in blocks] == ["image"]
+
+
+def test_pymupdf_boxes_are_clipped_to_the_page(tmp_path):
+    with pymupdf.open() as doc:
+        page = doc.new_page(width=200, height=200)
+        pix = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, 50, 50), False)
+        pix.set_rect(pix.irect, (10, 10, 10))
+        page.insert_image(pymupdf.Rect(-30, -20, 260, 230), pixmap=pix)
+        doc.save(tmp_path / "o.pdf")
+    rp = render_page(tmp_path / "o.pdf", 1, 72)
+    with pymupdf.open(tmp_path / "o.pdf") as doc:
+        (b,) = pm_adapter.to_blocks(doc[0], rp.to_pixels)
+    assert b.bbox == [0, 0, 200, 200]
+
+
+def test_pymupdf_blocks_outside_the_page_are_dropped(tmp_path):
+    with pymupdf.open() as doc:
+        page = doc.new_page(width=200, height=200)
+        pix = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, 50, 50), False)
+        pix.set_rect(pix.irect, (10, 10, 10))
+        page.insert_image(pymupdf.Rect(300, 300, 400, 400), pixmap=pix)
+        doc.save(tmp_path / "off.pdf")
+    rp = render_page(tmp_path / "off.pdf", 1, 72)
+    with pymupdf.open(tmp_path / "off.pdf") as doc:
+        assert pm_adapter.to_blocks(doc[0], rp.to_pixels) == []
+
+
+def test_pymupdf_adapter_on_rotated_page(tmp_path):
+    with pymupdf.open() as doc:
+        page = doc.new_page(width=300, height=200)
+        page.insert_text((40, 60), "rotated", fontsize=14)
+        page.set_rotation(90)
+        doc.save(tmp_path / "rot.pdf")
+    rp = render_page(tmp_path / "rot.pdf", 1, 72)
+    with pymupdf.open(tmp_path / "rot.pdf") as doc:
+        (b,) = pm_adapter.to_blocks(doc[0], rp.to_pixels)
+    assert (rp.width, rp.height) == (200, 300)
+    assert 0 <= b.bbox[0] < b.bbox[2] <= 200 and 0 <= b.bbox[1] < b.bbox[3] <= 300
+    # the text sits left of x=100 and above y=150 on the unrotated page; after a 90 degree turn it is in the upper right
+    assert b.bbox[0] > 100 and b.bbox[3] < 150
