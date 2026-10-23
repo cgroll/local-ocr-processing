@@ -25,7 +25,7 @@ Das Ganze soll als konfigurierbare Pipeline in anderen Projekten wiederverwendba
 | 1 | `select-document-dataset` | Datensatz recherchieren, Subset herunterladen, Manifest mit Quelle/Lizenz/Typ |
 | 2 ✓ | `define-models` | Modell-Registry für PyMuPDF, Layout, PP-OCRv6, VL-1.6, EmbeddingGemma 2: Versionen, VRAM, Laden/Entladen |
 | 3 ✓ | `parse-pipeline` | Seitenweise Parsing je Engine in ein einheitliches Zwischenformat, Subset-Lauf |
-| 4 | `visual-inspector` | HTML-Viewer: Original mit Layern vs. Rekonstruktion, Engine-Vergleich |
+| 4 ✓ | `visual-inspector` | HTML-Viewer: Original mit Layern vs. Rekonstruktion, Engine-Vergleich |
 | 5 | `configurable-routing` | Konfigurierbare Regeln, welche Engine welchen Blocktyp liefert (z. B. Tabellen: PyMuPDF vs. VL) |
 | 6 | `embedding-search` | Embeddings, Index, Volltext- und Vektorsuche |
 | 7 | `retrieval-eval` | Testfragen, Retrieval-Metriken, optional RAG |
@@ -111,6 +111,40 @@ Engines laufen nacheinander, jeweils mit einem geladenen Modell. Vorhandene `ok`
 **Stand:** `pymupdf`, `layout` und `ocr` liegen für alle 405 Seiten vor (0 Fehler, `validate` ohne Beanstandung). `vl` liegt für 30 Seiten aus 5 Dokumenten vor (LM317, NE555, ein Bitsavers-Scan, ein NASA-Bericht, eine GovDocs-Datei). Der Rest läuft mit `uv run python -m docparse.parse run --engines vl` und dauert grob 1,5 bis 3 Stunden (375 Seiten, Median ~10 s plus gelegentliche Timeouts).
 
 **Bewusste Entscheidungen:** Orientierungskorrektur und Entzerrung sind für OCR und VL aus, damit die Boxen zum Seitenbild passen; gedrehte Scans bleiben gedreht. pymupdf-Boxen werden auf die Seite beschnitten, Blöcke ganz außerhalb entfallen. Die Engines werden nicht zusammengeführt (Change `configurable-routing`), und OCR-Zeilen sind nicht den Layout-Blöcken zugeordnet.
+
+## Viewer
+
+`docparse.viewer` erzeugt aus Manifest, Seitenbildern und Ergebnissen eine statische Seite unter `data/viewer/` (nicht im Git, kein Server nötig, keine externen Ressourcen). Die Seitenbilder werden aus `data/pages/` verlinkt, der Ordner muss also neben `data/viewer/` liegen.
+
+```bash
+uv run python -m docparse.viewer build                     # alle Dokumente mit mindestens einem Ergebnis
+uv run python -m docparse.viewer build --docs ds-lm317     # nur ausgewählte Dokumente
+```
+
+Das Kommando nennt den Pfad der `index.html`. Direkt aus dem Dateisystem öffnen oder lokal ausliefern (`python -m http.server` im Ordner `data/`).
+
+**Bedienung:**
+- *Index:* Abdeckung je Engine (ok / Fehler / fehlend), Filter nach Gruppe, Tag und Freitext.
+- *Seite, links:* Original mit Ebenen je Engine (beim Öffnen alle aus), je Ebene ein Typfilter. Beschriftung der Boxen: Typ und Konfidenz.
+- *Seite, rechts:* Rekonstruktion aus einer wählbaren Engine (Text an der Boxposition, Tabellen als Tabelle, Bilder als Ausschnitt, Formeln als Quelltext, leere Blöcke als beschriftete Box). „Engines vergleichen" zeigt stattdessen zwei Rekonstruktionen im gleichen Maßstab.
+- *Block anklicken:* hebt ihn in beiden Ansichten hervor, rechts erscheinen alle Felder. Escape oder Klick ins Leere hebt die Auswahl auf.
+- *Navigation:* Pfeiltasten blättern (am Dokumentende ins nächste Dokument), Seitenwahl in der Leiste. Die Wahl von Engine und Vergleichsmodus bleibt im Browser (`localStorage`) erhalten.
+
+**Ebenenfarben:** `pymupdf` grün, `layout` blau, `ocr` rot, `vl` violett.
+
+**Sicherheit:** Text wird nur als Text eingesetzt, Tabellen-HTML läuft im Generator durch eine Erlaubnisliste (`table`, `tr`, `td`, ... mit numerischem `rowspan`/`colspan`), und jede Seite trägt eine Content-Security-Policy ohne fremde Hosts und ohne Inline-Skripte.
+
+**Beobachtungen aus der Sichtprüfung** (je eine Seite pro Gruppe, nur wo VL vorliegt):
+
+| Gruppe | Seite | Beobachtung |
+|---|---|---|
+| Datenblatt | `ds-lm317` S. 4 (Vergleichstabelle) | VL und OCR treffen die Struktur. VL liefert die Tabelle zusammenhängend mit `rowspan`, aber mit wörtlichen `\n` in Zellen (`LM317\n(Legacy Chip)`) und LaTeX-Resten (`$ T_{JA} $`). OCR liefert nur Zeilen, einzelne Zellen sind verstümmelt (etwa `nput vnge`). |
+| Datenblatt | `ds-lm317` S. 2 | Alle vier Engines decken sich in Text und Position. Layout trennt Logo und Kopfzeile sauber. |
+| Bericht (Scan) | `ntrs-19760010918` S. 10 | VL rekonstruiert die Tabelle sauber. PyMuPDF liefert hier nur Text, die Zeilenstruktur der Tabelle fehlt, und Scanrauschen bleibt sichtbar. |
+| Scan (Bitsavers) | `bs-dec-08-…` S. 4 | VL erkennt beide Spalten als Tabellen (28 und 22 Zeilen). PyMuPDF liefert nur einen Bildblock (die ganze Seite). Die Seite ist 2600 px breit, der Viewer skaliert sie. |
+| GovDocs | `gd1-001028` S. 1 | Titelseite mit Foto: VL und PyMuPDF zeigen Foto als Ausschnitt, Text an passender Stelle. |
+
+Die Zahl der Beobachtungen ist klein (vier Seiten, VL liegt nur für 30 Seiten vor). Aussagen über die Güte der Engines oder Routing-Regeln folgen aus dem Change `configurable-routing`, nicht aus diesen Notizen.
 
 ## Setup
 
