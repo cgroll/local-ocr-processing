@@ -1,0 +1,22 @@
+{
+  "backend": "gemma",
+  "model_variant": "google/gemma-3-4b-it",
+  "quantization": "4-bit bnb (bnb_4bit_compute_dtype=bfloat16)",
+  "load_time_s": 10.46986788600043,
+  "gen_times_s": [
+    2.42665767899598
+  ],
+  "gen_time_mean_s": 2.42665767899598,
+  "gen_time_median_s": 2.42665767899598,
+  "vram_peak_torch_mib": 3387.29052734375,
+  "vram_peak_nvidia_smi_mib": 3727,
+  "vram_before_mib": 13,
+  "results": [
+    {
+      "id": "1a",
+      "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+      "answer": "According to the table, the PSRR (120Hz) value for the LM317-N at 1.5A is 80 dB.",
+      "gen_time_s": 2.42665767899598
+    }
+  ]
+}

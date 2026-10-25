@@ -1,0 +1,915 @@
+{
+  "backends": [
+    "qwen3b",
+    "qwen7b",
+    "gemma",
+    "paddle_vl",
+    "gemini_argon"
+  ],
+  "backend_meta": {
+    "qwen3b": {
+      "model_variant": "Qwen/Qwen2.5-VL-3B-Instruct",
+      "gen_time_mean_s": 2.550037206651177,
+      "gen_time_median_s": 2.3316029950001393,
+      "vram_peak_nvidia_smi_mib": 4747
+    },
+    "qwen7b": {
+      "model_variant": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "gen_time_mean_s": 3.5328292915997737,
+      "gen_time_median_s": 3.062106593992212,
+      "vram_peak_nvidia_smi_mib": 7769
+    },
+    "gemma": {
+      "model_variant": "google/gemma-3-4b-it",
+      "gen_time_mean_s": 2.0246123257500583,
+      "gen_time_median_s": 1.700298264498997,
+      "vram_peak_nvidia_smi_mib": 3745
+    },
+    "paddle_vl": {
+      "model_variant": "PaddleOCR-VL-1.6-0.9B",
+      "gen_time_mean_s": 2.3702965126998605,
+      "gen_time_median_s": 2.5622942464979133,
+      "vram_peak_nvidia_smi_mib": 13
+    },
+    "gemini_argon": {
+      "model_variant": "gemini-4-argon",
+      "gen_time_mean_s": 11.153353700200388,
+      "gen_time_median_s": 6.257149022494559,
+      "total_cost_usd": 0.057046,
+      "mean_cost_usd_per_question": 0.0028523,
+      "pricing_usd_per_mtok": {
+        "input": 2.0,
+        "output": 10.0
+      }
+    }
+  },
+  "tally": {
+    "qwen3b": {
+      "correct": 15,
+      "partial": 0,
+      "wrong": 5
+    },
+    "qwen7b": {
+      "correct": 14,
+      "partial": 1,
+      "wrong": 5
+    },
+    "gemma": {
+      "correct": 8,
+      "partial": 2,
+      "wrong": 10
+    },
+    "paddle_vl": {
+      "correct": 5,
+      "partial": 0,
+      "wrong": 15
+    },
+    "gemini_argon": {
+      "correct": 20,
+      "partial": 0,
+      "wrong": 0
+    }
+  },
+  "questions": [
+    {
+      "id": "1a",
+      "doc": "ds-lm317",
+      "page": "data/pages/ds-lm317/0004.png",
+      "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+      "ground_truth": "80 dB",
+      "answers": {
+        "qwen3b": {
+          "answer": "The PSRR (120Hz) value in dB for the LM317-N at 1.5A output is 80 dB.",
+          "gen_time_s": 2.9264468000037596,
+          "verdict": "correct",
+          "note": "80 dB"
+        },
+        "qwen7b": {
+          "answer": "The PSRR (120Hz) value for the LM317-N at 1.5A output is 80 dB.",
+          "gen_time_s": 4.064183550013695,
+          "verdict": "correct",
+          "note": "80 dB"
+        },
+        "gemma": {
+          "answer": "According to the table, the PSRR (120Hz) value for the LM317-N at 1.5A output is **80 dB**.",
+          "gen_time_s": 2.4298575789871393,
+          "verdict": "correct",
+          "note": "80 dB"
+        },
+        "paddle_vl": {
+          "answer": "4 Device Comparison Table\n\nI_OUT | PARAMETER | LM317 (Legacy Chip) | LM317 (New Chip) | LM317-N | LM317A | LM317HV | UNIT\n--- | --- | --- | --- | --- | --- | --- | ---\nInput voltage range | 4.25 to 40 | 4.25 to 40 | 4.25 to 4",
+          "gen_time_s": 2.520907725003781,
+          "verdict": "wrong",
+          "note": "OCR dump truncated at 100 tokens before reaching PSRR row; no answer given"
+        },
+        "gemini_argon": {
+          "answer": "Based on the \"4 Device Comparison Table\" in the image, the PSRR (120Hz) value for the **LM317-N** at **1.5A** output is **80 dB**.",
+          "gen_time_s": 9.780326459003845,
+          "verdict": "correct",
+          "note": "80 dB",
+          "cost_usd": 0.002852,
+          "input_tokens": 1166,
+          "output_tokens": 52
+        }
+      }
+    },
+    {
+      "id": "1b",
+      "doc": "ds-lm317",
+      "page": "data/pages/ds-lm317/0004.png",
+      "question": "What is the recommended operating temperature range for the LM317HV at 1.5A?",
+      "ground_truth": "0 to 125 degrees C",
+      "answers": {
+        "qwen3b": {
+          "answer": "The recommended operating temperature range for the LM317HV at 1.5A is 0 to 125 \u00b0C.",
+          "gen_time_s": 2.3812014370050747,
+          "verdict": "correct",
+          "note": "0 to 125 C"
+        },
+        "qwen7b": {
+          "answer": "The recommended operating temperature range for the LM317HV at 1.5A is from -40\u00b0C to 125\u00b0C.",
+          "gen_time_s": 3.045729133998975,
+          "verdict": "wrong",
+          "note": "said -40 to 125 C -- that's the LM317A column, not LM317HV"
+        },
+        "gemma": {
+          "answer": "According to the table, the recommended operating temperature range for the LM317HV at 1.5A is -40 to 125 \u00b0C.",
+          "gen_time_s": 1.8183629999984987,
+          "verdict": "wrong",
+          "note": "same column mix-up as qwen7b, -40 to 125 C"
+        },
+        "paddle_vl": {
+          "answer": "LM317 SLVS044Z \u2013 SEPTEMBER 1997 \u2013 REVISED APRIL 2025 www.ti.com\n\n4 Device Comparison Table\n\nIDOUT | PARAMETER | LM317 (Legacy Chip) | LM317 (New Chip) | LM317-N | LM317A | LM317HV | UNIT\n--- | --- | --- | --- | --- | ---",
+          "gen_time_s": 2.5731649969966384,
+          "verdict": "wrong",
+          "note": "dump cut off before the 'Recommended operating temperature' row"
+        },
+        "gemini_argon": {
+          "answer": "Based on the Device Comparison Table, the recommended operating temperature range for the **LM317HV** at 1.5A is **0 to 125 \u00b0C**.",
+          "gen_time_s": 14.634105616991292,
+          "verdict": "correct",
+          "note": "0 to 125 C -- correct column, no mix-up",
+          "cost_usd": 0.0027319999999999996,
+          "input_tokens": 1156,
+          "output_tokens": 42
+        }
+      }
+    },
+    {
+      "id": "2a",
+      "doc": "ds-ne555",
+      "page": "data/pages/ds-ne555/0003.png",
+      "question": "Which pin number is TRIG (trigger) on the 8-pin NE555 package (D, P, PS, or PW)?",
+      "ground_truth": "pin 2",
+      "answers": {
+        "qwen3b": {
+          "answer": "The TRIG (trigger) pin on the 8-pin NE555 package (D, P, PS, or PW) is pin number 2.",
+          "gen_time_s": 2.4918090190039948,
+          "verdict": "correct",
+          "note": "pin 2"
+        },
+        "qwen7b": {
+          "answer": "The TRIG (trigger) pin on the 8-pin NE555 package (D, P, PS, or PW) is numbered as pin 2.",
+          "gen_time_s": 3.117355410999153,
+          "verdict": "correct",
+          "note": "pin 2"
+        },
+        "gemma": {
+          "answer": "Based on the provided table, the TRIG (trigger) pin is **pin 5** on the NE555 (D, P, PS, or PW) package.",
+          "gen_time_s": 1.8272674580075545,
+          "verdict": "wrong",
+          "note": "said pin 5 -- that's CONT, not TRIG"
+        },
+        "paddle_vl": {
+          "answer": "TEXAS INSTRUMENTS\nwww.ti.com\nNA555, NE555, SA555, SE555\nSLFS022K \u2013 SEPTEMBER 1973 \u2013 REVISED MARCH 2026\n\n4 Pin Configuration and Functions\n\nPIN\nNAME | NO.\n---|---\nD (SOIC), P (PDIP), PS (SO), PW (TSSOP),",
+          "gen_time_s": 2.5614878839987796,
+          "verdict": "wrong",
+          "note": "dump of package/title text, never reaches the pin table"
+        },
+        "gemini_argon": {
+          "answer": "Based on the provided datasheet, **TRIG** is **pin 2** on the 8-pin NE555 package (D, P, PS, or PW).",
+          "gen_time_s": 3.743193043002975,
+          "verdict": "correct",
+          "note": "pin 2",
+          "cost_usd": 0.0027280000000000004,
+          "input_tokens": 1164,
+          "output_tokens": 40
+        }
+      }
+    },
+    {
+      "id": "2b",
+      "doc": "ds-ne555",
+      "page": "data/pages/ds-ne555/0003.png",
+      "question": "What is the input supply voltage range given for VCC in the pin function table?",
+      "ground_truth": "4.5 V to 16 V (SE555 max 18 V)",
+      "answers": {
+        "qwen3b": {
+          "answer": "The input supply voltage range given for VCC in the pin function table is 4.5V to 16V. The SE555 maximum is 18V.",
+          "gen_time_s": 2.651488480012631,
+          "verdict": "correct",
+          "note": "4.5V-16V, SE555 max 18V -- matches table exactly"
+        },
+        "qwen7b": {
+          "answer": "The input supply voltage range given for VCC in the pin function table is 4.5V to 16V.",
+          "gen_time_s": 2.9248400640062755,
+          "verdict": "partial",
+          "note": "4.5V-16V correct but drops the SE555-max-18V caveat"
+        },
+        "gemma": {
+          "answer": "According to the pin function table, the input supply voltage range for VCC is **4.5V to 18V**.",
+          "gen_time_s": 1.4715041279996512,
+          "verdict": "wrong",
+          "note": "said 4.5V to 18V, conflating the general range with the SE555-only max"
+        },
+        "paddle_vl": {
+          "answer": "Pin Configuration and Functions\n\n4 Pin Configuration and Functions\n\nNA555...D OR P PACKAGE\nNE555...D, P, PS, OR PW PACKAGE\nSA555...D OR P PACKAGE\nSE555...D, JG, OR P PACKAGE\n(TOP VIEW)\n\nSE555...FK PACKAGE\n(TOP VIEW)\n\nGND1 1 8 Vcc\nTRIG2",
+          "gen_time_s": 2.5194295730034355,
+          "verdict": "wrong",
+          "note": "dump of package list, never reaches the VCC row"
+        },
+        "gemini_argon": {
+          "answer": "According to Table 4-1 (Pin Functions), the input supply voltage range for **$\\text{V}_{\\text{CC}}$** is **4.5V to 16V** (with the SE555 maximum being **18V**).",
+          "gen_time_s": 4.449604444002034,
+          "verdict": "correct",
+          "note": "4.5V-16V, SE555 max 18V -- matches table exactly",
+          "cost_usd": 0.0028919999999999996,
+          "input_tokens": 1151,
+          "output_tokens": 59
+        }
+      }
+    },
+    {
+      "id": "3a",
+      "doc": "ds-tps62130",
+      "page": "data/pages/ds-tps62130/0001.png",
+      "question": "In the Typical Application Schematic, what is the value of the output capacitor connected to VOS/output?",
+      "ground_truth": "22 uF",
+      "answers": {
+        "qwen3b": {
+          "answer": "The value of the output capacitor connected to VOS/output in the Typical Application Schematic is 100 \u03bcF.",
+          "gen_time_s": 2.2685358120070305,
+          "verdict": "wrong",
+          "note": "said 100 uF -- no such value appears anywhere on the page"
+        },
+        "qwen7b": {
+          "answer": "In the Typical Application Schematic provided in the image, the value of the output capacitor connected to VOS (output) is 22 \u00b5F.",
+          "gen_time_s": 3.0574887979892083,
+          "verdict": "correct",
+          "note": "22 uF"
+        },
+        "gemma": {
+          "answer": "According to the \"Typical Application Schematic\" in the provided image, the value of the output capacitor connected to VOS/output is **0.1uF**.",
+          "gen_time_s": 1.7173802640027134,
+          "verdict": "wrong",
+          "note": "said 0.1 uF -- that's the AVIN decoupling cap, not the output cap"
+        },
+        "paddle_vl": {
+          "answer": "Ordering & Quality\nTechnical Documentation\nDesign & Development\nSupport & Training\n\nTEXAS INSTRUMENTS\nTPS62130, TPS62130A, TPS62131, TPS62132, TPS62133\nSLVSAG7F \u2013 NOVEMBER 2011 \u2013 REVISED NOVEMBER 2021\n\nTPS6213x ",
+          "gen_time_s": 2.566477000989835,
+          "verdict": "wrong",
+          "note": "dump stuck on ordering/features section, never reaches the schematic"
+        },
+        "gemini_argon": {
+          "answer": "Based on the **Typical Application Schematic** in the bottom-left corner of the datasheet, the value of the output capacitor connected to the output (and VOS pin) is **22 \u00b5F**.",
+          "gen_time_s": 3.410748941008933,
+          "verdict": "correct",
+          "note": "22 uF",
+          "cost_usd": 0.0027619999999999997,
+          "input_tokens": 1156,
+          "output_tokens": 45
+        }
+      }
+    },
+    {
+      "id": "3b",
+      "doc": "ds-tps62130",
+      "page": "data/pages/ds-tps62130/0001.png",
+      "question": "According to the 'Efficiency vs Output Current' graph, which input voltage curve (VIN=5V, 12V, or 17V) shows the highest efficiency across most of the output current range?",
+      "ground_truth": "VIN=5V (topmost curve, marked in the legend/with an arrow to VIN=5V, black)",
+      "answers": {
+        "qwen3b": {
+          "answer": "The input voltage curve that shows the highest efficiency across most of the output current range is VIN=17V. The graph indicates that the efficiency for VIN=17V is consistently higher than for VIN=5V and VIN=12V over the entire output current range shown on the graph.",
+          "gen_time_s": 3.2833994009997696,
+          "verdict": "wrong",
+          "note": "said VIN=17V -- that's actually the lowest curve"
+        },
+        "qwen7b": {
+          "answer": "The 'Efficiency vs Output Current' graph shows that the curve for VIN=12V is the highest across most of the output current range. This can be observed by noting the peak and the general trend of the curve for VIN=12V, which stays above the curves for VIN=5V and VIN=17V throughout the output current range from 0 to 3A.",
+          "gen_time_s": 4.261894134993781,
+          "verdict": "wrong",
+          "note": "said VIN=12V -- that's the middle curve"
+        },
+        "gemma": {
+          "answer": "According to the graph in the provided image, the **12V input voltage curve (VIN=12V)** shows the highest efficiency across most of the output current range. \n\nSpecifically, the efficiency is consistently higher than both the 5V and 17V curves, particularly at lower output currents.",
+          "gen_time_s": 2.973353084002156,
+          "verdict": "wrong",
+          "note": "said VIN=12V, same mistake as qwen7b"
+        },
+        "paddle_vl": {
+          "answer": "Ordering & Quality  Technical Documentation  Design & Development  Support & Training  \n\nTEXAS INSTRUMENTS  \nTPS6213x 3-V to 17-V, 3-A Step-Down Converter In 3-mm \u00d7 3-mm QFN Package  \n\n1 Features  \n- DCS-Control\u2122 topology  \n- Input voltage range: 3 V to 17 V  \n- Up to",
+          "gen_time_s": 2.548278551999829,
+          "verdict": "wrong",
+          "note": "dump of features list, never reaches the graph"
+        },
+        "gemini_argon": {
+          "answer": "According to the **Efficiency vs Output Current** graph at the bottom right of the datasheet, the **VIN=5V** curve (the black line at the top) shows the highest efficiency across the entire output current range.",
+          "gen_time_s": 49.70330118700804,
+          "verdict": "correct",
+          "note": "VIN=5V -- correctly identifies the top curve",
+          "cost_usd": 0.002848,
+          "input_tokens": 1179,
+          "output_tokens": 49
+        }
+      }
+    },
+    {
+      "id": "4a",
+      "doc": "ds-irf540",
+      "page": "data/pages/ds-irf540/0001.png",
+      "question": "What is the maximum continuous drain current ID at TC=25 degC, per the Absolute Maximum Ratings table?",
+      "ground_truth": "28 A",
+      "answers": {
+        "qwen3b": {
+          "answer": "The maximum continuous drain current ID at TC=25 degC is 28 A.",
+          "gen_time_s": 2.110604016997968,
+          "verdict": "correct",
+          "note": "28 A"
+        },
+        "qwen7b": {
+          "answer": "The maximum continuous drain current \\( I_D \\) at \\( T_C = 25^\\circ C \\) is listed as 28 A in the Absolute Maximum Ratings table.",
+          "gen_time_s": 3.226777216012124,
+          "verdict": "correct",
+          "note": "28 A"
+        },
+        "gemma": {
+          "answer": "According to the \"Absolute Maximum Ratings\" table in the image, the maximum continuous drain current ID at TC = 25\u00b0C is 20A.",
+          "gen_time_s": 1.7162554410024313,
+          "verdict": "wrong",
+          "note": "said 20A -- that's the TC=100C row, not TC=25C"
+        },
+        "paddle_vl": {
+          "answer": "VISHAY\u00ae\nwww.vishay.com\nIRF540\nVishay Siliconix\n\nPower MOSFET\nFEATURES\n- Dynamic dV/dt rating\n- Repetitive avalanche rated\n- 175 \u00b0C operating temperature\n- Fast switching\n- Ease of paralleling\n- Simple drive requirements\n- Material categorization: for definitions of compliance please see www.vishay.com/doc?99912",
+          "gen_time_s": 2.571799343000748,
+          "verdict": "wrong",
+          "note": "dump of features list, never reaches the ratings table"
+        },
+        "gemini_argon": {
+          "answer": "According to the **ABSOLUTE MAXIMUM RATINGS** table, the maximum continuous drain current ($I_D$) at $T_C = 25\\text{ }^\\circ\\text{C}$ (with $V_{GS}$ at $10\\text{ V}$) is **28 A**.",
+          "gen_time_s": 12.832166420004796,
+          "verdict": "correct",
+          "note": "28 A",
+          "cost_usd": 0.002976,
+          "input_tokens": 1158,
+          "output_tokens": 66
+        }
+      }
+    },
+    {
+      "id": "4b",
+      "doc": "ds-irf540",
+      "page": "data/pages/ds-irf540/0001.png",
+      "question": "What package type is shown for the IRF540 in the photo and ordering information?",
+      "ground_truth": "TO-220AB",
+      "answers": {
+        "qwen3b": {
+          "answer": "The package type shown for the IRF540 in the photo and ordering information is TO-220AB.",
+          "gen_time_s": 2.282004552995204,
+          "verdict": "correct",
+          "note": "TO-220AB"
+        },
+        "qwen7b": {
+          "answer": "The package type shown for the IRF540 in the photo and ordering information is TO-220AB.",
+          "gen_time_s": 2.923461583995959,
+          "verdict": "correct",
+          "note": "TO-220AB"
+        },
+        "gemma": {
+          "answer": "According to the image, the package type for the IRF540 is **TO-220AB**.",
+          "gen_time_s": 1.3556865409918828,
+          "verdict": "correct",
+          "note": "TO-220AB"
+        },
+        "paddle_vl": {
+          "answer": "VISHAY\u00ae www.vishay.com IRF540\nVishay Siliconix\n\nPOWER MOSFET\nFEATURES\n- Dynamic dV/dt rating\n- Repetitive avalanche rated\n- 175 \u00b0C operating temperature\n- Fast switching\n- Ease of paralleling\n- Simple drive requirements\n- Material categorization: for definitions of compliance please see www.vishay.com/doc?99912\n\n",
+          "gen_time_s": 2.5642329469992546,
+          "verdict": "wrong",
+          "note": "dump starts mid-header, never includes the TO-220AB label"
+        },
+        "gemini_argon": {
+          "answer": "Based on the photo and the \"Ordering Information\" table, the package type shown for the IRF540 is **TO-220AB**.",
+          "gen_time_s": 11.537972300007823,
+          "verdict": "correct",
+          "note": "TO-220AB",
+          "cost_usd": 0.002656,
+          "input_tokens": 1153,
+          "output_tokens": 35
+        }
+      }
+    },
+    {
+      "id": "5a",
+      "doc": "bs-f-831f-pdp-8-interface-manual-may65",
+      "page": "data/pages/bs-f-831f-pdp-8-interface-manual-may65/0004.png",
+      "question": "What is the overall height dimension given for the PDP-8 mounted in the CAB-8B cabinet?",
+      "ground_truth": "69 1/8 inches",
+      "answers": {
+        "qwen3b": {
+          "answer": "The overall height dimension given for the PDP-8 mounted in the CAB-8B cabinet is 69 3/8 inches.",
+          "gen_time_s": 2.3943998949980596,
+          "verdict": "wrong",
+          "note": "said 69 3/8 in -- misread the fraction"
+        },
+        "qwen7b": {
+          "answer": "The overall height dimension given for the PDP-8 mounted in the CAB-8B cabinet is 69\u215d inches.",
+          "gen_time_s": 2.9730599369941046,
+          "verdict": "wrong",
+          "note": "said 69 5/8 in -- misread the fraction"
+        },
+        "gemma": {
+          "answer": "Based on the image, the overall height dimension of the PDP-8 mounted in the CAB-8B cabinet is **69 5/8 inches**.",
+          "gen_time_s": 1.6843410879955627,
+          "verdict": "wrong",
+          "note": "said 69 5/8 in -- same misread as qwen7b"
+        },
+        "paddle_vl": {
+          "answer": "Dimensional Data\nComponent 22%\nComponent 27%\nComponent 16%\nComponent 26%\nMounting Hardware\nProcessor and Memory\nFront View\nFRONT\nPower Supply\nSide View\n4",
+          "gen_time_s": 1.7656880060094409,
+          "verdict": "wrong",
+          "note": "garbled OCR of the dimension labels as 'Component 22%/27%/16%/26%', no height given"
+        },
+        "gemini_argon": {
+          "answer": "Based on the \"PDP-8 mounted in CAB-8B Cabinet\" diagram in the top-left section, the overall height dimension given is **69 1/8** (inches).",
+          "gen_time_s": 7.0171970299998065,
+          "verdict": "correct",
+          "note": "69 1/8 in -- correct fraction, the one every other model misread",
+          "cost_usd": 0.0027519999999999997,
+          "input_tokens": 1156,
+          "output_tokens": 44
+        }
+      }
+    },
+    {
+      "id": "5b",
+      "doc": "bs-f-831f-pdp-8-interface-manual-may65",
+      "page": "data/pages/bs-f-831f-pdp-8-interface-manual-may65/0004.png",
+      "question": "What is the height dimension given for the Power Supply unit?",
+      "ground_truth": "8 inches",
+      "answers": {
+        "qwen3b": {
+          "answer": "The height dimension given for the Power Supply unit is 17 5/8 inches.",
+          "gen_time_s": 2.11586532300862,
+          "verdict": "wrong",
+          "note": "said 17 5/8 in -- that's a width label on a different component"
+        },
+        "qwen7b": {
+          "answer": "The height dimension given for the Power Supply unit in the diagram is 9\u00bd inches.",
+          "gen_time_s": 2.753449907002505,
+          "verdict": "wrong",
+          "note": "said 9 1/2 in -- close to the 9 11/16 label but that's a partial segment, not the full height"
+        },
+        "gemma": {
+          "answer": "Based on the image you sent, the height dimension given for the Power Supply unit is **5 5/8\"**.",
+          "gen_time_s": 1.3852350609959103,
+          "verdict": "wrong",
+          "note": "said 5 5/8 in -- doesn't match any label in the Power Supply drawing"
+        },
+        "paddle_vl": {
+          "answer": "DIMENSIONAL DATA:  \nPDP-8 mounted in CAB-88 Cabinet  \nComponents:  \n\\(22\\frac{1}{4}\\)  \n\\(1/8\\)  \n\\(27\\frac{1}{4}\\)  \n\\(20\\frac{3}{8}\\)  \n\\(16\\frac{3}{4}\\)  \n\\(26\\frac{7}{8}\\)  \nMounting",
+          "gen_time_s": 2.5459941569861257,
+          "verdict": "wrong",
+          "note": "dump of the unrelated PDP-8 cabinet dimensions (wrong drawing on the page)"
+        },
+        "gemini_argon": {
+          "answer": "Based on the \"Power Supply\" diagram in the bottom right corner, there are two height dimensions given for the unit:\n\n* **Chassis (back box) height:** **8** inches (shown on the left side)\n* **Front panel height:** **9 11/16** inches (shown on the far right side) \n\n*(Note: A vertical mounting hole spacing of **7 1/2** inches is also indicated on the front panel).*",
+          "gen_time_s": 3.454155575003824,
+          "verdict": "correct",
+          "note": "8 in as the primary chassis height, also correctly notes 9 11/16 as a separate front-panel dimension",
+          "cost_usd": 0.003304,
+          "input_tokens": 1147,
+          "output_tokens": 101
+        }
+      }
+    },
+    {
+      "id": "6a",
+      "doc": "ntrs-19760010918",
+      "page": "data/pages/ntrs-19760010918/0010.png",
+      "question": "In the F2 Logic table, which pin is wired to the '+12 VDC bus'?",
+      "ground_truth": "pin 3",
+      "answers": {
+        "qwen3b": {
+          "answer": "The pin wired to the '+12 VDC bus' in the F2 Logic table is Pin 3.",
+          "gen_time_s": 2.170842300009099,
+          "verdict": "correct",
+          "note": "pin 3"
+        },
+        "qwen7b": {
+          "answer": "The pin that is wired to the '+12 VDC bus' in the F2 Logic table is pin number 3.",
+          "gen_time_s": 2.8722484129975783,
+          "verdict": "correct",
+          "note": "pin 3"
+        },
+        "gemma": {
+          "answer": "According to the provided image, pin **3** is wired to the '+12 VDC bus'.",
+          "gen_time_s": 1.2308973410108592,
+          "verdict": "correct",
+          "note": "pin 3"
+        },
+        "paddle_vl": {
+          "answer": "Pin | Wire To | No. of wires out | to | in | from\n--- | --- | --- | --- | --- | ---\n1 | Inv 16 out | 1 | INV 2-5 |   |  \n3 | +12 VDC bus | 1 | F3-1 | 1 | F 1-3\n5 | Common P | 1 | RR 4-V |   |  \n7 | OR 9 in",
+          "gen_time_s": 2.6158392200013623,
+          "verdict": "correct",
+          "note": "table dump includes the correct row verbatim"
+        },
+        "gemini_argon": {
+          "answer": "According to the F2 Logic table, **Pin 3** is wired to the '+12 VDC bus'.",
+          "gen_time_s": 3.2084165120031685,
+          "verdict": "correct",
+          "note": "pin 3",
+          "cost_usd": 0.002578,
+          "input_tokens": 1154,
+          "output_tokens": 27
+        }
+      }
+    },
+    {
+      "id": "6b",
+      "doc": "ntrs-19760010918",
+      "page": "data/pages/ntrs-19760010918/0010.png",
+      "question": "Which pin is wired to the 'Ground bus'?",
+      "ground_truth": "pin V",
+      "answers": {
+        "qwen3b": {
+          "answer": "The pin wired to the 'Ground bus' is V, as indicated in the table.",
+          "gen_time_s": 2.0353468349931063,
+          "verdict": "correct",
+          "note": "pin V"
+        },
+        "qwen7b": {
+          "answer": "The pin that is wired to the 'Ground bus' is pin V.",
+          "gen_time_s": 2.611446969996905,
+          "verdict": "correct",
+          "note": "pin V"
+        },
+        "gemma": {
+          "answer": "Based on the image you sent, pin **V** is wired to the Ground bus.",
+          "gen_time_s": 1.1055772120016627,
+          "verdict": "correct",
+          "note": "pin V"
+        },
+        "paddle_vl": {
+          "answer": "F2 Logic4",
+          "gen_time_s": 1.0389340800029458,
+          "verdict": "wrong",
+          "note": "answered 'F2 Logic4' -- nonsense, doesn't address the question"
+        },
+        "gemini_argon": {
+          "answer": "Based on the document, Pin **V** is wired to the 'Ground bus'.",
+          "gen_time_s": 2.9400094160082517,
+          "verdict": "correct",
+          "note": "pin V",
+          "cost_usd": 0.0025,
+          "input_tokens": 1145,
+          "output_tokens": 21
+        }
+      }
+    },
+    {
+      "id": "7a",
+      "doc": "bs-dec-08-hrka-d-rk8-schem-dec70",
+      "page": "data/pages/bs-dec-08-hrka-d-rk8-schem-dec70/0004.png",
+      "question": "What is the drawing number for Figure II-1, 'RK01 Basic Format Diagram'?",
+      "ground_truth": "D-TD-RK01-X-12",
+      "answers": {
+        "qwen3b": {
+          "answer": "The drawing number for Figure II-1, 'RK01 Basic Format Diagram' is D-TD-RK01-X-12.",
+          "gen_time_s": 4.156907414988382,
+          "verdict": "correct",
+          "note": "D-TD-RK01-X-12"
+        },
+        "qwen7b": {
+          "answer": "The drawing number for Figure II-1, 'RK01 Basic Format Diagram', is D-TD-RK01-X-12.",
+          "gen_time_s": 5.6079890499968315,
+          "verdict": "correct",
+          "note": "D-TD-RK01-X-12"
+        },
+        "gemma": {
+          "answer": "According to the image you sent, the drawing number for Figure II-1, 'RK01 Basic Format Diagram' is **D-TD-RK01-X12**.",
+          "gen_time_s": 1.9412986149982316,
+          "verdict": "partial",
+          "note": "dropped a dash: D-TD-RK01-X12 instead of D-TD-RK01-X-12"
+        },
+        "paddle_vl": {
+          "answer": "CONTENTS | Contents | Contents (Cont) | Figure Number | Description | Drawing Number\nFigure Number | Description | Drawing Number | Figure Number | RKO08 Disk Control (Cont) | Drawing Number\nFigure II-1 | RKO01 Disk Drive | D-TD-RK01-X-12 | Figure II-26 | Status Register Block Schematic Diagram | D-BS-RK08-0-15\nFigure II",
+          "gen_time_s": 2.7064426170109073,
+          "verdict": "correct",
+          "note": "table dump includes the correct drawing number verbatim"
+        },
+        "gemini_argon": {
+          "answer": "The drawing number for Figure II-1, \"RK01 Basic Format Diagram,\" is **D-TD-RK01-X-12**.",
+          "gen_time_s": 34.30593228498765,
+          "verdict": "correct",
+          "note": "D-TD-RK01-X-12 -- exact match, correct dash placement",
+          "cost_usd": 0.0025960000000000002,
+          "input_tokens": 1118,
+          "output_tokens": 36
+        }
+      }
+    },
+    {
+      "id": "7b",
+      "doc": "bs-dec-08-hrka-d-rk8-schem-dec70",
+      "page": "data/pages/bs-dec-08-hrka-d-rk8-schem-dec70/0004.png",
+      "question": "What is the title of Figure II-39?",
+      "ground_truth": "Type 716 Power Supply Circuit Schematic Diagram",
+      "answers": {
+        "qwen3b": {
+          "answer": "The title of Figure II-39 is \"Type 716 Power Supply Circuit Schematic Diagram\".",
+          "gen_time_s": 3.9226303309987998,
+          "verdict": "correct",
+          "note": "exact match"
+        },
+        "qwen7b": {
+          "answer": "The title of Figure II-39 is \"Type 716 Power Supply Circuit Schematic Diagram.\"",
+          "gen_time_s": 5.39961874599976,
+          "verdict": "correct",
+          "note": "exact match"
+        },
+        "gemma": {
+          "answer": "The title of Figure II-39 is: **\"AC Power Gating to 64K Block Schematic Diagram\"**",
+          "gen_time_s": 1.4333989970036782,
+          "verdict": "wrong",
+          "note": "hallucinated 'AC Power Gating to 64K Block Schematic Diagram' -- not in the contents table at all"
+        },
+        "paddle_vl": {
+          "answer": "Figure Number | Description | Drawing Number | Contents (Cont) | Drawing Number\nFigure II-1 | RK01 Basic Format Diagram | D-TD-RK01-X-12 | Figure II-26 | Status Register Block Schematic Diagram\nFigure II-2 | RK01 Block Diagram | D-BD-RK01-X-13 | Figure II-27 | Sector Addressing Block Schematic Diagram\n",
+          "gen_time_s": 2.6025673349940917,
+          "verdict": "wrong",
+          "note": "dump cut off before the Power Supply section of the contents table"
+        },
+        "gemini_argon": {
+          "answer": "The title (description) of Figure II-39 is **Type 716 Power Supply Circuit Schematic Diagram**.",
+          "gen_time_s": 2.8961303499963833,
+          "verdict": "correct",
+          "note": "exact match, no hallucination",
+          "cost_usd": 0.0025,
+          "input_tokens": 1110,
+          "output_tokens": 28
+        }
+      }
+    },
+    {
+      "id": "8a",
+      "doc": "gd1-001147",
+      "page": "data/pages/gd1-001147/0001.png",
+      "question": "What is the maximum daily mean discharge value in the JAN column (cubic feet per second)?",
+      "ground_truth": "5730",
+      "answers": {
+        "qwen3b": {
+          "answer": "The maximum daily mean discharge value in the JAN column is 147 cubic feet per second.",
+          "gen_time_s": 2.1610609689960256,
+          "verdict": "wrong",
+          "note": "said 147 -- that's an OCT value, not the JAN max"
+        },
+        "qwen7b": {
+          "answer": "The maximum daily mean discharge value in the JAN (January) column is 1810 cubic feet per second.",
+          "gen_time_s": 2.9394753420056077,
+          "verdict": "wrong",
+          "note": "said 1810 -- a JAN daily value (day 29), not the max"
+        },
+        "gemma": {
+          "answer": "Based on the provided data, the maximum daily mean discharge value in the JAN column (January) is 1760 cubic feet per second.",
+          "gen_time_s": 1.5996409700019285,
+          "verdict": "wrong",
+          "note": "said 1760 -- that's a FEB value, not JAN"
+        },
+        "paddle_vl": {
+          "answer": "LEHIGH RIVER BASIN\n01447800 LEHIGH RIVER BELOW FRANCIS E. WALTER RESERVOIR NEAR WHITE HAVEN, PA\nLOCATION...Lat 41\u00b006'17\", long 75\u00b043'57\", Luzerne County, Hydrologic Unit 02040106, on right bank 0.7 mi downstream from Francis E. Walter Reservoir",
+          "gen_time_s": 2.541568857006496,
+          "verdict": "wrong",
+          "note": "dump of location text, never reaches the discharge table"
+        },
+        "gemini_argon": {
+          "answer": "Based on the table in the image, the maximum daily mean discharge value (labeled **MAX**) in the **JAN** column is **5730** cubic feet per second (which occurred on January 26).",
+          "gen_time_s": 6.2940989609924145,
+          "verdict": "correct",
+          "note": "5730 cfs -- correctly reads the MAX row, not a daily value",
+          "cost_usd": 0.003496,
+          "input_tokens": 1153,
+          "output_tokens": 119
+        }
+      }
+    },
+    {
+      "id": "8b",
+      "doc": "gd1-001147",
+      "page": "data/pages/gd1-001147/0001.png",
+      "question": "What is the drainage area listed for this gaging station?",
+      "ground_truth": "290 square miles (mi^2)",
+      "answers": {
+        "qwen3b": {
+          "answer": "The drainage area listed for this gaging station is 290 mi\u00b2.",
+          "gen_time_s": 2.078669127993635,
+          "verdict": "correct",
+          "note": "290 mi^2"
+        },
+        "qwen7b": {
+          "answer": "The drainage area listed for the Lehigh River below Francis E. Walter Reservoir near White Haven, PA, is 290 square miles (mi\u00b2).",
+          "gen_time_s": 3.15865122199466,
+          "verdict": "correct",
+          "note": "290 square miles"
+        },
+        "gemma": {
+          "answer": "According to the provided text, the drainage area for the gaging station at 01447800 Lehigh River below Francis E. Walter Reservoir near White Haven, PA is **290 mi<sup>2</sup>**.",
+          "gen_time_s": 2.2948698770051124,
+          "verdict": "correct",
+          "note": "290 mi^2"
+        },
+        "paddle_vl": {
+          "answer": "LEHIGH RIVER BASIN\n01447800 LEHIGH RIVER BELOW FRANCIS E. WALTER RESERVOIR NEAR WHITE HAVEN, PA\nLOCATION...Lat 41\u00b006'17\", long 75\u00b043'57\", Luzerne County, Hydrologic Unit 02040106, on right bank 0.7 mi downstream from Francis E. Walter Reservoir",
+          "gen_time_s": 2.5637854890082963,
+          "verdict": "wrong",
+          "note": "dump truncated right before the 'DRAINAGE AREA--290 mi^2' line"
+        },
+        "gemini_argon": {
+          "answer": "The drainage area listed for this gaging station is **290 $\\text{mi}^2$** (square miles).",
+          "gen_time_s": 12.005703051996534,
+          "verdict": "correct",
+          "note": "290 mi^2",
+          "cost_usd": 0.003484,
+          "input_tokens": 1147,
+          "output_tokens": 119
+        }
+      }
+    },
+    {
+      "id": "9a",
+      "doc": "gd1-001028",
+      "page": "data/pages/gd1-001028/0001.png",
+      "question": "What is the title of this report shown on the cover page?",
+      "ground_truth": "California Grape Acreage 2006 Crop",
+      "answers": {
+        "qwen3b": {
+          "answer": "The title of the report shown on the cover page is \"California Grape Acreage 2006 Crop.\"",
+          "gen_time_s": 2.27916373500193,
+          "verdict": "correct",
+          "note": "exact match"
+        },
+        "qwen7b": {
+          "answer": "The title of the report shown on the cover page is \"CALIFORNIA GRAPE ACREAGE 2006 CROP.\"",
+          "gen_time_s": 3.0667243899952155,
+          "verdict": "correct",
+          "note": "exact match"
+        },
+        "gemma": {
+          "answer": "The title of the report on the cover page is \"CALIFORNIA GRAPE ACREAGE 2006 CROP\".",
+          "gen_time_s": 1.4441023559920723,
+          "verdict": "correct",
+          "note": "exact match"
+        },
+        "paddle_vl": {
+          "answer": "CALIFORNIA GRAPE ACREAGE 2006 CROP \nApril 2007",
+          "gen_time_s": 1.4184251619881252,
+          "verdict": "correct",
+          "note": "exact match"
+        },
+        "gemini_argon": {
+          "answer": "Based on the cover page, the title of the report is:\n\n**CALIFORNIA GRAPE ACREAGE**\n**2006 CROP**",
+          "gen_time_s": 5.075807879999047,
+          "verdict": "correct",
+          "note": "exact match",
+          "cost_usd": 0.002646,
+          "input_tokens": 1148,
+          "output_tokens": 35
+        }
+      }
+    },
+    {
+      "id": "9b",
+      "doc": "gd1-001028",
+      "page": "data/pages/gd1-001028/0001.png",
+      "question": "What does the photo on the cover show?",
+      "ground_truth": "(open/descriptive; guideline) Vineyard landscape, grapevines in the foreground, hills with more vine rows and trees behind.",
+      "answers": {
+        "qwen3b": {
+          "answer": "The photo on the cover shows a vineyard with rows of grapevines in the foreground and rolling hills in the background. The sky is clear, indicating good weather conditions for the grape harvest.",
+          "gen_time_s": 2.7013778399996227,
+          "verdict": "correct",
+          "note": "vineyard, grapevine rows foreground, hills behind -- matches"
+        },
+        "qwen7b": {
+          "answer": "The photo on the cover shows a vineyard in California, specifically depicting grapevines with rows of grape plants extending into the distance. The landscape includes trees and hills in the background, suggesting a rural agricultural setting. This image is likely representative of the type of land used for grape cultivation in California, which is a major producer of wine grapes.",
+          "gen_time_s": 4.05403376299364,
+          "verdict": "correct",
+          "note": "same, with more detail, matches"
+        },
+        "gemma": {
+          "answer": "The photo on the cover shows a vineyard in California. It's a beautiful, rural scene with rows of grapevines and a rural landscape in the background. \n\nLet me know if you would like to have me analyze the data from the document itself (the acreage figures and crop details) after I\u2019ve finished with the image!",
+          "gen_time_s": 3.1976540869945893,
+          "verdict": "partial",
+          "note": "content matches but vaguer, plus an odd unprompted offer to analyze the report data tacked on"
+        },
+        "paddle_vl": {
+          "answer": "CALIFORNIA GRAPE ACREAGE 2006 CROP \nCALIFORNIA DEPARTMENT OF FOOD AND AGRICULTURE SACRAMENTO, CALIFORNIA \nApril 2007",
+          "gen_time_s": 1.9170839250000427,
+          "verdict": "wrong",
+          "note": "doesn't describe the photo at all, just re-OCRs the title/publisher text"
+        },
+        "gemini_argon": {
+          "answer": "The photo on the cover shows a **vineyard landscape** (grapevines and fields). Specifically, it features:\n\n* **Foreground:** A close-up of a row of lush, green grapevines supported by wooden posts, growing on dry, golden grass.\n* **Midground:** A large, leafy green tree on the left, with neatly planted rows of vineyards stretching across rolling hills on the right. \n* **Background:** Tree-covered hills and ridges under a clear, pale sky. \n\nThe imagery directly reflects the report's title, **\"California Grape Acreage, 2006 Crop.\"**",
+          "gen_time_s": 6.220199083996704,
+          "verdict": "correct",
+          "note": "detailed, accurate description (foreground vines, midground tree/hills, background ridges)",
+          "cost_usd": 0.0035980000000000005,
+          "input_tokens": 1144,
+          "output_tokens": 131
+        }
+      }
+    },
+    {
+      "id": "10a",
+      "doc": "ntrs-19930013073",
+      "page": "data/pages/ntrs-19930013073/0001.png",
+      "question": "Who is the author of this paper, and what organization are they affiliated with?",
+      "ground_truth": "David M. Henderson, TRW Houston",
+      "answers": {
+        "qwen3b": {
+          "answer": "The author of this paper is David M. Henderson, and they are affiliated with TRW Houston.",
+          "gen_time_s": 2.136726303011528,
+          "verdict": "correct",
+          "note": "exact match"
+        },
+        "qwen7b": {
+          "answer": "The author of the paper is David M. Henderson, and they are affiliated with TRW Houston.",
+          "gen_time_s": 2.8300990850111702,
+          "verdict": "correct",
+          "note": "exact match"
+        },
+        "gemma": {
+          "answer": "According to the image, the author of the paper is **David M. Henderson** and they are affiliated with **TRW Houston**.",
+          "gen_time_s": 1.486958986002719,
+          "verdict": "correct",
+          "note": "exact match"
+        },
+        "paddle_vl": {
+          "answer": "Use of Non-spherical Gravity Harmonics for Relative Motion GN&C. (Category 2)\n\nDavid M. Henderson\nTRW Houston\nPhone: 713-333-3133\nFAX 713-333-1875\n\nAbstract:\n\nDetailed analysis of the Automatic Rendezvous and Capture problem indicate a need for three different regions of mathematical description for the GN&C algorithms: (",
+          "gen_time_s": 2.700722775000031,
+          "verdict": "correct",
+          "note": "dump includes the author/affiliation lines verbatim"
+        },
+        "gemini_argon": {
+          "answer": "Based on the provided document, the author of the paper is **David M. Henderson**, and he is affiliated with **TRW Houston**.",
+          "gen_time_s": 23.618620799999917,
+          "verdict": "correct",
+          "note": "exact match",
+          "cost_usd": 0.0026219999999999998,
+          "input_tokens": 1151,
+          "output_tokens": 32
+        }
+      }
+    },
+    {
+      "id": "10b",
+      "doc": "ntrs-19930013073",
+      "page": "data/pages/ntrs-19930013073/0001.png",
+      "question": "According to the abstract, how many different regions of mathematical description does GN&C analysis for the Automatic Rendezvous and Capture problem require?",
+      "ground_truth": "three (3)",
+      "answers": {
+        "qwen3b": {
+          "answer": "The abstract states that detailed analysis of the Automatic Rendezvous and Capture problem indicates a need for three different regions of mathematical description for the GN&C algorithms.",
+          "gen_time_s": 2.4522645399993053,
+          "verdict": "correct",
+          "note": "says three, no further embellishment"
+        },
+        "qwen7b": {
+          "answer": "The abstract states that GN&C analysis for the Automatic Rendezvous and Capture problem requires a detailed analysis of three different regions of mathematical description. These regions are:\n\n1. Multi-vehicle orbital mechanics to the rendezvous interface point, i.e., within 100 nm.\n2. Relative motion solutions (such as Clohessy-Wiltshire type) from the far-field to the near-field interface, i.e., within 1 nm.\n3. Close proximity motion - the near-field motion where the relative differences in the gravitational and orbit inertial accelerations can be neglected from the equations of motion.\n\nThus, the GN&C analysis requires a mathematical description for these three distinct regions.",
+          "gen_time_s": 5.768059114998323,
+          "verdict": "correct",
+          "note": "says three; itemized sub-descriptions are paraphrased/partly inaccurate but the asked-for count is right"
+        },
+        "gemma": {
+          "answer": "According to the abstract, the GN&C analysis for the Automatic Rendezvous and Capture problem requires **three** different regions of mathematical description. \n\nThese regions are:\n\n1.  (1) multi-vehicle orbital mechanics to the rendezvous interface point, i.e., within 100 nm.\n2.  (2) relative motion solutions, such as Clohessy-Wilshire time-pole from the far-field to the near-field interface, i.e., within 1-mm and 3 close proximity motion.\n3.  Regions 2 and 3 are defined based on the precision of the tracking measurement accuracies and the computer resources available for the solution of the algorithms.",
+          "gen_time_s": 6.378604430006817,
+          "verdict": "correct",
+          "note": "says three; itemized sub-descriptions are garbled/hallucinated but the asked-for count is right"
+        },
+        "paddle_vl": {
+          "answer": "Use of Non-spherical Gravity Harmonics for Relative Motion GN&C. (Category 2)\n\nDavid M. Henderson\nTRW Houston\nPhone: 713-333-3133\nFAX 713-333-1875\n\nAbstract:\n\n- include these gravity perturbations (especially the Details of the Automatic Rendezvous and Capture problem indicate a need for three different regions of mathematical description for",
+          "gen_time_s": 2.563100608997047,
+          "verdict": "correct",
+          "note": "dump includes 'three different regions of mathematical description' verbatim"
+        },
+        "gemini_argon": {
+          "answer": "According to the abstract, it requires **three** different regions of mathematical description.",
+          "gen_time_s": 5.939384647994302,
+          "verdict": "correct",
+          "note": "says three, no fabricated elaboration",
+          "cost_usd": 0.002524,
+          "input_tokens": 1162,
+          "output_tokens": 20
+        }
+      }
+    }
+  ]
+}

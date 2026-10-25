@@ -1,0 +1,220 @@
+{
+  "backend": "argon",
+  "model_variant": "gemini-4-argon",
+  "gcp_project": "pi-agent-gemini",
+  "gcp_location": "global",
+  "pricing_usd_per_mtok": {
+    "input": 2.0,
+    "output": 10.0
+  },
+  "gen_times_s": [
+    9.780326459003845,
+    14.634105616991292,
+    3.743193043002975,
+    4.449604444002034,
+    3.410748941008933,
+    49.70330118700804,
+    12.832166420004796,
+    11.537972300007823,
+    7.0171970299998065,
+    3.454155575003824,
+    3.2084165120031685,
+    2.9400094160082517,
+    34.30593228498765,
+    2.8961303499963833,
+    6.2940989609924145,
+    12.005703051996534,
+    5.075807879999047,
+    6.220199083996704,
+    23.618620799999917,
+    5.939384647994302
+  ],
+  "gen_time_mean_s": 11.153353700200388,
+  "gen_time_median_s": 6.257149022494559,
+  "total_input_tokens": 23018,
+  "total_output_tokens": 1101,
+  "total_cost_usd": 0.057046,
+  "mean_cost_usd_per_question": 0.0028523,
+  "results": [
+    {
+      "id": "1a",
+      "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+      "answer": "Based on the \"4 Device Comparison Table\" in the image, the PSRR (120Hz) value for the **LM317-N** at **1.5A** output is **80 dB**.",
+      "gen_time_s": 9.780326459003845,
+      "input_tokens": 1166,
+      "output_tokens": 52,
+      "cost_usd": 0.002852
+    },
+    {
+      "id": "1b",
+      "question": "What is the recommended operating temperature range for the LM317HV at 1.5A?",
+      "answer": "Based on the Device Comparison Table, the recommended operating temperature range for the **LM317HV** at 1.5A is **0 to 125 \u00b0C**.",
+      "gen_time_s": 14.634105616991292,
+      "input_tokens": 1156,
+      "output_tokens": 42,
+      "cost_usd": 0.0027319999999999996
+    },
+    {
+      "id": "2a",
+      "question": "Which pin number is TRIG (trigger) on the 8-pin NE555 package (D, P, PS, or PW)?",
+      "answer": "Based on the provided datasheet, **TRIG** is **pin 2** on the 8-pin NE555 package (D, P, PS, or PW).",
+      "gen_time_s": 3.743193043002975,
+      "input_tokens": 1164,
+      "output_tokens": 40,
+      "cost_usd": 0.0027280000000000004
+    },
+    {
+      "id": "2b",
+      "question": "What is the input supply voltage range given for VCC in the pin function table?",
+      "answer": "According to Table 4-1 (Pin Functions), the input supply voltage range for **$\\text{V}_{\\text{CC}}$** is **4.5V to 16V** (with the SE555 maximum being **18V**).",
+      "gen_time_s": 4.449604444002034,
+      "input_tokens": 1151,
+      "output_tokens": 59,
+      "cost_usd": 0.0028919999999999996
+    },
+    {
+      "id": "3a",
+      "question": "In the Typical Application Schematic, what is the value of the output capacitor connected to VOS/output?",
+      "answer": "Based on the **Typical Application Schematic** in the bottom-left corner of the datasheet, the value of the output capacitor connected to the output (and VOS pin) is **22 \u00b5F**.",
+      "gen_time_s": 3.410748941008933,
+      "input_tokens": 1156,
+      "output_tokens": 45,
+      "cost_usd": 0.0027619999999999997
+    },
+    {
+      "id": "3b",
+      "question": "According to the 'Efficiency vs Output Current' graph, which input voltage curve (VIN=5V, 12V, or 17V) shows the highest efficiency across most of the output current range?",
+      "answer": "According to the **Efficiency vs Output Current** graph at the bottom right of the datasheet, the **VIN=5V** curve (the black line at the top) shows the highest efficiency across the entire output current range.",
+      "gen_time_s": 49.70330118700804,
+      "input_tokens": 1179,
+      "output_tokens": 49,
+      "cost_usd": 0.002848
+    },
+    {
+      "id": "4a",
+      "question": "What is the maximum continuous drain current ID at TC=25 degC, per the Absolute Maximum Ratings table?",
+      "answer": "According to the **ABSOLUTE MAXIMUM RATINGS** table, the maximum continuous drain current ($I_D$) at $T_C = 25\\text{ }^\\circ\\text{C}$ (with $V_{GS}$ at $10\\text{ V}$) is **28 A**.",
+      "gen_time_s": 12.832166420004796,
+      "input_tokens": 1158,
+      "output_tokens": 66,
+      "cost_usd": 0.002976
+    },
+    {
+      "id": "4b",
+      "question": "What package type is shown for the IRF540 in the photo and ordering information?",
+      "answer": "Based on the photo and the \"Ordering Information\" table, the package type shown for the IRF540 is **TO-220AB**.",
+      "gen_time_s": 11.537972300007823,
+      "input_tokens": 1153,
+      "output_tokens": 35,
+      "cost_usd": 0.002656
+    },
+    {
+      "id": "5a",
+      "question": "What is the overall height dimension given for the PDP-8 mounted in the CAB-8B cabinet?",
+      "answer": "Based on the \"PDP-8 mounted in CAB-8B Cabinet\" diagram in the top-left section, the overall height dimension given is **69 1/8** (inches).",
+      "gen_time_s": 7.0171970299998065,
+      "input_tokens": 1156,
+      "output_tokens": 44,
+      "cost_usd": 0.0027519999999999997
+    },
+    {
+      "id": "5b",
+      "question": "What is the height dimension given for the Power Supply unit?",
+      "answer": "Based on the \"Power Supply\" diagram in the bottom right corner, there are two height dimensions given for the unit:\n\n* **Chassis (back box) height:** **8** inches (shown on the left side)\n* **Front panel height:** **9 11/16** inches (shown on the far right side) \n\n*(Note: A vertical mounting hole spacing of **7 1/2** inches is also indicated on the front panel).*",
+      "gen_time_s": 3.454155575003824,
+      "input_tokens": 1147,
+      "output_tokens": 101,
+      "cost_usd": 0.003304
+    },
+    {
+      "id": "6a",
+      "question": "In the F2 Logic table, which pin is wired to the '+12 VDC bus'?",
+      "answer": "According to the F2 Logic table, **Pin 3** is wired to the '+12 VDC bus'.",
+      "gen_time_s": 3.2084165120031685,
+      "input_tokens": 1154,
+      "output_tokens": 27,
+      "cost_usd": 0.002578
+    },
+    {
+      "id": "6b",
+      "question": "Which pin is wired to the 'Ground bus'?",
+      "answer": "Based on the document, Pin **V** is wired to the 'Ground bus'.",
+      "gen_time_s": 2.9400094160082517,
+      "input_tokens": 1145,
+      "output_tokens": 21,
+      "cost_usd": 0.0025
+    },
+    {
+      "id": "7a",
+      "question": "What is the drawing number for Figure II-1, 'RK01 Basic Format Diagram'?",
+      "answer": "The drawing number for Figure II-1, \"RK01 Basic Format Diagram,\" is **D-TD-RK01-X-12**.",
+      "gen_time_s": 34.30593228498765,
+      "input_tokens": 1118,
+      "output_tokens": 36,
+      "cost_usd": 0.0025960000000000002
+    },
+    {
+      "id": "7b",
+      "question": "What is the title of Figure II-39?",
+      "answer": "The title (description) of Figure II-39 is **Type 716 Power Supply Circuit Schematic Diagram**.",
+      "gen_time_s": 2.8961303499963833,
+      "input_tokens": 1110,
+      "output_tokens": 28,
+      "cost_usd": 0.0025
+    },
+    {
+      "id": "8a",
+      "question": "What is the maximum daily mean discharge value in the JAN column (cubic feet per second)?",
+      "answer": "Based on the table in the image, the maximum daily mean discharge value (labeled **MAX**) in the **JAN** column is **5730** cubic feet per second (which occurred on January 26).",
+      "gen_time_s": 6.2940989609924145,
+      "input_tokens": 1153,
+      "output_tokens": 119,
+      "cost_usd": 0.003496
+    },
+    {
+      "id": "8b",
+      "question": "What is the drainage area listed for this gaging station?",
+      "answer": "The drainage area listed for this gaging station is **290 $\\text{mi}^2$** (square miles).",
+      "gen_time_s": 12.005703051996534,
+      "input_tokens": 1147,
+      "output_tokens": 119,
+      "cost_usd": 0.003484
+    },
+    {
+      "id": "9a",
+      "question": "What is the title of this report shown on the cover page?",
+      "answer": "Based on the cover page, the title of the report is:\n\n**CALIFORNIA GRAPE ACREAGE**\n**2006 CROP**",
+      "gen_time_s": 5.075807879999047,
+      "input_tokens": 1148,
+      "output_tokens": 35,
+      "cost_usd": 0.002646
+    },
+    {
+      "id": "9b",
+      "question": "What does the photo on the cover show?",
+      "answer": "The photo on the cover shows a **vineyard landscape** (grapevines and fields). Specifically, it features:\n\n* **Foreground:** A close-up of a row of lush, green grapevines supported by wooden posts, growing on dry, golden grass.\n* **Midground:** A large, leafy green tree on the left, with neatly planted rows of vineyards stretching across rolling hills on the right. \n* **Background:** Tree-covered hills and ridges under a clear, pale sky. \n\nThe imagery directly reflects the report's title, **\"California Grape Acreage, 2006 Crop.\"**",
+      "gen_time_s": 6.220199083996704,
+      "input_tokens": 1144,
+      "output_tokens": 131,
+      "cost_usd": 0.0035980000000000005
+    },
+    {
+      "id": "10a",
+      "question": "Who is the author of this paper, and what organization are they affiliated with?",
+      "answer": "Based on the provided document, the author of the paper is **David M. Henderson**, and he is affiliated with **TRW Houston**.",
+      "gen_time_s": 23.618620799999917,
+      "input_tokens": 1151,
+      "output_tokens": 32,
+      "cost_usd": 0.0026219999999999998
+    },
+    {
+      "id": "10b",
+      "question": "According to the abstract, how many different regions of mathematical description does GN&C analysis for the Automatic Rendezvous and Capture problem require?",
+      "answer": "According to the abstract, it requires **three** different regions of mathematical description.",
+      "gen_time_s": 5.939384647994302,
+      "input_tokens": 1162,
+      "output_tokens": 20,
+      "cost_usd": 0.002524
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "backend": "paddleocr-vl-1.6-0.9b",
+  "model_variant": "PaddleOCR-VL-1.6-0.9B",
+  "load_time_mean_s": 0.6617183008995198,
+  "gen_times_s": [
+    2.520907725003781,
+    2.5731649969966384,
+    2.5614878839987796,
+    2.5194295730034355,
+    2.566477000989835,
+    2.548278551999829,
+    2.571799343000748,
+    2.5642329469992546,
+    1.7656880060094409,
+    2.5459941569861257,
+    2.6158392200013623,
+    1.0389340800029458,
+    2.7064426170109073,
+    2.6025673349940917,
+    2.541568857006496,
+    2.5637854890082963,
+    1.4184251619881252,
+    1.9170839250000427,
+    2.700722775000031,
+    2.563100608997047
+  ],
+  "gen_time_mean_s": 2.3702965126998605,
+  "gen_time_median_s": 2.5622942464979133,
+  "vram_peak_nvidia_smi_mib": 13,
+  "vram_before_mib": 13,
+  "results": [
+    {
+      "id": "1a",
+      "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+      "answer": "4 Device Comparison Table\n\nI_OUT | PARAMETER | LM317 (Legacy Chip) | LM317 (New Chip) | LM317-N | LM317A | LM317HV | UNIT\n--- | --- | --- | --- | --- | --- | --- | ---\nInput voltage range | 4.25 to 40 | 4.25 to 40 | 4.25 to 4",
+      "gen_time_s": 2.520907725003781,
+      "timed_out": false
+    },
+    {
+      "id": "1b",
+      "question": "What is the recommended operating temperature range for the LM317HV at 1.5A?",
+      "answer": "LM317 SLVS044Z \u2013 SEPTEMBER 1997 \u2013 REVISED APRIL 2025 www.ti.com\n\n4 Device Comparison Table\n\nIDOUT | PARAMETER | LM317 (Legacy Chip) | LM317 (New Chip) | LM317-N | LM317A | LM317HV | UNIT\n--- | --- | --- | --- | --- | ---",
+      "gen_time_s": 2.5731649969966384,
+      "timed_out": false
+    },
+    {
+      "id": "2a",
+      "question": "Which pin number is TRIG (trigger) on the 8-pin NE555 package (D, P, PS, or PW)?",
+      "answer": "TEXAS INSTRUMENTS\nwww.ti.com\nNA555, NE555, SA555, SE555\nSLFS022K \u2013 SEPTEMBER 1973 \u2013 REVISED MARCH 2026\n\n4 Pin Configuration and Functions\n\nPIN\nNAME | NO.\n---|---\nD (SOIC), P (PDIP), PS (SO), PW (TSSOP),",
+      "gen_time_s": 2.5614878839987796,
+      "timed_out": false
+    },
+    {
+      "id": "2b",
+      "question": "What is the input supply voltage range given for VCC in the pin function table?",
+      "answer": "Pin Configuration and Functions\n\n4 Pin Configuration and Functions\n\nNA555...D OR P PACKAGE\nNE555...D, P, PS, OR PW PACKAGE\nSA555...D OR P PACKAGE\nSE555...D, JG, OR P PACKAGE\n(TOP VIEW)\n\nSE555...FK PACKAGE\n(TOP VIEW)\n\nGND1 1 8 Vcc\nTRIG2",
+      "gen_time_s": 2.5194295730034355,
+      "timed_out": false
+    },
+    {
+      "id": "3a",
+      "question": "In the Typical Application Schematic, what is the value of the output capacitor connected to VOS/output?",
+      "answer": "Ordering & Quality\nTechnical Documentation\nDesign & Development\nSupport & Training\n\nTEXAS INSTRUMENTS\nTPS62130, TPS62130A, TPS62131, TPS62132, TPS62133\nSLVSAG7F \u2013 NOVEMBER 2011 \u2013 REVISED NOVEMBER 2021\n\nTPS6213x ",
+      "gen_time_s": 2.566477000989835,
+      "timed_out": false
+    },
+    {
+      "id": "3b",
+      "question": "According to the 'Efficiency vs Output Current' graph, which input voltage curve (VIN=5V, 12V, or 17V) shows the highest efficiency across most of the output current range?",
+      "answer": "Ordering & Quality  Technical Documentation  Design & Development  Support & Training  \n\nTEXAS INSTRUMENTS  \nTPS6213x 3-V to 17-V, 3-A Step-Down Converter In 3-mm \u00d7 3-mm QFN Package  \n\n1 Features  \n- DCS-Control\u2122 topology  \n- Input voltage range: 3 V to 17 V  \n- Up to",
+      "gen_time_s": 2.548278551999829,
+      "timed_out": false
+    },
+    {
+      "id": "4a",
+      "question": "What is the maximum continuous drain current ID at TC=25 degC, per the Absolute Maximum Ratings table?",
+      "answer": "VISHAY\u00ae\nwww.vishay.com\nIRF540\nVishay Siliconix\n\nPower MOSFET\nFEATURES\n- Dynamic dV/dt rating\n- Repetitive avalanche rated\n- 175 \u00b0C operating temperature\n- Fast switching\n- Ease of paralleling\n- Simple drive requirements\n- Material categorization: for definitions of compliance please see www.vishay.com/doc?99912",
+      "gen_time_s": 2.571799343000748,
+      "timed_out": false
+    },
+    {
+      "id": "4b",
+      "question": "What package type is shown for the IRF540 in the photo and ordering information?",
+      "answer": "VISHAY\u00ae www.vishay.com IRF540\nVishay Siliconix\n\nPOWER MOSFET\nFEATURES\n- Dynamic dV/dt rating\n- Repetitive avalanche rated\n- 175 \u00b0C operating temperature\n- Fast switching\n- Ease of paralleling\n- Simple drive requirements\n- Material categorization: for definitions of compliance please see www.vishay.com/doc?99912\n\n",
+      "gen_time_s": 2.5642329469992546,
+      "timed_out": false
+    },
+    {
+      "id": "5a",
+      "question": "What is the overall height dimension given for the PDP-8 mounted in the CAB-8B cabinet?",
+      "answer": "Dimensional Data\nComponent 22%\nComponent 27%\nComponent 16%\nComponent 26%\nMounting Hardware\nProcessor and Memory\nFront View\nFRONT\nPower Supply\nSide View\n4",
+      "gen_time_s": 1.7656880060094409,
+      "timed_out": false
+    },
+    {
+      "id": "5b",
+      "question": "What is the height dimension given for the Power Supply unit?",
+      "answer": "DIMENSIONAL DATA:  \nPDP-8 mounted in CAB-88 Cabinet  \nComponents:  \n\\(22\\frac{1}{4}\\)  \n\\(1/8\\)  \n\\(27\\frac{1}{4}\\)  \n\\(20\\frac{3}{8}\\)  \n\\(16\\frac{3}{4}\\)  \n\\(26\\frac{7}{8}\\)  \nMounting",
+      "gen_time_s": 2.5459941569861257,
+      "timed_out": false
+    },
+    {
+      "id": "6a",
+      "question": "In the F2 Logic table, which pin is wired to the '+12 VDC bus'?",
+      "answer": "Pin | Wire To | No. of wires out | to | in | from\n--- | --- | --- | --- | --- | ---\n1 | Inv 16 out | 1 | INV 2-5 |   |  \n3 | +12 VDC bus | 1 | F3-1 | 1 | F 1-3\n5 | Common P | 1 | RR 4-V |   |  \n7 | OR 9 in",
+      "gen_time_s": 2.6158392200013623,
+      "timed_out": false
+    },
+    {
+      "id": "6b",
+      "question": "Which pin is wired to the 'Ground bus'?",
+      "answer": "F2 Logic4",
+      "gen_time_s": 1.0389340800029458,
+      "timed_out": false
+    },
+    {
+      "id": "7a",
+      "question": "What is the drawing number for Figure II-1, 'RK01 Basic Format Diagram'?",
+      "answer": "CONTENTS | Contents | Contents (Cont) | Figure Number | Description | Drawing Number\nFigure Number | Description | Drawing Number | Figure Number | RKO08 Disk Control (Cont) | Drawing Number\nFigure II-1 | RKO01 Disk Drive | D-TD-RK01-X-12 | Figure II-26 | Status Register Block Schematic Diagram | D-BS-RK08-0-15\nFigure II",
+      "gen_time_s": 2.7064426170109073,
+      "timed_out": false
+    },
+    {
+      "id": "7b",
+      "question": "What is the title of Figure II-39?",
+      "answer": "Figure Number | Description | Drawing Number | Contents (Cont) | Drawing Number\nFigure II-1 | RK01 Basic Format Diagram | D-TD-RK01-X-12 | Figure II-26 | Status Register Block Schematic Diagram\nFigure II-2 | RK01 Block Diagram | D-BD-RK01-X-13 | Figure II-27 | Sector Addressing Block Schematic Diagram\n",
+      "gen_time_s": 2.6025673349940917,
+      "timed_out": false
+    },
+    {
+      "id": "8a",
+      "question": "What is the maximum daily mean discharge value in the JAN column (cubic feet per second)?",
+      "answer": "LEHIGH RIVER BASIN\n01447800 LEHIGH RIVER BELOW FRANCIS E. WALTER RESERVOIR NEAR WHITE HAVEN, PA\nLOCATION...Lat 41\u00b006'17\", long 75\u00b043'57\", Luzerne County, Hydrologic Unit 02040106, on right bank 0.7 mi downstream from Francis E. Walter Reservoir",
+      "gen_time_s": 2.541568857006496,
+      "timed_out": false
+    },
+    {
+      "id": "8b",
+      "question": "What is the drainage area listed for this gaging station?",
+      "answer": "LEHIGH RIVER BASIN\n01447800 LEHIGH RIVER BELOW FRANCIS E. WALTER RESERVOIR NEAR WHITE HAVEN, PA\nLOCATION...Lat 41\u00b006'17\", long 75\u00b043'57\", Luzerne County, Hydrologic Unit 02040106, on right bank 0.7 mi downstream from Francis E. Walter Reservoir",
+      "gen_time_s": 2.5637854890082963,
+      "timed_out": false
+    },
+    {
+      "id": "9a",
+      "question": "What is the title of this report shown on the cover page?",
+      "answer": "CALIFORNIA GRAPE ACREAGE 2006 CROP \nApril 2007",
+      "gen_time_s": 1.4184251619881252,
+      "timed_out": false
+    },
+    {
+      "id": "9b",
+      "question": "What does the photo on the cover show?",
+      "answer": "CALIFORNIA GRAPE ACREAGE 2006 CROP \nCALIFORNIA DEPARTMENT OF FOOD AND AGRICULTURE SACRAMENTO, CALIFORNIA \nApril 2007",
+      "gen_time_s": 1.9170839250000427,
+      "timed_out": false
+    },
+    {
+      "id": "10a",
+      "question": "Who is the author of this paper, and what organization are they affiliated with?",
+      "answer": "Use of Non-spherical Gravity Harmonics for Relative Motion GN&C. (Category 2)\n\nDavid M. Henderson\nTRW Houston\nPhone: 713-333-3133\nFAX 713-333-1875\n\nAbstract:\n\nDetailed analysis of the Automatic Rendezvous and Capture problem indicate a need for three different regions of mathematical description for the GN&C algorithms: (",
+      "gen_time_s": 2.700722775000031,
+      "timed_out": false
+    },
+    {
+      "id": "10b",
+      "question": "According to the abstract, how many different regions of mathematical description does GN&C analysis for the Automatic Rendezvous and Capture problem require?",
+      "answer": "Use of Non-spherical Gravity Harmonics for Relative Motion GN&C. (Category 2)\n\nDavid M. Henderson\nTRW Houston\nPhone: 713-333-3133\nFAX 713-333-1875\n\nAbstract:\n\n- include these gravity perturbations (especially the Details of the Automatic Rendezvous and Capture problem indicate a need for three different regions of mathematical description for",
+      "gen_time_s": 2.563100608997047,
+      "timed_out": false
+    }
+  ]
+}

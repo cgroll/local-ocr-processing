@@ -1,0 +1,148 @@
+"""Shared question set for the informal VLM QA test (see README.md for provenance).
+
+Not part of the production pipeline (`src/docparse`). Lives entirely under
+experiments/vlm-qa-test/.
+"""
+
+QUESTIONS = [
+    {
+        "id": "1a",
+        "doc": "ds-lm317",
+        "page": "data/pages/ds-lm317/0004.png",
+        "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+        "ground_truth": "80 dB",
+    },
+    {
+        "id": "1b",
+        "doc": "ds-lm317",
+        "page": "data/pages/ds-lm317/0004.png",
+        "question": "What is the recommended operating temperature range for the LM317HV at 1.5A?",
+        "ground_truth": "0 to 125 degrees C",
+    },
+    {
+        "id": "2a",
+        "doc": "ds-ne555",
+        "page": "data/pages/ds-ne555/0003.png",
+        "question": "Which pin number is TRIG (trigger) on the 8-pin NE555 package (D, P, PS, or PW)?",
+        "ground_truth": "pin 2",
+    },
+    {
+        "id": "2b",
+        "doc": "ds-ne555",
+        "page": "data/pages/ds-ne555/0003.png",
+        "question": "What is the input supply voltage range given for VCC in the pin function table?",
+        "ground_truth": "4.5 V to 16 V (SE555 max 18 V)",
+    },
+    {
+        "id": "3a",
+        "doc": "ds-tps62130",
+        "page": "data/pages/ds-tps62130/0001.png",
+        "question": "In the Typical Application Schematic, what is the value of the output capacitor connected to VOS/output?",
+        "ground_truth": "22 uF",
+    },
+    {
+        "id": "3b",
+        "doc": "ds-tps62130",
+        "page": "data/pages/ds-tps62130/0001.png",
+        "question": "According to the 'Efficiency vs Output Current' graph, which input voltage curve (VIN=5V, 12V, or 17V) shows the highest efficiency across most of the output current range?",
+        "ground_truth": "VIN=5V (topmost curve, marked in the legend/with an arrow to VIN=5V, black)",
+    },
+    {
+        "id": "4a",
+        "doc": "ds-irf540",
+        "page": "data/pages/ds-irf540/0001.png",
+        "question": "What is the maximum continuous drain current ID at TC=25 degC, per the Absolute Maximum Ratings table?",
+        "ground_truth": "28 A",
+    },
+    {
+        "id": "4b",
+        "doc": "ds-irf540",
+        "page": "data/pages/ds-irf540/0001.png",
+        "question": "What package type is shown for the IRF540 in the photo and ordering information?",
+        "ground_truth": "TO-220AB",
+    },
+    {
+        "id": "5a",
+        "doc": "bs-f-831f-pdp-8-interface-manual-may65",
+        "page": "data/pages/bs-f-831f-pdp-8-interface-manual-may65/0004.png",
+        "question": "What is the overall height dimension given for the PDP-8 mounted in the CAB-8B cabinet?",
+        "ground_truth": "69 1/8 inches",
+    },
+    {
+        "id": "5b",
+        "doc": "bs-f-831f-pdp-8-interface-manual-may65",
+        "page": "data/pages/bs-f-831f-pdp-8-interface-manual-may65/0004.png",
+        "question": "What is the height dimension given for the Power Supply unit?",
+        "ground_truth": "8 inches",
+    },
+    {
+        "id": "6a",
+        "doc": "ntrs-19760010918",
+        "page": "data/pages/ntrs-19760010918/0010.png",
+        "question": "In the F2 Logic table, which pin is wired to the '+12 VDC bus'?",
+        "ground_truth": "pin 3",
+    },
+    {
+        "id": "6b",
+        "doc": "ntrs-19760010918",
+        "page": "data/pages/ntrs-19760010918/0010.png",
+        "question": "Which pin is wired to the 'Ground bus'?",
+        "ground_truth": "pin V",
+    },
+    {
+        "id": "7a",
+        "doc": "bs-dec-08-hrka-d-rk8-schem-dec70",
+        "page": "data/pages/bs-dec-08-hrka-d-rk8-schem-dec70/0004.png",
+        "question": "What is the drawing number for Figure II-1, 'RK01 Basic Format Diagram'?",
+        "ground_truth": "D-TD-RK01-X-12",
+    },
+    {
+        "id": "7b",
+        "doc": "bs-dec-08-hrka-d-rk8-schem-dec70",
+        "page": "data/pages/bs-dec-08-hrka-d-rk8-schem-dec70/0004.png",
+        "question": "What is the title of Figure II-39?",
+        "ground_truth": "Type 716 Power Supply Circuit Schematic Diagram",
+    },
+    {
+        "id": "8a",
+        "doc": "gd1-001147",
+        "page": "data/pages/gd1-001147/0001.png",
+        "question": "What is the maximum daily mean discharge value in the JAN column (cubic feet per second)?",
+        "ground_truth": "5730",
+    },
+    {
+        "id": "8b",
+        "doc": "gd1-001147",
+        "page": "data/pages/gd1-001147/0001.png",
+        "question": "What is the drainage area listed for this gaging station?",
+        "ground_truth": "290 square miles (mi^2)",
+    },
+    {
+        "id": "9a",
+        "doc": "gd1-001028",
+        "page": "data/pages/gd1-001028/0001.png",
+        "question": "What is the title of this report shown on the cover page?",
+        "ground_truth": "California Grape Acreage 2006 Crop",
+    },
+    {
+        "id": "9b",
+        "doc": "gd1-001028",
+        "page": "data/pages/gd1-001028/0001.png",
+        "question": "What does the photo on the cover show?",
+        "ground_truth": "(open/descriptive; guideline) Vineyard landscape, grapevines in the foreground, hills with more vine rows and trees behind.",
+    },
+    {
+        "id": "10a",
+        "doc": "ntrs-19930013073",
+        "page": "data/pages/ntrs-19930013073/0001.png",
+        "question": "Who is the author of this paper, and what organization are they affiliated with?",
+        "ground_truth": "David M. Henderson, TRW Houston",
+    },
+    {
+        "id": "10b",
+        "doc": "ntrs-19930013073",
+        "page": "data/pages/ntrs-19930013073/0001.png",
+        "question": "According to the abstract, how many different regions of mathematical description does GN&C analysis for the Automatic Rendezvous and Capture problem require?",
+        "ground_truth": "three (3)",
+    },
+]

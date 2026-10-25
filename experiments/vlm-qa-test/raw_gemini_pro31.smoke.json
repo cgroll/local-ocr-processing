@@ -1,0 +1,30 @@
+{
+  "backend": "pro31",
+  "model_variant": "gemini-3.1-pro-preview",
+  "gcp_project": "pi-agent-gemini",
+  "gcp_location": "global",
+  "pricing_usd_per_mtok": {
+    "input": 2.0,
+    "output": 12.0
+  },
+  "gen_times_s": [
+    10.323794128998998
+  ],
+  "gen_time_mean_s": 10.323794128998998,
+  "gen_time_median_s": 10.323794128998998,
+  "total_input_tokens": 1132,
+  "total_output_tokens": 948,
+  "total_cost_usd": 0.01364,
+  "mean_cost_usd_per_question": 0.01364,
+  "results": [
+    {
+      "id": "1a",
+      "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+      "answer": "Based on the provided table, the PSRR (120Hz) value for the LM317-N at 1.5A output is **80**.",
+      "gen_time_s": 10.323794128998998,
+      "input_tokens": 1132,
+      "output_tokens": 948,
+      "cost_usd": 0.01364
+    }
+  ]
+}

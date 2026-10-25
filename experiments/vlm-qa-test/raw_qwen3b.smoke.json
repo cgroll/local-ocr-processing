@@ -1,0 +1,22 @@
+{
+  "backend": "qwen3b",
+  "model_variant": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "quantization": "4-bit bnb (bnb_4bit_compute_dtype=bfloat16)",
+  "load_time_s": 512.5711815810064,
+  "gen_times_s": [
+    3.353023593997932
+  ],
+  "gen_time_mean_s": 3.353023593997932,
+  "gen_time_median_s": 3.353023593997932,
+  "vram_peak_torch_mib": 3007.50732421875,
+  "vram_peak_nvidia_smi_mib": 3513,
+  "vram_before_mib": 13,
+  "results": [
+    {
+      "id": "1a",
+      "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+      "answer": "The PSRR (120Hz) value in dB for the LM317-N at 1.5A output is 80 dB.",
+      "gen_time_s": 3.353023593997932
+    }
+  ]
+}

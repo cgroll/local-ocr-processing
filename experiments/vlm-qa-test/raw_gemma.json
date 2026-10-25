@@ -1,0 +1,155 @@
+{
+  "backend": "gemma",
+  "model_variant": "google/gemma-3-4b-it",
+  "quantization": "4-bit bnb (bnb_4bit_compute_dtype=bfloat16)",
+  "load_time_s": 7.023493197004427,
+  "gen_times_s": [
+    2.4298575789871393,
+    1.8183629999984987,
+    1.8272674580075545,
+    1.4715041279996512,
+    1.7173802640027134,
+    2.973353084002156,
+    1.7162554410024313,
+    1.3556865409918828,
+    1.6843410879955627,
+    1.3852350609959103,
+    1.2308973410108592,
+    1.1055772120016627,
+    1.9412986149982316,
+    1.4333989970036782,
+    1.5996409700019285,
+    2.2948698770051124,
+    1.4441023559920723,
+    3.1976540869945893,
+    1.486958986002719,
+    6.378604430006817
+  ],
+  "gen_time_mean_s": 2.0246123257500583,
+  "gen_time_median_s": 1.700298264498997,
+  "vram_peak_torch_mib": 3389.61083984375,
+  "vram_peak_nvidia_smi_mib": 3745,
+  "vram_before_mib": 13,
+  "results": [
+    {
+      "id": "1a",
+      "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+      "answer": "According to the table, the PSRR (120Hz) value for the LM317-N at 1.5A output is **80 dB**.",
+      "gen_time_s": 2.4298575789871393
+    },
+    {
+      "id": "1b",
+      "question": "What is the recommended operating temperature range for the LM317HV at 1.5A?",
+      "answer": "According to the table, the recommended operating temperature range for the LM317HV at 1.5A is -40 to 125 \u00b0C.",
+      "gen_time_s": 1.8183629999984987
+    },
+    {
+      "id": "2a",
+      "question": "Which pin number is TRIG (trigger) on the 8-pin NE555 package (D, P, PS, or PW)?",
+      "answer": "Based on the provided table, the TRIG (trigger) pin is **pin 5** on the NE555 (D, P, PS, or PW) package.",
+      "gen_time_s": 1.8272674580075545
+    },
+    {
+      "id": "2b",
+      "question": "What is the input supply voltage range given for VCC in the pin function table?",
+      "answer": "According to the pin function table, the input supply voltage range for VCC is **4.5V to 18V**.",
+      "gen_time_s": 1.4715041279996512
+    },
+    {
+      "id": "3a",
+      "question": "In the Typical Application Schematic, what is the value of the output capacitor connected to VOS/output?",
+      "answer": "According to the \"Typical Application Schematic\" in the provided image, the value of the output capacitor connected to VOS/output is **0.1uF**.",
+      "gen_time_s": 1.7173802640027134
+    },
+    {
+      "id": "3b",
+      "question": "According to the 'Efficiency vs Output Current' graph, which input voltage curve (VIN=5V, 12V, or 17V) shows the highest efficiency across most of the output current range?",
+      "answer": "According to the graph in the provided image, the **12V input voltage curve (VIN=12V)** shows the highest efficiency across most of the output current range. \n\nSpecifically, the efficiency is consistently higher than both the 5V and 17V curves, particularly at lower output currents.",
+      "gen_time_s": 2.973353084002156
+    },
+    {
+      "id": "4a",
+      "question": "What is the maximum continuous drain current ID at TC=25 degC, per the Absolute Maximum Ratings table?",
+      "answer": "According to the \"Absolute Maximum Ratings\" table in the image, the maximum continuous drain current ID at TC = 25\u00b0C is 20A.",
+      "gen_time_s": 1.7162554410024313
+    },
+    {
+      "id": "4b",
+      "question": "What package type is shown for the IRF540 in the photo and ordering information?",
+      "answer": "According to the image, the package type for the IRF540 is **TO-220AB**.",
+      "gen_time_s": 1.3556865409918828
+    },
+    {
+      "id": "5a",
+      "question": "What is the overall height dimension given for the PDP-8 mounted in the CAB-8B cabinet?",
+      "answer": "Based on the image, the overall height dimension of the PDP-8 mounted in the CAB-8B cabinet is **69 5/8 inches**.",
+      "gen_time_s": 1.6843410879955627
+    },
+    {
+      "id": "5b",
+      "question": "What is the height dimension given for the Power Supply unit?",
+      "answer": "Based on the image you sent, the height dimension given for the Power Supply unit is **5 5/8\"**.",
+      "gen_time_s": 1.3852350609959103
+    },
+    {
+      "id": "6a",
+      "question": "In the F2 Logic table, which pin is wired to the '+12 VDC bus'?",
+      "answer": "According to the provided image, pin **3** is wired to the '+12 VDC bus'.",
+      "gen_time_s": 1.2308973410108592
+    },
+    {
+      "id": "6b",
+      "question": "Which pin is wired to the 'Ground bus'?",
+      "answer": "Based on the image you sent, pin **V** is wired to the Ground bus.",
+      "gen_time_s": 1.1055772120016627
+    },
+    {
+      "id": "7a",
+      "question": "What is the drawing number for Figure II-1, 'RK01 Basic Format Diagram'?",
+      "answer": "According to the image you sent, the drawing number for Figure II-1, 'RK01 Basic Format Diagram' is **D-TD-RK01-X12**.",
+      "gen_time_s": 1.9412986149982316
+    },
+    {
+      "id": "7b",
+      "question": "What is the title of Figure II-39?",
+      "answer": "The title of Figure II-39 is: **\"AC Power Gating to 64K Block Schematic Diagram\"**",
+      "gen_time_s": 1.4333989970036782
+    },
+    {
+      "id": "8a",
+      "question": "What is the maximum daily mean discharge value in the JAN column (cubic feet per second)?",
+      "answer": "Based on the provided data, the maximum daily mean discharge value in the JAN column (January) is 1760 cubic feet per second.",
+      "gen_time_s": 1.5996409700019285
+    },
+    {
+      "id": "8b",
+      "question": "What is the drainage area listed for this gaging station?",
+      "answer": "According to the provided text, the drainage area for the gaging station at 01447800 Lehigh River below Francis E. Walter Reservoir near White Haven, PA is **290 mi<sup>2</sup>**.",
+      "gen_time_s": 2.2948698770051124
+    },
+    {
+      "id": "9a",
+      "question": "What is the title of this report shown on the cover page?",
+      "answer": "The title of the report on the cover page is \"CALIFORNIA GRAPE ACREAGE 2006 CROP\".",
+      "gen_time_s": 1.4441023559920723
+    },
+    {
+      "id": "9b",
+      "question": "What does the photo on the cover show?",
+      "answer": "The photo on the cover shows a vineyard in California. It's a beautiful, rural scene with rows of grapevines and a rural landscape in the background. \n\nLet me know if you would like to have me analyze the data from the document itself (the acreage figures and crop details) after I\u2019ve finished with the image!",
+      "gen_time_s": 3.1976540869945893
+    },
+    {
+      "id": "10a",
+      "question": "Who is the author of this paper, and what organization are they affiliated with?",
+      "answer": "According to the image, the author of the paper is **David M. Henderson** and they are affiliated with **TRW Houston**.",
+      "gen_time_s": 1.486958986002719
+    },
+    {
+      "id": "10b",
+      "question": "According to the abstract, how many different regions of mathematical description does GN&C analysis for the Automatic Rendezvous and Capture problem require?",
+      "answer": "According to the abstract, the GN&C analysis for the Automatic Rendezvous and Capture problem requires **three** different regions of mathematical description. \n\nThese regions are:\n\n1.  (1) multi-vehicle orbital mechanics to the rendezvous interface point, i.e., within 100 nm.\n2.  (2) relative motion solutions, such as Clohessy-Wilshire time-pole from the far-field to the near-field interface, i.e., within 1-mm and 3 close proximity motion.\n3.  Regions 2 and 3 are defined based on the precision of the tracking measurement accuracies and the computer resources available for the solution of the algorithms.",
+      "gen_time_s": 6.378604430006817
+    }
+  ]
+}
