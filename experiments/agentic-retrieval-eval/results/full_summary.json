@@ -1,0 +1,1251 @@
+[
+ {
+  "question_id": "1a",
+  "variant": "local",
+  "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+  "final_answer": "80 dB",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-lm317"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 9915,
+  "total_cost_usd": 0.0104337,
+  "input_tokens": 6,
+  "output_tokens": 272,
+  "cache_read_input_tokens": 23546,
+  "cache_creation_input_tokens": 0,
+  "is_error": false,
+  "ground_truth": "80 dB",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.000516
+ },
+ {
+  "question_id": "1a",
+  "variant": "cloud",
+  "question": "What is the PSRR (120Hz) value in dB for the LM317-N at 1.5A output?",
+  "final_answer": "80 dB",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-lm317"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 7542,
+  "total_cost_usd": 0.0745173,
+  "input_tokens": 6,
+  "output_tokens": 259,
+  "cache_read_input_tokens": 15809,
+  "cache_creation_input_tokens": 8247,
+  "is_error": false,
+  "ground_truth": "80 dB",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.000516
+ },
+ {
+  "question_id": "1b",
+  "variant": "local",
+  "question": "What is the recommended operating temperature range for the LM317HV at 1.5A?",
+  "final_answer": "0°C to 125°C",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-lm317"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 13519,
+  "total_cost_usd": 0.08293110000000001,
+  "input_tokens": 6,
+  "output_tokens": 271,
+  "cache_read_input_tokens": 14211,
+  "cache_creation_input_tokens": 9309,
+  "is_error": false,
+  "ground_truth": "0 to 125 degrees C",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference temperature range of 0°C to 125°C.",
+  "judge_cost_usd": 0.0006360000000000001
+ },
+ {
+  "question_id": "1b",
+  "variant": "cloud",
+  "question": "What is the recommended operating temperature range for the LM317HV at 1.5A?",
+  "final_answer": "0°C to 125°C",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-lm317"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 11488,
+  "total_cost_usd": 0.0842591,
+  "input_tokens": 6,
+  "output_tokens": 266,
+  "cache_read_input_tokens": 14551,
+  "cache_creation_input_tokens": 9479,
+  "is_error": false,
+  "ground_truth": "0 to 125 degrees C",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference temperature range of 0°C to 125°C.",
+  "judge_cost_usd": 0.0006360000000000001
+ },
+ {
+  "question_id": "2a",
+  "variant": "local",
+  "question": "Which pin number is TRIG (trigger) on the 8-pin NE555 package (D, P, PS, or PW)?",
+  "final_answer": "Pin 2",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-ne555"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 5639,
+  "total_cost_usd": 0.0761245,
+  "input_tokens": 6,
+  "output_tokens": 326,
+  "cache_read_input_tokens": 13426,
+  "cache_creation_input_tokens": 8340,
+  "is_error": false,
+  "ground_truth": "pin 2",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly, differing only in capitalization.",
+  "judge_cost_usd": 0.000554
+ },
+ {
+  "question_id": "2a",
+  "variant": "cloud",
+  "question": "Which pin number is TRIG (trigger) on the 8-pin NE555 package (D, P, PS, or PW)?",
+  "final_answer": "2",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-ne555"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 5910,
+  "total_cost_usd": 0.0111125,
+  "input_tokens": 6,
+  "output_tokens": 328,
+  "cache_read_input_tokens": 21766,
+  "cache_creation_input_tokens": 0,
+  "is_error": false,
+  "ground_truth": "pin 2",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent correctly identified pin 2 as the TRIG pin.",
+  "judge_cost_usd": 0.0005120000000000001
+ },
+ {
+  "question_id": "2b",
+  "variant": "local",
+  "question": "What is the input supply voltage range given for VCC in the pin function table?",
+  "final_answer": "4.5 V to 16 V (SE555 maximum is 18 V)",
+  "image_verified": true,
+  "tool_calls_total": 7,
+  "tool_calls_by_tool": {
+   "Bash": 5,
+   "Read": 2
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1,
+   "vector": 1
+  },
+  "visited_documents": [
+   "ds-ne555"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 8,
+  "duration_ms": 24133,
+  "total_cost_usd": 0.1146574,
+  "input_tokens": 16,
+  "output_tokens": 907,
+  "cache_read_input_tokens": 59732,
+  "cache_creation_input_tokens": 10530,
+  "is_error": false,
+  "ground_truth": "4.5 V to 16 V (SE555 max 18 V)",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer exactly matches the reference answer's values and conditions.",
+  "judge_cost_usd": 0.000602
+ },
+ {
+  "question_id": "2b",
+  "variant": "cloud",
+  "question": "What is the input supply voltage range given for VCC in the pin function table?",
+  "final_answer": "4.5 V to 16 V (SE555 maximum is 18 V)",
+  "image_verified": true,
+  "tool_calls_total": 7,
+  "tool_calls_by_tool": {
+   "Bash": 6,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1,
+   "vector": 1
+  },
+  "visited_documents": [
+   "ds-ne555"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 8,
+  "duration_ms": 24316,
+  "total_cost_usd": 0.11240050000000001,
+  "input_tokens": 16,
+  "output_tokens": 1009,
+  "cache_read_input_tokens": 57590,
+  "cache_creation_input_tokens": 10047,
+  "is_error": false,
+  "ground_truth": "4.5 V to 16 V (SE555 max 18 V)",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer identically in factual content.",
+  "judge_cost_usd": 0.000582
+ },
+ {
+  "question_id": "3a",
+  "variant": "local",
+  "question": "In the Typical Application Schematic, what is the value of the output capacitor connected to VOS/output?",
+  "final_answer": "22 µF",
+  "image_verified": true,
+  "tool_calls_total": 3,
+  "tool_calls_by_tool": {
+   "Bash": 2,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-tps62130"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 4,
+  "duration_ms": 6099,
+  "total_cost_usd": 0.0951303,
+  "input_tokens": 8,
+  "output_tokens": 380,
+  "cache_read_input_tokens": 24944,
+  "cache_creation_input_tokens": 10292,
+  "is_error": false,
+  "ground_truth": "22 uF",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference value of 22 microfarads, differing only in the formatting of the unit symbol.",
+  "judge_cost_usd": 0.000656
+ },
+ {
+  "question_id": "3a",
+  "variant": "cloud",
+  "question": "In the Typical Application Schematic, what is the value of the output capacitor connected to VOS/output?",
+  "final_answer": "22 µF",
+  "image_verified": true,
+  "tool_calls_total": 3,
+  "tool_calls_by_tool": {
+   "Bash": 2,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-tps62130"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 4,
+  "duration_ms": 14540,
+  "total_cost_usd": 0.0820616,
+  "input_tokens": 8,
+  "output_tokens": 463,
+  "cache_read_input_tokens": 24338,
+  "cache_creation_input_tokens": 8466,
+  "is_error": false,
+  "ground_truth": "22 uF",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly, differing only in the representation of the micro symbol.",
+  "judge_cost_usd": 0.000596
+ },
+ {
+  "question_id": "3b",
+  "variant": "local",
+  "question": "According to the 'Efficiency vs Output Current' graph, which input voltage curve (VIN=5V, 12V, or 17V) shows the highest efficiency across most of the output current range?",
+  "final_answer": "VIN=5V",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-tps62130"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 14949,
+  "total_cost_usd": 0.09213210000000001,
+  "input_tokens": 6,
+  "output_tokens": 448,
+  "cache_read_input_tokens": 14891,
+  "cache_creation_input_tokens": 9999,
+  "is_error": false,
+  "ground_truth": "VIN=5V (topmost curve, marked in the legend/with an arrow to VIN=5V, black)",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent correctly identified VIN=5V as the input voltage curve with the highest efficiency.",
+  "judge_cost_usd": 0.00065
+ },
+ {
+  "question_id": "3b",
+  "variant": "cloud",
+  "question": "According to the 'Efficiency vs Output Current' graph, which input voltage curve (VIN=5V, 12V, or 17V) shows the highest efficiency across most of the output current range?",
+  "final_answer": "VIN=5V",
+  "image_verified": true,
+  "tool_calls_total": 3,
+  "tool_calls_by_tool": {
+   "Bash": 2,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-tps62130"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 4,
+  "duration_ms": 7951,
+  "total_cost_usd": 0.0798176,
+  "input_tokens": 8,
+  "output_tokens": 445,
+  "cache_read_input_tokens": 23986,
+  "cache_creation_input_tokens": 8239,
+  "is_error": false,
+  "ground_truth": "VIN=5V (topmost curve, marked in the legend/with an arrow to VIN=5V, black)",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent correctly identified VIN=5V as the curve with the highest efficiency, matching the reference answer.",
+  "judge_cost_usd": 0.00068
+ },
+ {
+  "question_id": "4a",
+  "variant": "local",
+  "question": "What is the maximum continuous drain current ID at TC=25 degC, per the Absolute Maximum Ratings table?",
+  "final_answer": "28 A",
+  "image_verified": true,
+  "tool_calls_total": 7,
+  "tool_calls_by_tool": {
+   "Bash": 3,
+   "Read": 4
+  },
+  "search_calls_by_mode": {
+   "fulltext": 2
+  },
+  "visited_documents": [
+   "ds-infineon-irf540n-datasheet-v01-01-en",
+   "ds-irf540"
+  ],
+  "num_documents_visited": 2,
+  "num_turns": 8,
+  "duration_ms": 15268,
+  "total_cost_usd": 0.1718082,
+  "input_tokens": 12,
+  "output_tokens": 1199,
+  "cache_read_input_tokens": 58140,
+  "cache_creation_input_tokens": 16997,
+  "is_error": false,
+  "ground_truth": "28 A",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.0004959999999999999
+ },
+ {
+  "question_id": "4a",
+  "variant": "cloud",
+  "question": "What is the maximum continuous drain current ID at TC=25 degC, per the Absolute Maximum Ratings table?",
+  "final_answer": "28 A",
+  "image_verified": true,
+  "tool_calls_total": 5,
+  "tool_calls_by_tool": {
+   "Bash": 3,
+   "Read": 2
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-infineon-irf540n-datasheet-v01-01-en",
+   "ds-irf540"
+  ],
+  "num_documents_visited": 2,
+  "num_turns": 6,
+  "duration_ms": 18684,
+  "total_cost_usd": 0.1253243,
+  "input_tokens": 10,
+  "output_tokens": 1079,
+  "cache_read_input_tokens": 30078,
+  "cache_creation_input_tokens": 12189,
+  "is_error": false,
+  "ground_truth": "28 A",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.0004959999999999999
+ },
+ {
+  "question_id": "4b",
+  "variant": "local",
+  "question": "What package type is shown for the IRF540 in the photo and ordering information?",
+  "final_answer": "TO-220AB",
+  "image_verified": true,
+  "tool_calls_total": 4,
+  "tool_calls_by_tool": {
+   "Bash": 2,
+   "Read": 2
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-irf540"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 5,
+  "duration_ms": 14465,
+  "total_cost_usd": 0.0854207,
+  "input_tokens": 10,
+  "output_tokens": 432,
+  "cache_read_input_tokens": 29803,
+  "cache_creation_input_tokens": 8826,
+  "is_error": false,
+  "ground_truth": "TO-220AB",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.000494
+ },
+ {
+  "question_id": "4b",
+  "variant": "cloud",
+  "question": "What package type is shown for the IRF540 in the photo and ordering information?",
+  "final_answer": "TO-220AB",
+  "image_verified": true,
+  "tool_calls_total": 4,
+  "tool_calls_by_tool": {
+   "Bash": 2,
+   "Read": 2
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ds-irf540"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 5,
+  "duration_ms": 9313,
+  "total_cost_usd": 0.0775739,
+  "input_tokens": 10,
+  "output_tokens": 453,
+  "cache_read_input_tokens": 30869,
+  "cache_creation_input_tokens": 7766,
+  "is_error": false,
+  "ground_truth": "TO-220AB",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.000494
+ },
+ {
+  "question_id": "5a",
+  "variant": "local",
+  "question": "What is the overall height dimension given for the PDP-8 mounted in the CAB-8B cabinet?",
+  "final_answer": "69⅛ inches",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "bs-f-831f-pdp-8-interface-manual-may65"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 16000,
+  "total_cost_usd": 0.08401370000000001,
+  "input_tokens": 6,
+  "output_tokens": 466,
+  "cache_read_input_tokens": 14025,
+  "cache_creation_input_tokens": 8961,
+  "is_error": false,
+  "ground_truth": "69 1/8 inches",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer is factually identical to the reference answer, using the Unicode character for one-eighth instead of standard text.",
+  "judge_cost_usd": 0.000652
+ },
+ {
+  "question_id": "5a",
+  "variant": "cloud",
+  "question": "What is the overall height dimension given for the PDP-8 mounted in the CAB-8B cabinet?",
+  "final_answer": "69⅛ inches",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "bs-f-831f-pdp-8-interface-manual-may65"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 16563,
+  "total_cost_usd": 0.0733884,
+  "input_tokens": 6,
+  "output_tokens": 417,
+  "cache_read_input_tokens": 15276,
+  "cache_creation_input_tokens": 7724,
+  "is_error": false,
+  "ground_truth": "69 1/8 inches",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer is factually identical to the reference answer, using a Unicode fraction symbol instead of a slash.",
+  "judge_cost_usd": 0.000622
+ },
+ {
+  "question_id": "5b",
+  "variant": "local",
+  "question": "What is the height dimension given for the Power Supply unit?",
+  "final_answer": "8 inches",
+  "image_verified": true,
+  "tool_calls_total": 10,
+  "tool_calls_by_tool": {
+   "Bash": 8,
+   "Read": 2
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "bs-f-831f-pdp-8-interface-manual-may65"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 11,
+  "duration_ms": 33659,
+  "total_cost_usd": 0.199417,
+  "input_tokens": 22,
+  "output_tokens": 1826,
+  "cache_read_input_tokens": 118822,
+  "cache_creation_input_tokens": 17359,
+  "is_error": false,
+  "ground_truth": "8 inches",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer exactly matches the reference answer.",
+  "judge_cost_usd": 0.00047
+ },
+ {
+  "question_id": "5b",
+  "variant": "cloud",
+  "question": "What is the height dimension given for the Power Supply unit?",
+  "final_answer": "8 inches (front panel: 9 11/16 inches)",
+  "image_verified": true,
+  "tool_calls_total": 20,
+  "tool_calls_by_tool": {
+   "Bash": 19,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "bs-f-831f-pdp-8-interface-manual-may65"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 21,
+  "duration_ms": 85121,
+  "total_cost_usd": 0.3389543,
+  "input_tokens": 42,
+  "output_tokens": 3012,
+  "cache_read_input_tokens": 290031,
+  "cache_creation_input_tokens": 27546,
+  "is_error": false,
+  "ground_truth": "8 inches",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent correctly identified the 8-inch height dimension and simply included helpful additional context about the front panel.",
+  "judge_cost_usd": 0.000608
+ },
+ {
+  "question_id": "6a",
+  "variant": "local",
+  "question": "In the F2 Logic table, which pin is wired to the '+12 VDC bus'?",
+  "final_answer": "Pin 3",
+  "image_verified": true,
+  "tool_calls_total": 4,
+  "tool_calls_by_tool": {
+   "Bash": 3,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ntrs-19760010918"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 5,
+  "duration_ms": 8427,
+  "total_cost_usd": 0.0835592,
+  "input_tokens": 10,
+  "output_tokens": 448,
+  "cache_read_input_tokens": 27715,
+  "cache_creation_input_tokens": 8605,
+  "is_error": false,
+  "ground_truth": "pin 3",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly, differing only in capitalization.",
+  "judge_cost_usd": 0.000534
+ },
+ {
+  "question_id": "6a",
+  "variant": "cloud",
+  "question": "In the F2 Logic table, which pin is wired to the '+12 VDC bus'?",
+  "final_answer": "Pin 3",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ntrs-19760010918"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 6202,
+  "total_cost_usd": 0.12460559999999998,
+  "input_tokens": 6,
+  "output_tokens": 312,
+  "cache_read_input_tokens": 19427,
+  "cache_creation_input_tokens": 14285,
+  "is_error": false,
+  "ground_truth": "pin 3",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly, ignoring capitalization.",
+  "judge_cost_usd": 0.000514
+ },
+ {
+  "question_id": "6b",
+  "variant": "local",
+  "question": "Which pin is wired to the 'Ground bus'?",
+  "final_answer": "Pin 1",
+  "image_verified": true,
+  "tool_calls_total": 4,
+  "tool_calls_by_tool": {
+   "Bash": 3,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ntrs-19760010918"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 5,
+  "duration_ms": 19739,
+  "total_cost_usd": 0.1323756,
+  "input_tokens": 10,
+  "output_tokens": 822,
+  "cache_read_input_tokens": 42920,
+  "cache_creation_input_tokens": 13392,
+  "is_error": false,
+  "ground_truth": "pin V",
+  "judge_verdict": "wrong",
+  "judge_reason": "The agent identified Pin 1 instead of the correct Pin V.",
+  "judge_cost_usd": 0.000484
+ },
+ {
+  "question_id": "6b",
+  "variant": "cloud",
+  "question": "Which pin is wired to the 'Ground bus'?",
+  "final_answer": "Pin 1",
+  "image_verified": true,
+  "tool_calls_total": 3,
+  "tool_calls_by_tool": {
+   "Bash": 2,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ntrs-19760010918"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 4,
+  "duration_ms": 10766,
+  "total_cost_usd": 0.11488060000000001,
+  "input_tokens": 8,
+  "output_tokens": 811,
+  "cache_read_input_tokens": 30265,
+  "cache_creation_input_tokens": 11550,
+  "is_error": false,
+  "ground_truth": "pin V",
+  "judge_verdict": "wrong",
+  "judge_reason": "The agent identified Pin 1 instead of the correct answer, pin V.",
+  "judge_cost_usd": 0.000504
+ },
+ {
+  "question_id": "7a",
+  "variant": "local",
+  "question": "What is the drawing number for Figure II-1, 'RK01 Basic Format Diagram'?",
+  "final_answer": "D-TD-RK01-X-12",
+  "image_verified": true,
+  "tool_calls_total": 4,
+  "tool_calls_by_tool": {
+   "Bash": 2,
+   "Read": 2
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "bs-dec-08-hrka-d-rk8-schem-dec70"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 6,
+  "duration_ms": 9892,
+  "total_cost_usd": 0.1446922,
+  "input_tokens": 10,
+  "output_tokens": 534,
+  "cache_read_input_tokens": 47826,
+  "cache_creation_input_tokens": 15529,
+  "is_error": false,
+  "ground_truth": "D-TD-RK01-X-12",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.00052
+ },
+ {
+  "question_id": "7a",
+  "variant": "cloud",
+  "question": "What is the drawing number for Figure II-1, 'RK01 Basic Format Diagram'?",
+  "final_answer": "D-TD-RK01-X-12",
+  "image_verified": true,
+  "tool_calls_total": 4,
+  "tool_calls_by_tool": {
+   "Bash": 2,
+   "Read": 2
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "bs-dec-08-hrka-d-rk8-schem-dec70"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 6,
+  "duration_ms": 11690,
+  "total_cost_usd": 0.023824500000000002,
+  "input_tokens": 10,
+  "output_tokens": 547,
+  "cache_read_input_tokens": 63355,
+  "cache_creation_input_tokens": 0,
+  "is_error": false,
+  "ground_truth": "D-TD-RK01-X-12",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer exactly matches the reference answer.",
+  "judge_cost_usd": 0.00052
+ },
+ {
+  "question_id": "7b",
+  "variant": "local",
+  "question": "What is the title of Figure II-39?",
+  "final_answer": "Type 716 Power Supply Circuit Schematic Diagram",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "bs-dec-08-hrka-d-rk8-schem-dec70"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 4,
+  "duration_ms": 6723,
+  "total_cost_usd": 0.1091863,
+  "input_tokens": 6,
+  "output_tokens": 375,
+  "cache_read_input_tokens": 16594,
+  "cache_creation_input_tokens": 12271,
+  "is_error": false,
+  "ground_truth": "Type 716 Power Supply Circuit Schematic Diagram",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.0004959999999999999
+ },
+ {
+  "question_id": "7b",
+  "variant": "cloud",
+  "question": "What is the title of Figure II-39?",
+  "final_answer": "Type 716 Power Supply Circuit Schematic Diagram",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "bs-dec-08-hrka-d-rk8-schem-dec70"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 4,
+  "duration_ms": 7025,
+  "total_cost_usd": 0.1073143,
+  "input_tokens": 6,
+  "output_tokens": 353,
+  "cache_read_input_tokens": 16254,
+  "cache_creation_input_tokens": 12101,
+  "is_error": false,
+  "ground_truth": "Type 716 Power Supply Circuit Schematic Diagram",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.0004959999999999999
+ },
+ {
+  "question_id": "8a",
+  "variant": "local",
+  "question": "What is the maximum daily mean discharge value in the JAN column (cubic feet per second)?",
+  "final_answer": "5730",
+  "image_verified": true,
+  "tool_calls_total": 4,
+  "tool_calls_by_tool": {
+   "Bash": 3,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "gd1-001147"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 5,
+  "duration_ms": 30064,
+  "total_cost_usd": 0.09194609999999999,
+  "input_tokens": 10,
+  "output_tokens": 690,
+  "cache_read_input_tokens": 35614,
+  "cache_creation_input_tokens": 8851,
+  "is_error": false,
+  "ground_truth": "5730",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.00049
+ },
+ {
+  "question_id": "8a",
+  "variant": "cloud",
+  "question": "What is the maximum daily mean discharge value in the JAN column (cubic feet per second)?",
+  "final_answer": "5730",
+  "image_verified": true,
+  "tool_calls_total": 6,
+  "tool_calls_by_tool": {
+   "Bash": 4,
+   "Read": 2
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "gd1-001147"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 7,
+  "duration_ms": 16148,
+  "total_cost_usd": 0.158304,
+  "input_tokens": 14,
+  "output_tokens": 1012,
+  "cache_read_input_tokens": 60086,
+  "cache_creation_input_tokens": 15727,
+  "is_error": false,
+  "ground_truth": "5730",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.00049
+ },
+ {
+  "question_id": "8b",
+  "variant": "local",
+  "question": "What is the drainage area listed for this gaging station?",
+  "final_answer": "290 mi² (square miles)",
+  "image_verified": true,
+  "tool_calls_total": 4,
+  "tool_calls_by_tool": {
+   "Bash": 3,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1,
+   "vector": 1
+  },
+  "visited_documents": [
+   "gd1-001147"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 5,
+  "duration_ms": 20976,
+  "total_cost_usd": 0.09568020000000002,
+  "input_tokens": 10,
+  "output_tokens": 567,
+  "cache_read_input_tokens": 29999,
+  "cache_creation_input_tokens": 9766,
+  "is_error": false,
+  "ground_truth": "290 square miles (mi^2)",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer provides the exact same value and units as the reference answer, differing only in formatting.",
+  "judge_cost_usd": 0.00061
+ },
+ {
+  "question_id": "8b",
+  "variant": "cloud",
+  "question": "What is the drainage area listed for this gaging station?",
+  "final_answer": "290 mi²",
+  "image_verified": true,
+  "tool_calls_total": 4,
+  "tool_calls_by_tool": {
+   "Bash": 3,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1,
+   "vector": 1
+  },
+  "visited_documents": [
+   "gd1-001147"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 5,
+  "duration_ms": 20606,
+  "total_cost_usd": 0.0547252,
+  "input_tokens": 10,
+  "output_tokens": 517,
+  "cache_read_input_tokens": 34984,
+  "cache_creation_input_tokens": 4647,
+  "is_error": false,
+  "ground_truth": "290 square miles (mi^2)",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference value and unit exactly, using the standard abbreviation for square miles.",
+  "judge_cost_usd": 0.000592
+ },
+ {
+  "question_id": "9a",
+  "variant": "local",
+  "question": "What is the title of this report shown on the cover page?",
+  "final_answer": "California Grape Acreage – 2006 Crop",
+  "image_verified": true,
+  "tool_calls_total": 6,
+  "tool_calls_by_tool": {
+   "Bash": 5,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "vector": 1
+  },
+  "visited_documents": [
+   "gd1-001028"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 7,
+  "duration_ms": 26170,
+  "total_cost_usd": 0.132166,
+  "input_tokens": 14,
+  "output_tokens": 970,
+  "cache_read_input_tokens": 57286,
+  "cache_creation_input_tokens": 12635,
+  "is_error": false,
+  "ground_truth": "California Grape Acreage 2006 Crop",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer, differing only by an added dash for formatting.",
+  "judge_cost_usd": 0.000582
+ },
+ {
+  "question_id": "9a",
+  "variant": "cloud",
+  "question": "What is the title of this report shown on the cover page?",
+  "final_answer": "California Grape Acreage 2006 Crop",
+  "image_verified": true,
+  "tool_calls_total": 6,
+  "tool_calls_by_tool": {
+   "Bash": 5,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "vector": 1
+  },
+  "visited_documents": [
+   "gd1-001028"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 7,
+  "duration_ms": 28478,
+  "total_cost_usd": 0.1834046,
+  "input_tokens": 14,
+  "output_tokens": 1064,
+  "cache_read_input_tokens": 70039,
+  "cache_creation_input_tokens": 18486,
+  "is_error": false,
+  "ground_truth": "California Grape Acreage 2006 Crop",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.0005
+ },
+ {
+  "question_id": "9b",
+  "variant": "local",
+  "question": "What does the photo on the cover show?",
+  "final_answer": "A California vineyard scene: grapevines on wooden trellis posts in the foreground, rows of vineyard across rolling hills behind, with oak and pine trees",
+  "image_verified": true,
+  "tool_calls_total": 22,
+  "tool_calls_by_tool": {
+   "Bash": 19,
+   "Read": 3
+  },
+  "search_calls_by_mode": {
+   "fulltext": 2,
+   "vector": 1
+  },
+  "visited_documents": [
+   "gd1-001028"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 23,
+  "duration_ms": 102002,
+  "total_cost_usd": 0.47501490000000013,
+  "input_tokens": 46,
+  "output_tokens": 3682,
+  "cache_read_input_tokens": 475370,
+  "cache_creation_input_tokens": 38243,
+  "is_error": false,
+  "ground_truth": "(open/descriptive; guideline) Vineyard landscape, grapevines in the foreground, hills with more vine rows and trees behind.",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's description accurately matches all the elements specified in the reference answer.",
+  "judge_cost_usd": 0.0006039999999999999
+ },
+ {
+  "question_id": "9b",
+  "variant": "cloud",
+  "question": "What does the photo on the cover show?",
+  "final_answer": "A California vineyard: leafy grapevines on wooden posts in the foreground, rows of vines across rolling hills behind, and forested hills in the distance (cover of \"California Grape Acreage 2006 Crop\")",
+  "image_verified": true,
+  "tool_calls_total": 23,
+  "tool_calls_by_tool": {
+   "Bash": 18,
+   "Read": 5
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1,
+   "vector": 1
+  },
+  "visited_documents": [
+   "gd1-001028",
+   "nist-nist-mono-175",
+   "{d}"
+  ],
+  "num_documents_visited": 3,
+  "num_turns": 26,
+  "duration_ms": 85691,
+  "total_cost_usd": 0.418167,
+  "input_tokens": 40,
+  "output_tokens": 4281,
+  "cache_read_input_tokens": 324363,
+  "cache_creation_input_tokens": 33407,
+  "is_error": false,
+  "ground_truth": "(open/descriptive; guideline) Vineyard landscape, grapevines in the foreground, hills with more vine rows and trees behind.",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's description accurately captures all elements of the vineyard landscape specified in the reference answer.",
+  "judge_cost_usd": 0.0006640000000000001
+ },
+ {
+  "question_id": "10a",
+  "variant": "local",
+  "question": "Who is the author of this paper, and what organization are they affiliated with?",
+  "final_answer": "David M. Henderson, TRW Houston",
+  "image_verified": true,
+  "tool_calls_total": 7,
+  "tool_calls_by_tool": {
+   "Bash": 5,
+   "Read": 2
+  },
+  "search_calls_by_mode": {},
+  "visited_documents": [
+   "ntrs-19850024202",
+   "ntrs-19930013073"
+  ],
+  "num_documents_visited": 2,
+  "num_turns": 8,
+  "duration_ms": 33413,
+  "total_cost_usd": 0.249711,
+  "input_tokens": 16,
+  "output_tokens": 1915,
+  "cache_read_input_tokens": 99195,
+  "cache_creation_input_tokens": 23917,
+  "is_error": false,
+  "ground_truth": "David M. Henderson, TRW Houston",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer matches the reference answer exactly.",
+  "judge_cost_usd": 0.000498
+ },
+ {
+  "question_id": "10a",
+  "variant": "cloud",
+  "question": "Who is the author of this paper, and what organization are they affiliated with?",
+  "final_answer": "David M. Henderson, TRW Houston",
+  "image_verified": true,
+  "tool_calls_total": 6,
+  "tool_calls_by_tool": {
+   "Bash": 4,
+   "Read": 2
+  },
+  "search_calls_by_mode": {
+   "vector": 1
+  },
+  "visited_documents": [
+   "ntrs-19930013073"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 7,
+  "duration_ms": 29853,
+  "total_cost_usd": 0.18288430000000003,
+  "input_tokens": 14,
+  "output_tokens": 1054,
+  "cache_read_input_tokens": 79974,
+  "cache_creation_input_tokens": 18179,
+  "is_error": false,
+  "ground_truth": "David M. Henderson, TRW Houston",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer exactly matches the reference answer in both author name and affiliation.",
+  "judge_cost_usd": 0.0005579999999999999
+ },
+ {
+  "question_id": "10b",
+  "variant": "local",
+  "question": "According to the abstract, how many different regions of mathematical description does GN&C analysis for the Automatic Rendezvous and Capture problem require?",
+  "final_answer": "Three",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ntrs-19930013073"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 5751,
+  "total_cost_usd": 0.086422,
+  "input_tokens": 6,
+  "output_tokens": 427,
+  "cache_read_input_tokens": 14438,
+  "cache_creation_input_tokens": 9349,
+  "is_error": false,
+  "ground_truth": "three (3)",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer \"Three\" matches the reference answer \"three (3)\" exactly in meaning.",
+  "judge_cost_usd": 0.000598
+ },
+ {
+  "question_id": "10b",
+  "variant": "cloud",
+  "question": "According to the abstract, how many different regions of mathematical description does GN&C analysis for the Automatic Rendezvous and Capture problem require?",
+  "final_answer": "Three",
+  "image_verified": true,
+  "tool_calls_total": 2,
+  "tool_calls_by_tool": {
+   "Bash": 1,
+   "Read": 1
+  },
+  "search_calls_by_mode": {
+   "fulltext": 1
+  },
+  "visited_documents": [
+   "ntrs-19930013073"
+  ],
+  "num_documents_visited": 1,
+  "num_turns": 3,
+  "duration_ms": 6919,
+  "total_cost_usd": 0.014070299999999999,
+  "input_tokens": 6,
+  "output_tokens": 450,
+  "cache_read_input_tokens": 23787,
+  "cache_creation_input_tokens": 0,
+  "is_error": false,
+  "ground_truth": "three (3)",
+  "judge_verdict": "correct",
+  "judge_reason": "The agent's answer \"Three\" matches the reference answer \"three (3)\".",
+  "judge_cost_usd": 0.0005579999999999999
+ }
+]
