@@ -27,6 +27,17 @@ def test_page_shell_is_offline_and_script_free():
     assert 'rel="next"' not in html  # no target -> plain label
 
 
+def test_page_shell_embeds_markdown_html_and_stays_script_free():
+    data = {
+        "doc": "d1", "title": "d1", "page": 1, "size": [10, 10], "engines": {},
+        "markdown_html": "<h3>Title</h3><p>Some text.</p>",
+    }
+    html = page_html(data, "../../pages/d1/0001.png", Nav("../index.html"))
+    assert external(html) == [] and inline_scripts(html) == []
+    assert '\\u003ch3>Title' in html  # embed_json escapes "<" so </script> cannot break out
+    assert "Some text." in html
+
+
 def test_index_shell():
     e = Entry(id="d1", title="T&C", group="datasheet", tags="table;schematic", kind="native", pages="5")
     counts = {x: {"ok": 1, "error": 0, "missing": 2} for x in ENGINES}

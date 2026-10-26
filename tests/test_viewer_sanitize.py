@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from docparse.viewer.sanitize import sanitize_table
+from docparse.viewer.sanitize import sanitize_markdown_html, sanitize_table
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -56,3 +56,43 @@ def test_unclosed_and_stray_tags_balanced():
 
 def test_br_kept():
     assert "<br>" in sanitize_table("<table><tr><td>a<br/>b</td></tr></table>")
+
+
+# --- sanitize_markdown_html: extended allow-list for Markdown-rendered pages (viewer-markdown-view) ----
+
+def test_markdown_headings_lists_and_emphasis_kept():
+    html = "<h3>Title</h3><p>Some <strong>bold</strong> and <em>italic</em> text.</p><ul><li>one</li><li>two</li></ul>"
+    assert sanitize_markdown_html(html) == html
+
+
+def test_markdown_table_kept():
+    html = "<table><thead><tr><th>a</th></tr></thead><tbody><tr><td>1</td></tr></tbody></table>"
+    assert sanitize_markdown_html(html) == html
+
+
+def test_markdown_code_and_blockquote_kept():
+    html = "<pre><code>x = 1</code></pre><blockquote>quoted</blockquote>"
+    assert sanitize_markdown_html(html) == html
+
+
+def test_markdown_script_tag_dropped():
+    out = sanitize_markdown_html("<p>ok</p><script>alert(1)</script>")
+    assert out == "<p>ok</p>"
+
+
+def test_markdown_links_and_images_dropped():
+    # No real use case for links/images in narrative/VLM-description text -- deliberately not
+    # in MARKDOWN_TAGS, so both the tag and (for <img>, which has no text content) its attributes
+    # are gone; for <a>, the enclosed link text survives as plain escaped text.
+    out = sanitize_markdown_html('<p>see <a href="javascript:alert(1)">this</a></p><img src=x onerror=alert(1)>')
+    assert "href" not in out and "javascript" not in out and "<a" not in out
+    assert "<img" not in out and "onerror" not in out
+    assert "this" in out  # link text itself is not attacker-controlled markup, kept as text
+
+
+def test_markdown_does_not_leak_table_only_sanitizer_difference():
+    # sanitize_table (TABLE_TAGS) must NOT accept headings -- confirms the two allow-lists are
+    # genuinely distinct, not accidentally merged into one shared global. The <h3> tag itself is
+    # dropped like any other disallowed-but-harmless tag (text content is kept, same as the
+    # existing "stray tag" behavior covered by test_unclosed_and_stray_tags_balanced).
+    assert sanitize_table("<h3>Title</h3><table><tr><td>x</td></tr></table>") == "Title<table><tr><td>x</td></tr></table>"

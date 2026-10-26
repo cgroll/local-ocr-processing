@@ -78,6 +78,16 @@ main { padding: 1rem; }
 .blk.tbl table { border-collapse: collapse; width: 100%; }
 .blk.tbl td, .blk.tbl th { border: 1px solid #999; padding: 1px 3px; vertical-align: top; }
 
+/* markdown representation (flowing text, not positioned over the page image) */
+.markdown-body { padding: 1.2rem 1.5rem; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.2); line-height: 1.5; overflow: auto; }
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 { margin: 1.2em 0 .4em; line-height: 1.25; }
+.markdown-body p, .markdown-body ul, .markdown-body ol, .markdown-body blockquote, .markdown-body table { margin: 0 0 .8em; }
+.markdown-body table { border-collapse: collapse; width: 100%; }
+.markdown-body td, .markdown-body th { border: 1px solid #999; padding: .25rem .5rem; vertical-align: top; }
+.markdown-body blockquote { border-left: 3px solid var(--line); padding-left: .8em; color: var(--muted); }
+.markdown-body pre { background: #f6f3ff; padding: .6em; overflow: auto; }
+.markdown-body code { font-family: ui-monospace, monospace; }
+
 /* inspector */
 .inspector { border-left: 1px solid var(--line); background: var(--panel); padding: .8rem; overflow: auto; }
 .inspector h2 { font-size: .95rem; margin: 0 0 .5rem; }

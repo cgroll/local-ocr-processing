@@ -3,11 +3,21 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+import markdown
+
 from ..dataset.manifest import Entry
+from ..digest.page import render_page
+from ..enrich.blocks import choose_text_source
+from ..enrich.format import read_result as read_enrichment
+from ..enrich.format import result_path as enrich_result_path
 from ..parse.format import RESULTS_DIR, read_result, result_path
-from .sanitize import sanitize_table
+from .sanitize import sanitize_markdown_html, sanitize_table
 
 ENGINES = ("pymupdf", "layout", "ocr", "vl")
+# Same wording `digest/page.py:render_page` uses for the heading, so the "no content beyond the
+# heading" check below matches exactly rather than guessing a prefix.
+NO_ENRICHMENT_NOTE = "*Keine Anreicherung für diese Seite vorhanden.*"
+NO_TEXT_SOURCE_NOTE = "*Keine Textquelle für diese Seite ermittelt.*"
 
 
 def page_numbers(entry: Entry) -> list[int]:
@@ -46,6 +56,31 @@ def _load_engine(engine: str, doc_id: str, page: int, results_dir: Path) -> dict
     }
 
 
+def _page_markdown(doc_id: str, page: int, root: Path) -> str:
+    """Same text as `document-digest` would render for this page -- see `digest/page.py:
+    render_page`. Deliberately not `write_digest`/`render_document`: those join a whole
+    document's pages, which would be wasted work for rendering a single page here."""
+    heading = f"## Seite {page}"
+    enrich_path = enrich_result_path(doc_id, page, root)
+    if not enrich_path.exists():
+        return f"{heading}\n\n{NO_ENRICHMENT_NOTE}"
+    enrichment = read_enrichment(enrich_path)
+    _, source = choose_text_source(doc_id, page, root)
+    text = render_page(enrichment, source, root)
+    if text.strip() == heading:
+        text = f"{text}\n\n{NO_TEXT_SOURCE_NOTE}"
+    return text
+
+
+def markdown_html(doc_id: str, page: int, root: Path = RESULTS_DIR) -> str:
+    """Flowing Markdown representation of one page, rendered to sanitized HTML for the viewer's
+    Markdown tab -- same fixed text-source choice as production (`choose_text_source`), no
+    per-engine selection like the Original/Rekonstruktion columns."""
+    text = _page_markdown(doc_id, page, root)
+    html = markdown.markdown(text, extensions=["tables"])
+    return sanitize_markdown_html(html)
+
+
 def page_data(entry: Entry, page: int, results_dir: Path = RESULTS_DIR) -> dict:
     """All engine results of one page; failed and absent results are marked, tables are sanitized."""
     engines = {e: _load_engine(e, entry.id, page, results_dir) for e in ENGINES}
@@ -53,6 +88,7 @@ def page_data(entry: Entry, page: int, results_dir: Path = RESULTS_DIR) -> dict:
     return {
         "doc": entry.id, "title": entry.title or entry.id, "page": page,
         "size": size, "engines": engines,
+        "markdown_html": markdown_html(entry.id, page, results_dir),
     }
 
 

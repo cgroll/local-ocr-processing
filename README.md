@@ -127,12 +127,15 @@ Das Kommando nennt den Pfad der `index.html`. Direkt aus dem Dateisystem öffnen
 - *Index:* Abdeckung je Engine (ok / Fehler / fehlend), Filter nach Gruppe, Tag und Freitext.
 - *Seite, links:* Original mit Ebenen je Engine (beim Öffnen alle aus), je Ebene ein Typfilter. Beschriftung der Boxen: Typ und Konfidenz.
 - *Seite, rechts:* Rekonstruktion aus einer wählbaren Engine (Text an der Boxposition, Tabellen als Tabelle, Bilder als Ausschnitt, Formeln als Quelltext, leere Blöcke als beschriftete Box). „Engines vergleichen" zeigt stattdessen zwei Rekonstruktionen im gleichen Maßstab.
+- *„Markdown anzeigen":* dritte Darstellung, ersetzt die beiden Spalten durch den fließenden Markdown-Text, den `document-digest` für diese Seite erzeugen würde (identisch zur Produktions-Textquellen-Wahl: `pymupdf` primär, `ocr`-Fallback bei Scans, `vl`-HTML für Tabellen -- keine eigene Engine-Auswahl wie bei der Rekonstruktion). Wird serverseitig beim Build gerendert (`markdown`-Paket) und derselben Erlaubnisliste wie Tabellen-HTML unterzogen.
 - *Block anklicken:* hebt ihn in beiden Ansichten hervor, rechts erscheinen alle Felder. Escape oder Klick ins Leere hebt die Auswahl auf.
 - *Navigation:* Pfeiltasten blättern (am Dokumentende ins nächste Dokument), Seitenwahl in der Leiste. Die Wahl von Engine und Vergleichsmodus bleibt im Browser (`localStorage`) erhalten.
 
 **Ebenenfarben:** `pymupdf` grün, `layout` blau, `ocr` rot, `vl` violett.
 
-**Sicherheit:** Text wird nur als Text eingesetzt, Tabellen-HTML läuft im Generator durch eine Erlaubnisliste (`table`, `tr`, `td`, ... mit numerischem `rowspan`/`colspan`), und jede Seite trägt eine Content-Security-Policy ohne fremde Hosts und ohne Inline-Skripte.
+**Sicherheit:** Text wird nur als Text eingesetzt, Tabellen-HTML und aus Markdown gerendertes HTML laufen im Generator durch je eine Erlaubnisliste (Tabellen: `table`, `tr`, `td`, ... mit numerischem `rowspan`/`colspan`; Markdown: zusätzlich Überschriften/Absätze/Listen/Emphasis/Code, bewusst ohne `a`/`img`), und jede Seite trägt eine Content-Security-Policy ohne fremde Hosts und ohne Inline-Skripte.
+
+**Stichprobe Markdown-Ansicht** (von Hand gegen die jeweiligen Original-/Rekonstruktionsspalten geprüft): `ds-lm317` S. 4 (Tabelle korrekt als Markdown-Tabelle, Überschriften und Fließtext passend), `bs-pdp-8-memory-schematics-jun70` S. 1 (OCR-Fallback bei reinem Scan, jedes erkannte Textfragment als eigener Absatz -- entspricht 1:1 dem rohen `.md`-Digest, wirkt zerstückelt, ist aber keine Regression), `gd1-001147` S. 1 (dichte Tabelle korrekt als Markdown-Tabelle). Eine Seite ganz ohne Textquelle kam im aktuellen Datensatz nicht vor; der Leer-Hinweis dafür ist nur unit-getestet, nicht an echten Daten gesehen.
 
 **Beobachtungen aus der Sichtprüfung** (je eine Seite pro Gruppe, nur wo VL vorliegt):
 

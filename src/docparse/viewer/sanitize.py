@@ -1,8 +1,21 @@
-"""Reduce untrusted table HTML to plain table structure (allow-list, rebuilt from parsed tokens)."""
+"""Reduce untrusted HTML to an allow-listed tag subset (rebuilt from parsed tokens, not a
+regex/blocklist) -- `sanitize_table` for engine-supplied table HTML, `sanitize_markdown_html`
+for HTML rendered from digest Markdown (viewer-markdown-view). Both share one parser: safety
+comes from only ever emitting tags in the given allow-list, regardless of how a disallowed tag
+reached the parser (hand-written HTML, or passed through unchanged by the `markdown` library's
+raw-HTML handling) -- never from trusting the input's own escaping."""
 from html import escape
 from html.parser import HTMLParser
 
-ALLOWED_TAGS = {"table", "thead", "tbody", "tr", "td", "th"}
+TABLE_TAGS = {"table", "thead", "tbody", "tr", "td", "th"}
+# Superset of TABLE_TAGS: digest Markdown renders to headings/paragraphs/lists/emphasis/code in
+# addition to the tables `html_table_to_markdown` already produces. No `a`/`img`: no real use
+# case in VLM-description/narrative text, and skipping them avoids href/src validation entirely.
+MARKDOWN_TAGS = TABLE_TAGS | {
+    "h1", "h2", "h3", "h4", "h5", "h6", "p", "ul", "ol", "li",
+    "strong", "em", "code", "pre", "blockquote",
+}
+ALLOWED_TAGS = TABLE_TAGS  # backward-compatible alias; sanitize_table's allow-list
 VOID_TAGS = {"br"}
 DROP_CONTENT = {"script", "style", "template", "noscript"}
 SPAN_ATTRS = {"rowspan", "colspan"}
@@ -10,8 +23,9 @@ MAX_SPAN = 1000
 
 
 class _Sanitizer(HTMLParser):
-    def __init__(self):
+    def __init__(self, allowed_tags: set[str]):
         super().__init__(convert_charrefs=True)
+        self.allowed_tags = allowed_tags
         self.out: list[str] = []
         self.open: list[str] = []
         self.dropping: str | None = None  # tag whose content is being discarded
@@ -23,7 +37,7 @@ class _Sanitizer(HTMLParser):
             self.dropping = tag
         elif tag in VOID_TAGS:
             self.out.append("<br>")
-        elif tag in ALLOWED_TAGS:
+        elif tag in self.allowed_tags:
             kept = "".join(
                 f' {k}="{v}"' for k, v in attrs
                 if k in SPAN_ATTRS and v and v.isascii() and v.isdigit() and 0 < int(v) <= MAX_SPAN
@@ -40,7 +54,7 @@ class _Sanitizer(HTMLParser):
             if tag == self.dropping:
                 self.dropping = None
             return
-        if tag in ALLOWED_TAGS and tag in self.open:
+        if tag in self.allowed_tags and tag in self.open:
             while self.open:
                 self.out.append(f"</{(top := self.open.pop())}>")
                 if top == tag:
@@ -56,9 +70,19 @@ class _Sanitizer(HTMLParser):
             self.out.append(f"</{self.open.pop()}>")
 
 
-def sanitize_table(html: str) -> str:
-    """Return html reduced to table structure with rowspan/colspan; text is escaped, everything else dropped."""
-    parser = _Sanitizer()
+def _sanitize(html: str, allowed_tags: set[str]) -> str:
+    parser = _Sanitizer(allowed_tags)
     parser.feed(html)
     parser.close()
     return "".join(parser.out)
+
+
+def sanitize_table(html: str) -> str:
+    """Return html reduced to table structure with rowspan/colspan; text is escaped, everything else dropped."""
+    return _sanitize(html, TABLE_TAGS)
+
+
+def sanitize_markdown_html(html: str) -> str:
+    """Return html reduced to the Markdown-view tag subset (headings/paragraphs/lists/emphasis/
+    code/tables); text is escaped, everything else (including `a`/`img`) dropped."""
+    return _sanitize(html, MARKDOWN_TAGS)

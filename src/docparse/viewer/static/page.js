@@ -89,6 +89,9 @@
     if (state.mode === "compare") {
       stage.appendChild(reconColumn("engineA"));
       stage.appendChild(reconColumn("engineB"));
+    } else if (state.mode === "markdown") {
+      stage.appendChild(originalColumn());
+      stage.appendChild(markdownColumn());
     } else {
       stage.appendChild(originalColumn());
       stage.appendChild(reconColumn("engineA"));
@@ -123,9 +126,18 @@
       render();
     });
     mode.appendChild(btn);
+
+    var mdBtn = el("button", "", state.mode === "markdown" ? "Markdown ausblenden" : "Markdown anzeigen");
+    mdBtn.type = "button";
+    mdBtn.addEventListener("click", function () {
+      state.mode = state.mode === "markdown" ? "single" : "markdown";
+      savePrefs();
+      render();
+    });
+    mode.appendChild(mdBtn);
     toolbar.appendChild(mode);
 
-    if (state.mode !== "compare") {
+    if (state.mode === "single" || state.mode === "markdown") {
       var layers = el("div", "group");
       layers.appendChild(el("span", "", "Ebenen:"));
       ENGINES.forEach(function (e) { layers.appendChild(layerControl(e)); });
@@ -260,6 +272,17 @@
     v.page.classList.add("eng-" + engine);
     blocksOf(engine).forEach(function (b) { v.page.appendChild(blockElement(b)); });
     col.appendChild(v.wrap);
+    return col;
+  }
+
+  function markdownColumn() {
+    var col = el("div", "col");
+    var head = el("div", "col-head");
+    head.appendChild(el("span", "", "Markdown"));
+    col.appendChild(head);
+    var body = el("div", "markdown-body");
+    body.innerHTML = data.markdown_html; // sanitized server-side, see viewer/sanitize.py
+    col.appendChild(body);
     return col;
   }
 
