@@ -1,5 +1,6 @@
 """Native PDF content (text layer, images, vector graphics, simple tables) -> blocks. No confidence."""
 import html
+import re
 
 import pymupdf
 
@@ -10,6 +11,20 @@ DRAWING_GAP_PT = 6.0  # rectangles closer than this belong to one drawing
 DRAWING_MIN_PT = 12.0  # smaller clusters (rules, bullets) are not reported
 MAX_DRAWINGS = 200  # a page with more clusters is mostly hatching; keep the largest
 
+# Some embedded/subset fonts map the micro-sign glyph to U+2026 (ellipsis) in their ToUnicode
+# CMap instead of U+00B5 (observed in ds-tps62130: font "CALIBRI_02" renders a visible "µ" but
+# pymupdf reports "…", e.g. "0.1 …F" where the PDF shows "0.1 µF"). pymupdf only reports what the
+# font's own cmap says, so this is a PDF/font bug, not a pymupdf bug -- it cannot be fixed by
+# reading the text layer differently, only detected and corrected after the fact. Scoped
+# narrowly: only an ellipsis directly between a digit and a single unit letter (not the start of
+# an ordinary word, hence the trailing negative lookahead) is remapped, since a literal ellipsis
+# could never legitimately appear in that exact position (a one-letter unit suffix).
+_MICRO_SIGN_MANGLE_RE = re.compile(r"(?<=[0-9])(\s?)…(?=[A-Za-zΩ](?![A-Za-z]))")
+
+
+def _fix_micro_sign_mangling(text: str) -> str:
+    return _MICRO_SIGN_MANGLE_RE.sub(r"\1µ", text)
+
 
 def to_blocks(page: pymupdf.Page, to_pixels: pymupdf.Matrix) -> list[Block]:
     """Blocks of one page; boxes are clipped to the page image (scans and drawings often reach beyond the page); blocks outside the page are dropped."""
@@ -19,7 +34,7 @@ def to_blocks(page: pymupdf.Page, to_pixels: pymupdf.Matrix) -> list[Block]:
     table_rects: list[pymupdf.Rect] = []
 
     for table in page.find_tables().tables:
-        rows = table.extract()
+        rows = [[_fix_micro_sign_mangling(c) if c else c for c in row] for row in table.extract()]
         table_rects.append(pymupdf.Rect(table.bbox))
         blocks.append(Block(
             type="table", label="table", bbox=rect_to_pixels(table.bbox, to_pixels), engine="pymupdf",
@@ -32,7 +47,9 @@ def to_blocks(page: pymupdf.Page, to_pixels: pymupdf.Matrix) -> list[Block]:
         rect = pymupdf.Rect(b["bbox"])
         if any(rect.intersects(t) and (rect & t).get_area() > 0.5 * rect.get_area() for t in table_rects):
             continue  # already part of a table
-        text = "\n".join("".join(s["text"] for s in line["spans"]) for line in b["lines"]).strip()
+        text = _fix_micro_sign_mangling(
+            "\n".join("".join(s["text"] for s in line["spans"]) for line in b["lines"]).strip()
+        )
         if text:
             blocks.append(Block(
                 type="text", label="text", bbox=rect_to_pixels(rect, to_pixels), engine="pymupdf", text=text,

@@ -1,0 +1,126 @@
+{
+  "n_items": 24,
+  "check1_desc_to_own_image_hit_rate": 1.0,
+  "items": [
+    {
+      "key": "ds-lm317/p0004/PAGE_IMAGE",
+      "doc": "ds-lm317",
+      "kind": "page_image"
+    },
+    {
+      "key": "ds-lm317/p0004/PAGE_TEXT",
+      "doc": "ds-lm317",
+      "kind": "page_text"
+    },
+    {
+      "key": "ds-lm317/p0004/figure_0_header_image/IMAGE",
+      "doc": "ds-lm317",
+      "kind": "visual_image"
+    },
+    {
+      "key": "ds-lm317/p0004/figure_0_header_image/DESC",
+      "doc": "ds-lm317",
+      "kind": "visual_desc"
+    },
+    {
+      "key": "ds-lm317/p0004/table_3_table/IMAGE",
+      "doc": "ds-lm317",
+      "kind": "visual_image"
+    },
+    {
+      "key": "ds-lm317/p0004/table_3_table/DESC",
+      "doc": "ds-lm317",
+      "kind": "visual_desc"
+    },
+    {
+      "key": "ds-lm317/p0004/table_3_table/CONTENT",
+      "doc": "ds-lm317",
+      "kind": "visual_content"
+    },
+    {
+      "key": "ds-tps62130/p0001/PAGE_IMAGE",
+      "doc": "ds-tps62130",
+      "kind": "page_image"
+    },
+    {
+      "key": "ds-tps62130/p0001/PAGE_TEXT",
+      "doc": "ds-tps62130",
+      "kind": "page_text"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_0_header_image/IMAGE",
+      "doc": "ds-tps62130",
+      "kind": "visual_image"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_0_header_image/DESC",
+      "doc": "ds-tps62130",
+      "kind": "visual_desc"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_1_header_image/IMAGE",
+      "doc": "ds-tps62130",
+      "kind": "visual_image"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_1_header_image/DESC",
+      "doc": "ds-tps62130",
+      "kind": "visual_desc"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_2_header_image/IMAGE",
+      "doc": "ds-tps62130",
+      "kind": "visual_image"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_2_header_image/DESC",
+      "doc": "ds-tps62130",
+      "kind": "visual_desc"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_3_header_image/IMAGE",
+      "doc": "ds-tps62130",
+      "kind": "visual_image"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_3_header_image/DESC",
+      "doc": "ds-tps62130",
+      "kind": "visual_desc"
+    },
+    {
+      "key": "ds-tps62130/p0001/table_38_table/IMAGE",
+      "doc": "ds-tps62130",
+      "kind": "visual_image"
+    },
+    {
+      "key": "ds-tps62130/p0001/table_38_table/DESC",
+      "doc": "ds-tps62130",
+      "kind": "visual_desc"
+    },
+    {
+      "key": "ds-tps62130/p0001/table_38_table/CONTENT",
+      "doc": "ds-tps62130",
+      "kind": "visual_content"
+    },
+    {
+      "key": "ds-tps62130/p0001/chart_39_chart/IMAGE",
+      "doc": "ds-tps62130",
+      "kind": "visual_image"
+    },
+    {
+      "key": "ds-tps62130/p0001/chart_39_chart/DESC",
+      "doc": "ds-tps62130",
+      "kind": "visual_desc"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_40_image/IMAGE",
+      "doc": "ds-tps62130",
+      "kind": "visual_image"
+    },
+    {
+      "key": "ds-tps62130/p0001/figure_40_image/DESC",
+      "doc": "ds-tps62130",
+      "kind": "visual_desc"
+    }
+  ]
+}

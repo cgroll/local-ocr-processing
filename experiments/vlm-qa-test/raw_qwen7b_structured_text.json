@@ -1,0 +1,36 @@
+{
+  "model_variant": "Qwen/Qwen2.5-VL-7B-Instruct",
+  "load_time_s": 16.20289262701408,
+  "results": [
+    {
+      "id": "1b",
+      "question": "What is the recommended operating temperature range for the LM317HV at 1.5A?",
+      "ground_truth": "0 to 125 degrees C",
+      "answer": "The recommended operating temperature range for the LM317HV at 1.5A is from 0\u00b0C to 125\u00b0C.",
+      "gen_time_s": 2.319416298996657,
+      "page_text_chars": 3170,
+      "source_engine": "vl",
+      "source_mode": "markdown"
+    },
+    {
+      "id": "8a",
+      "question": "What is the maximum daily mean discharge value in the JAN column (cubic feet per second)?",
+      "ground_truth": "5730",
+      "answer": "The maximum daily mean discharge value in the JAN column is 143 cfs.",
+      "gen_time_s": 1.7730934820137918,
+      "page_text_chars": 3774,
+      "source_engine": "pymupdf",
+      "source_mode": "markdown"
+    },
+    {
+      "id": "3a",
+      "question": "In the Typical Application Schematic, what is the value of the output capacitor connected to VOS/output?",
+      "ground_truth": "22 uF",
+      "answer": "The value of the output capacitor connected to VOS/output in the Typical Application Schematic is 3.3 nF.",
+      "gen_time_s": 1.6749964240007102,
+      "page_text_chars": 4424,
+      "source_engine": "pymupdf",
+      "source_mode": "bbox"
+    }
+  ]
+}

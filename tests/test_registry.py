@@ -2,7 +2,7 @@ import pytest
 
 from docparse.models import Registry, RegistryError
 
-KEYS = ["pymupdf", "layout", "ocr", "vl", "embedding"]
+KEYS = ["pymupdf", "layout", "ocr", "vl", "embedding", "describe"]
 
 
 def test_all_components_with_required_fields():
@@ -71,3 +71,10 @@ def test_ocr_and_layout_fit_together():
 
 def test_repo_models_toml_is_valid():
     assert Registry.load().get("embedding").params["model_id"] == "google/embeddinggemma-2"
+
+
+def test_describe_is_separate_from_vl_and_has_a_model_id():
+    params = Registry.load(None).get("describe").params
+    assert params["model_id"] == "Qwen/Qwen2.5-VL-3B-Instruct"
+    assert params["max_new_tokens"] > 0
+    assert Registry.load(None).get("describe").name != Registry.load(None).get("vl").name

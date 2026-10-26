@@ -64,6 +64,16 @@ def default_specs() -> dict[str, ModelSpec]:
             "embedding", "text and image embeddings in one 768-dim space", "google/embeddinggemma-2", "gpu", 1100,
             {"model_id": "google/embeddinggemma-2", "dim": 768, "audio_encoder": False},
         ),
+        # Separate from `vl`: `vl` (PaddleOCR-VL) times out on exactly the pages that most need a
+        # description (dense schematics/graphs, see experiments/vlm-qa-test/README.md). 3B, not
+        # 7B: the 7B variant measured ~7.8 GB VRAM in that experiment (an informal harness, not
+        # this registry's smoke test), leaving almost no margin in an 8 GB budget; 3B had
+        # comparable QA accuracy there. vram_mb below is measured with this project's own
+        # `python -m docparse.models smoke describe` (3500 MB peak over baseline).
+        ModelSpec(
+            "describe", "short topic-level descriptions for figure/chart/table crops", "Qwen2.5-VL-3B-Instruct", "gpu", 3500,
+            {"model_id": "Qwen/Qwen2.5-VL-3B-Instruct", "max_new_tokens": 100, "quantization": "4bit"},
+        ),
     ]
     return {s.key: s for s in specs}
 

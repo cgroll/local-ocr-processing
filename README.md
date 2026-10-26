@@ -27,7 +27,7 @@ Das Ganze soll als konfigurierbare Pipeline in anderen Projekten wiederverwendba
 | 3 ✓ | `parse-pipeline` | Seitenweise Parsing je Engine in ein einheitliches Zwischenformat, Subset-Lauf |
 | 4 ✓ | `visual-inspector` | HTML-Viewer: Original mit Layern vs. Rekonstruktion, Engine-Vergleich |
 | 5 | `configurable-routing` | Konfigurierbare Regeln, welche Engine welchen Blocktyp liefert (z. B. Tabellen: PyMuPDF vs. VL) |
-| 6 | `embedding-search` | Embeddings, Index, Volltext- und Vektorsuche |
+| 6 ✓ | `embedding-search` | Embeddings, Index, Volltext- und Vektorsuche |
 | 7 | `retrieval-eval` | Testfragen, Retrieval-Metriken, optional RAG |
 
 Specs und Changes liegen in `openspec/`. Neue Änderungen mit `/opsx:propose "idee"` anlegen.
@@ -145,6 +145,58 @@ Das Kommando nennt den Pfad der `index.html`. Direkt aus dem Dateisystem öffnen
 | GovDocs | `gd1-001028` S. 1 | Titelseite mit Foto: VL und PyMuPDF zeigen Foto als Ausschnitt, Text an passender Stelle. |
 
 Die Zahl der Beobachtungen ist klein (vier Seiten, VL liegt nur für 30 Seiten vor). Aussagen über die Güte der Engines oder Routing-Regeln folgen aus dem Change `configurable-routing`, nicht aus diesen Notizen.
+
+## Suche
+
+Zwei Stufen, beide über das bestehende Zwischenformat (`data/results/{pymupdf,layout,ocr,vl}/`), ohne eine der vier Engines zu ändern:
+
+1. **`docparse.enrich`** wählt je Seite eine Textquelle (`pymupdf`, bei reinen Scans ohne Textlayer Fallback auf `ocr`; `vl`s HTML für Table-Blöcke, wo es vorliegt, weil es die Zeilenstruktur zuverlässiger erhält als `pymupdf`), setzt den Fließtext in **spaltenbewusster Lesereihenfolge** zusammen (linke Spalte komplett vor der nächsten, statt der von `ocr`/`pymupdf` gelieferten reinen Y-Position-Reihenfolge, die bei mehrspaltigen Seiten Wortsalat erzeugt -- betraf 16 Seiten in 11 Dokumenten, überwiegend gescannte, zweispaltige Handbücher/Paper; ein strenger Filter verhindert Fehlalarme bei Schaltplänen mit verstreuten Bauteillabels), croppt Figure-/Chart-/Table-Regionen aus den `layout`-Boxen als Bildausschnitt (Dekorations-Icons unter 10.000 px² werden herausgefiltert) und lässt ein lokales VLM (`describe`, Qwen2.5-VL-3B-Instruct) pro Crop eine kurze, bewusst themenbezogene Beschreibung schreiben -- nie konkrete Werte, siehe `experiments/multimodal-repr-test/`. Ablage unter `data/results/enrich/<doc>/<page>.json` plus die Crop-PNGs daneben.
+2. **`docparse.search`** embeddet Seiten-Text, Seiten-Bild und je angereichertem Block Bild/Beschreibung/Inhalt mit `embedding` (EmbeddingGemma 2, gemeinsamer 768-dim Raum für Text und Bild) und baut einen SQLite-FTS5-Volltextindex über denselben Textkorpus. `query` liefert zu einer Text-Query Volltext- und Vektor-Treffer nebeneinander, je mit Herkunft markiert -- keine Fusion zu einem Ranking, das ist Aufgabe von `retrieval-eval`.
+3. **`docparse.digest`** setzt zusätzlich eine Markdown-Datei je **Dokument** zusammen (`data/results/digest/<doc>.md`, alle Seiten in einer Datei, Seitenwechsel als `## Seite N`) -- rein mechanisch aus den Ergebnissen von oben, ohne neuen Modell-Lauf. Fließtext bekommt echte Überschriften (Blocktyp → Markdown-Formatierung statt flachem Text), Tabellen werden aus dem HTML in Markdown-Tabellen umgewandelt (mit Pflicht-Hinweis, dass die Zeilenzuordnung unverifiziert ist), und zu jedem Figure-/Chart-/Table-Block kommt zusätzlich eine Liste aller `pymupdf`-/`ocr`-Textfragmente, deren Box sich mit dem Block überlappt -- macht z. B. bei Schaltplänen Bauteillabels wie "VOS" oder "22 µF" sichtbar, die sonst in keiner Tabelle stehen.
+4. **Dokument-Ebene für die Suche:** aus dem fertigen Digest lässt `describe` (wiederverwendet als reines Textmodell) einen kurzen Titel + 3-5-Satz-Summary erzeugen (`data/results/digest/<doc>.summary.json`, getrennt von der deterministischen `.md`), und daraus zwei zusätzliche Embeddings je Dokument (`document_summary`, `document_fulltext`, Sentinel `page=0` statt echter Seitenzahl) im selben Index. `document_fulltext` wird vor dem Embedden hart auf 20.000 Zeichen gekappt -- EmbeddingGemma 2 begrenzt die Eingabelänge nicht selbst und crasht bei den längsten Digests (~40.000 Zeichen) sonst mit einem CUDA-Out-of-Memory auf der 8-GB-Karte (empirisch eingekreist: ~19.800 Tokens laufen noch, ~21.300 Tokens crashen).
+
+```bash
+uv run python -m docparse.enrich run                              # alle Seiten laut Manifest, fortsetzbar
+uv run python -m docparse.enrich run --docs ds-lm317 --force       # ein Dokument neu anreichern
+uv run python -m docparse.digest run                                # ein Markdown-Digest je Dokument, kein GPU nötig
+uv run python -m docparse.search run                               # Seiten- + Dokument-Embeddings, inkrementell
+uv run python -m docparse.search query "PSRR" --top-k 5             # Volltext- und Vektor-Treffer
+uv run python -m docparse.search query "..." --fulltext-only        # ohne GPU/Embedding-Modell
+```
+
+**Digest-Stand:** 73/73 Dokumente, 0 Fehler. Stichprobe von Hand gesichtet (`ds-lm317`, `ds-tps62130`, `bs-dec-08-hrka-d-rk8-schem-dec70`): Überschriften, Tabellen und Beschreibungen passend; bei `ds-tps62130`s Schaltplan-Abbildung tauchen in der Rohtext-Liste u. a. "VOS", "100 kΩ", "22 µF" auf -- Werte, die sonst in keinem Block strukturiert vorliegen.
+
+**Titel/Summary-Stand, ehrlich:** 73/73 Dokumente verarbeitet, **15 von 73 (~21%) liefern degenerierten Output** (leere Antwort, eine Wortwiederholungsschleife wie "Title Title Title..." x180, zeichenweise Wiederholung wie bei einer LaTeX-Tabellen-Halluzination, das Modell echot das Prompt-Trennzeichen zurück, oder -- subtiler -- es schreibt nur den unausgefüllten Platzhalter seines eigenen Formats zurück, z. B. `<paragraph>` statt echtem Text) -- erkannt und als `status: "degenerate"` markiert statt stillschweigend als Text embedded (siehe `src/docparse/digest/summary.py:is_degenerate`). Die Platzhalter-Variante wurde erst in einer zweiten Prüfungsrunde gefunden: zwei Fälle, die zunächst als "ok" durchgingen, bestanden nur aus dem Wort `<paragraph>`; bei drei weiteren Fällen war das Problem rein kosmetisch (echter, brauchbarer Text, nur mit Platzhalter-Tags wie `<abstract>` oder `<ref lang="en">` verunreinigt) -- der Parser bereinigt solche Tags jetzt generell, statt nur `<title>`/`<summary>` zu kennen. Betroffene Dokumente bekommen **kein** `document_summary`-Embedding (58 statt 73), aber weiterhin ein `document_fulltext`-Embedding (unbeeinflusst, da rein mechanisch aus dem Digest gekappt, keine Modell-Generierung). Ein Versuch mit stärkerer `repetition_penalty` behob einen beobachteten Fall, verschlechterte einen anderen aber zu kohärent wirkendem, aber unsinnigem mehrsprachigem Text -- keine saubere Parameter-Lösung gefunden, deshalb Erkennung statt Vermeidung. Der Ursache systematisch nachgegangen: nur 1 der ursprünglich 14 als "kaputt" erkannten Fälle (`bs-f-831f-pdp-8-interface-manual-may65`) hatte eine klar identifizierbare Ursache in der Eingabequalität (die Spalten-Vertauschung, inzwischen behoben) -- stellte sich bei genauerem Hinsehen aber als weiterhin degeneriert heraus (`<paragraph>`-Platzhalter), nur aus einem anderen Grund. Die übrigen Fälle betreffen überwiegend Dokumente mit sauberem, kohärentem Text ohne erkennbares Muster (weder Länge noch Tabellendichte korrelieren zuverlässig) -- das sieht nach einer inhärenten Unzuverlässigkeit des 3B-Modells bei Long-Context-Generierung aus, nicht nach durchgängig schlechtem Input.
+
+Aktueller Gesamt-Index: 2385 Vektoren (405 Seiten-Bild, 399 Seiten-Text, 619 Block-Bild, 618 Block-Beschreibung, 212 Tabellen-Inhalt, 73 Dokument-Volltext, 59 Dokument-Summary).
+
+**Stand:** Beide Läufe sind über den gesamten Datensatz durch. Anreicherung: 405/405 Seiten, 0 Seiten-Fehler, 0 Block-Fehler, 619 Crops nach Dekorations-Filter. Index: 2253 Embeddings (405 Seiten-Bild, 399 Seiten-Text -- 6 Seiten ohne jeden extrahierbaren Text --, 619 Block-Bild, 618 Block-Beschreibung, 212 Tabellen-Inhalt).
+
+**Modelle:**
+
+| Schlüssel | Modell | VRAM (gemessen) | Rolle |
+|---|---|---|---|
+| `describe` | Qwen2.5-VL-3B-Instruct (4-bit bnb) | 3500 MB | Kurzbeschreibungen für Figure/Chart/Table-Crops |
+| `embedding` | EmbeddingGemma 2 | ~1100 MB | Text- und Bild-Embeddings im gemeinsamen Raum |
+
+`describe` ist bewusst von `vl` (PaddleOCR-VL) getrennt: `vl` läuft bei manchen Dokumenten (dichte Schaltpläne/Graphen, dichte Zahlentabellen) auf allen Seiten in den 180s-Timeout -- reproduzierbar, nicht nur im informellen Test (`experiments/vlm-qa-test/`). `describe` nutzt die 3B- statt der 7B-Variante: 7B maß in einem Vorab-Experiment ~7,8 GB VRAM, fast das gesamte 8-GB-Budget ohne Marge; 3B maß im eigenen Smoke-Test 3,5 GB bei vergleichbarer QA-Genauigkeit im Vorab-Test.
+
+**Bekannte Einschränkungen:**
+- Der Dekorations-Filter (10.000 px² Mindestfläche) ist an einem einzigen beobachteten Fall (vier TI-Marketing-Icons) kalibriert, nicht an einer systematischen Stichprobe über den ganzen Datensatz.
+- `pymupdf`s Tabellen-Zeilenstruktur bleibt stellenweise schwach (mehrere Zeilen landen ohne `<tr>`-Trennung in einer Zelle, siehe `experiments/vlm-qa-test/README.md`, Follow-up A) -- für die Volltextsuche unkritisch (ein Begriff muss nur irgendwo auf der Seite stehen), für ein exaktes Auslesen einer bestimmten Zeile aber weiterhin ein offenes Problem.
+- Die Volltextsuche verlangt alle Query-Wörter (FTS5 `AND`-Verknüpfung) -- keine Phrasen- oder OR-Suche.
+- Vektorsuche liefert immer die nächstgelegenen Treffer, auch zu einer bedeutungslosen Query -- es gibt keine Ähnlichkeits-Schwelle, ab der "kein Treffer" zurückkommt.
+
+**Stichprobe (6 Queries von Hand gegen den Vollindex, Plausibilitäts-Check, keine systematische Messung):**
+
+| Query | Beobachtung |
+|---|---|
+| `PSRR` | Volltext trifft `ds-lm317` S. 4 (die Tabelle mit dem PSRR-Wert) sofort richtig. Vektor-Treffer sind dagegen schwächer/breiter gestreut (0.73-0.78, NASA-Berichte) -- eine kurze Abkürzung allein ist für die Embedding-Query semantisch arm. |
+| `efficiency versus output current` | Trifft sowohl per Volltext als auch per Vektor (0.865) exakt die zwei Effizienz-Graphen (`ds-tps5430`, `ds-tps62130`) -- der Idealfall, den der Multimodal-Spike versprach. |
+| `schematic circuit diagram` | Breite, aber plausible Trefferstreuung über mehrere Schaltplan-Figuren verschiedener Dokumente (DEC-Technical-Manual, TPS62130, DRV8825), alle mit konsistent hoher Ähnlichkeit (~0.85). |
+| `NE555 timer pin configuration` | Vektor-Treffer sind ausschließlich und korrekt `ds-ne555`-Seiten; keine Volltext-Treffer, weil nicht alle Begriffe wörtlich auf einer Seite stehen (FTS5-`AND`). |
+| `drainage area gaging station` | **Echter Lückenfall:** Die Phrase steht wörtlich im narrativen Text von `gd1-001147` S. 1, aber dessen Seiten-Text-Embedding liegt in den Top-5 der Vektorsuche nicht vorne (Rang hinter mehreren unrelated Datenblatt-Tabellen). Genau die Art Fehltreffer, die `retrieval-eval` systematisch messen soll. |
+| `zzyxqwerty blorple nonsense term` | Keine Volltext-Treffer (korrekt), aber Vektorsuche liefert trotzdem "nächste" Treffer mit moderater Ähnlichkeit (~0.70) -- erwartetes Verhalten einer reinen Nearest-Neighbor-Suche ohne Schwellenwert, kein Bug. |
 
 ## Setup
 

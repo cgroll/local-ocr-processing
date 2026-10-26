@@ -1,4 +1,5 @@
 """One loader per component. Heavy imports happen inside `load` so the registry works without a GPU."""
+from dataclasses import dataclass
 from typing import Any
 
 from .registry import ModelSpec
@@ -56,8 +57,55 @@ class EmbeddingLoader(_Base):
         )
 
 
+@dataclass
+class DescribeHandle:
+    """Bundles the model and its processor; `describe()` is the one operation callers need."""
+    model: Any
+    processor: Any
+    max_new_tokens: int
+
+    def describe(self, image, prompt: str) -> str:
+        messages = [{"role": "user", "content": [
+            {"type": "image", "image": image}, {"type": "text", "text": prompt},
+        ]}]
+        text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        inputs = self.processor(text=[text], images=[image], return_tensors="pt").to(self.model.device)
+        return self._generate(inputs, self.max_new_tokens)
+
+    def generate_text(self, prompt: str, max_new_tokens: int | None = None) -> str:
+        """Text-only call (no image) -- e.g. for summarizing an already-extracted document."""
+        messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
+        text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        inputs = self.processor(text=[text], return_tensors="pt").to(self.model.device)
+        return self._generate(inputs, max_new_tokens or self.max_new_tokens)
+
+    def _generate(self, inputs, max_new_tokens: int) -> str:
+        import torch
+        with torch.inference_mode():
+            out_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
+        trimmed = out_ids[:, inputs["input_ids"].shape[1]:]
+        return self.processor.batch_decode(trimmed, skip_special_tokens=True)[0].strip()
+
+
+class DescribeLoader(_Base):
+    def load(self, spec: ModelSpec):
+        import torch
+        from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration
+
+        quant_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.bfloat16)
+        model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+            spec.params["model_id"], quantization_config=quant_config, device_map="cuda", dtype=torch.bfloat16,
+        )
+        processor = AutoProcessor.from_pretrained(spec.params["model_id"])
+        return DescribeHandle(model, processor, spec.params["max_new_tokens"])
+
+    def unload(self, handle: Any) -> None:
+        del handle.model, handle.processor
+        super().unload(handle)
+
+
 def default_loaders() -> dict[str, _Base]:
     return {
         "pymupdf": PyMuPDFLoader(), "layout": LayoutLoader(), "ocr": OcrLoader(),
-        "vl": VlLoader(), "embedding": EmbeddingLoader(),
+        "vl": VlLoader(), "embedding": EmbeddingLoader(), "describe": DescribeLoader(),
     }

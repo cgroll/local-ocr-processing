@@ -1,0 +1,58 @@
+{
+  "model_variant": "Qwen/Qwen2.5-VL-7B-Instruct",
+  "load_time_s": 14.577986752992729,
+  "results": [
+    {
+      "doc": "ds-lm317",
+      "pages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "content_chars": 7794,
+      "gen_time_s": 8.911694854992675,
+      "output": "**SUMMARY:** This document provides detailed technical specifications, applications, and descriptions for the LM317 adjustable three-pin positive voltage regulator, including its features, electrical characteristics, package options, and comparison with other similar devices. It also covers application information, system examples, and layout recommendations.\n\n**KEYWORDS:** LM317, adjustable regulator, positive voltage, 3-pin, 1.25V to 37V, 1.5A, line regulation, load regulation, thermal overload protection, PSRR, TO-263, TO-220, TO-223, battery-charger circuit, multifunction printers, electricity meters, servo drive control modules, merchant network PSU, input bypass, output capacitor, transient response, safety-critical applications, Texas Instruments, datasheet, regulator, voltage supply, power stage module, electric meter, AC drive, servo control, PSU, bypass capacitor, input filter, output filter, thermal information, electrical characteristics, system design, application notes, component comparison, package size, thermal resistance, input voltage range, load regulation accuracy, PSRR, recommended operating temperature, device comparison table, system examples, power supply recommendations, layout guidelines, device support, documentation updates, electrostatic discharge caution, glossary, trademarks, revision history, mechanical packaging, orderable information."
+    },
+    {
+      "doc": "ds-ne555",
+      "pages": [
+        1,
+        2,
+        3
+      ],
+      "content_chars": 6021,
+      "gen_time_s": 5.621051293011988,
+      "output": "**SUMMARY:** This document provides detailed technical specifications and descriptions for various versions of the 555 timer ICs (NA555, NE555, SA555, SE555), including their features, applications, pin configurations, and electrical characteristics. It also includes information on absolute maximum ratings, thermal considerations, and typical performance characteristics.\n\n**KEYWORDS:** 555 timer, NA555, NE555, SA555, SE555, precision timing circuits, astable, monostable, pulse-shaping circuits, pulse-width modulators, industrial controls, timing circuits, TTL-compatible, temperature ranges, package types, electrical characteristics, switching characteristics, thermal information, application information, device functional modes, pin configuration, documentation updates, Texas Instruments, SLFS022K, September 1973, March 2026 revision."
+    },
+    {
+      "doc": "bs-dec-08-hrka-d-rk8-schem-dec70",
+      "pages": [
+        1,
+        4
+      ],
+      "content_chars": 5120,
+      "gen_time_s": 5.152675340999849,
+      "output": "**SUMMARY:** This document is a detailed maintenance manual for the Digital Equipment Corporation's RK8 Disk System, specifically focusing on the RK01 and RK08 disk drives. It provides comprehensive diagrams and schematics for various components and systems within these disk drives, including power supplies and control circuits.\n\n**KEYWORDS:** RK8 Disk System, RK01 Disk Drive, RK08 Disk Control, Digital Equipment Corporation, Maintenance Manual, Disk Drive Components, Power Supply, AC Input Gating, Longitudinal Parity, Sector Addressing, Disk Selection, Data Buffer, Read Block, Write Block, AC Memory Buffer, Type 716 Power Supply, Type 854 Power Control Panel, Disk System Maintenance, Digital Equipment Corporation Manuals, Disk Drive Troubleshooting, Disk Drive Components Diagrams."
+    },
+    {
+      "doc": "gd1-001028",
+      "pages": [
+        1
+      ],
+      "content_chars": 125,
+      "gen_time_s": 9.741210686013801,
+      "output": "SUMMARY: This document provides data on California grape acreage for the 2006 crop year, compiled by the California Department of Food and Agriculture in April 2007.\n\nKEYWORDS: California grape acreage, 2006 crop, California Department of Food and Agriculture, grape farming, agricultural statistics, California agriculture, grape production, agricultural data, crop report, agricultural industry, grape acreage, agricultural research, California agriculture industry, grape farming statistics, agricultural department, agricultural data collection, agricultural policy, agricultural economics, grape farming trends, agricultural resources, agricultural management, agricultural planning, agricultural development, agricultural innovation, agricultural technology, agricultural sustainability, agricultural conservation, agricultural environment, agricultural policy analysis, agricultural market analysis, agricultural supply chain, agricultural value chain, agricultural investment, agricultural financing, agricultural risk management, agricultural insurance, agricultural trade, agricultural exports, agricultural imports, agricultural policy implementation, agricultural policy evaluation, agricultural policy reform, agricultural policy coordination, agricultural policy collaboration, agricultural policy dialogue, agricultural policy consultation, agricultural policy negotiation, agricultural policy mediation, agricultural policy facilitation, agricultural policy advocacy, agricultural policy communication, agricultural policy education, agricultural policy training, agricultural policy outreach, agricultural policy engagement, agricultural policy participation, agricultural policy involvement, agricultural policy commitment, agricultural policy action, agricultural policy initiative, agricultural policy project, agricultural policy program, agricultural policy strategy, agricultural policy plan, agricultural policy framework, agricultural policy guideline, agricultural policy standard, agricultural policy regulation, agricultural policy guideline, agricultural policy requirement, agricultural policy directive, agricultural policy instruction, agricultural policy guidance, agricultural policy recommendation, agricultural policy suggestion, agricultural policy proposal, agricultural policy initiative, agricultural policy action, agricultural policy implementation, agricultural policy enforcement, agricultural policy monitoring, agricultural policy evaluation, agricultural policy assessment, agricultural policy review, agricultural policy audit, agricultural policy oversight, agricultural policy supervision, agricultural policy control, agricultural policy regulation, agricultural policy compliance, agricultural policy enforcement, agricultural policy inspection, agricultural policy audit, agricultural policy oversight,"
+    },
+    {
+      "doc": "ntrs-19760010918",
+      "pages": [
+        1,
+        10
+      ],
+      "content_chars": 1559,
+      "gen_time_s": 3.0912372680031694,
+      "output": "SUMMARY: This document appears to be a detailed technical specification or wiring diagram for a component labeled \"F2 Logic,\" detailing the connections between various pins and their corresponding wires, buses, and outputs. It includes a table outlining the pin numbers, wire connections, and associated components.\n\nKEYWORDS: F2 Logic, Pin Connections, Wiring Diagram, Component Specification, Pin Numbers, Wire Connections, Bus Connections, Output Signals, Electrical Components, Technical Documentation, Component Wiring, Electrical Wiring Diagram, Component Interface, Electrical Standards, Component Specifications"
+    }
+  ]
+}

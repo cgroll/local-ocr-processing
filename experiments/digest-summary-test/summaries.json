@@ -1,0 +1,20 @@
+[
+  {
+    "doc_id": "ds-lm317",
+    "content_chars": 20280,
+    "gen_time_s": 7.73232851899229,
+    "output": "LM317 is an adjustable three-pin positive-voltage regulator capable of supplying up to 1.5A over an output voltage range of 1.25V to 37V. The device requires only two external resistors to set the output voltage. The device features typical line regulation of 0.01% and typical load regulation of 0.1%. The LM317 includes internal short-circuit current limiting, thermal overload protection, and safe operating area compensation. Overload protection remains functional even if the ADJUST pin is disconnected. The LM317 can be used as a precision current regulator with electronic shutdown by clamping the adjustment terminal to ground, which programs the output to 1.25V where most loads draw little current. The LM317 is available in multiple package options including DCY, KCS, KCT, TO-220, TO-223, TO-223 (NDE),"
+  },
+  {
+    "doc_id": "ds-tps62130",
+    "content_chars": 33728,
+    "gen_time_s": 5.811638031998882,
+    "output": "<title>\nSummary: The document is a technical data sheet for the TPS62130 series of voltage regulators. It provides details on various electrical characteristics, including input voltage range, shutdown current, thermal shutdown temperature, and power switch characteristics such as ON-resistance and forward current limit. The document also includes typical characteristics and electrical characteristics tables, as well as detailed descriptions of the device's functionality and modes of operation.</title"
+  },
+  {
+    "doc_id": "ntrs-19760010918",
+    "content_chars": 17499,
+    "gen_time_s": 3.9087480870075524,
+    "output": "SUMMARY: The document is a detailed wiring diagram for various electronic components, outlining connections between different pins and wires, including ground bus, VDC buses, and other common connections. It details the number of wires required to connect each pin to other components within the system or circuitry."
+  }
+]

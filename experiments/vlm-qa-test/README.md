@@ -39,6 +39,11 @@ question?
 - **`raw_<backend>.json`** -- one file per backend, written by that backend's `run_*.py` script.
   Each has per-question answers + timing, and for the Gemini backends, per-question token counts
   and cost.
+- **`run_structured_text_qa.py`** / **`raw_qwen7b_structured_text.json`** and
+  **`run_summary_keywords.py`** / **`summaries_qwen7b.json`** -- two follow-up spikes (see
+  "Follow-up A" and "Follow-up C" below): does text extraction instead of pixels fix the trap
+  questions, and can a local LLM write useful doc summaries/keywords. Not joined into
+  `combined_results.json` -- small enough to read as-is.
 
 ## The 10 source documents
 
@@ -108,6 +113,119 @@ several models the same way:
 Takeaway: dense tables with near-duplicate neighboring columns/rows, and graphs that require
 matching a legend to a curve, are a real weak spot for all four of the smaller/local models
 tested -- not model-specific quirks.
+
+## Follow-up A: structured text instead of pixels, on the trap questions
+
+**Question:** the 5 trap questions above are mostly dense-table column/row mix-ups and a
+curve-to-legend mismatch. Does handing the model the *already-extracted* structured
+markdown/HTML (what `src/docparse` actually produces) instead of the raw page image fix this --
+i.e. is the problem "the model can't visually parse a dense table" rather than "the model can't
+reason about a dense table"? `run_structured_text_qa.py`, same model (Qwen2.5-VL-7B), same
+questions, text-only input (no image).
+
+**Not all 5 trap questions had a usable structured source to test with**, which is itself a
+finding (re-run 2026-10-25):
+
+- **1b** (ds-lm317): VL had already been run for this doc -- clean HTML table available.
+- **8a** (gd1-001147): VL had not been run for this doc; ran it specifically for this test and it
+  **timed out on all 6 pages** (`PageTimeout: inference exceeded the limit of 180 s`) -- not a
+  harness artifact this time, the production `docparse.parse --engines vl` path itself hit the
+  180s cap. Fell back to pymupdf's table extraction instead (native PDF, so pymupdf has a real
+  text layer).
+- **3a** (ds-tps62130): VL also timed out on all 6 pages of this doc. Fell back to pymupdf's raw
+  positioned text blocks (bbox + text -- a schematic isn't a table, so there's no HTML table to
+  fall back to, only spatial proximity between labels and values).
+- **3b** and **5a** were skipped outright, not run with degraded input: 3b (which curve sits on
+  top) has no text proxy at all -- that's pixel-only information (curve color vs. legend color).
+  5a's VL run timed out too, and PP-OCRv6's line OCR on that scanned page is too garbled (mixed-in
+  CJK artifacts, no correct fraction text) to contain "69 1/8" or anything close. Feeding the
+  model garbled or absent text would not have been a fair test.
+
+**Result: 1 of 3 fixed, and the other 2 failed for reasons that are not "vision vs. text":**
+
+| Q | Source | Model's answer | Ground truth | Verdict |
+|---|---|---|---|---|
+| 1b | VL HTML table | "0°C to 125°C" | 0 to 125 °C | **correct** -- the column mix-up (LM317A's -40 to 125 at the same row) is gone once the columns are named cells instead of visually adjacent pixels. |
+| 8a | pymupdf HTML table | "143 cfs" | 5730 | **wrong**, and wrong the *same way* as before: 143 is JAN day 4's actual daily value, not the MAX summary row. pymupdf's table reconstruction stacks all ~31 day-values plus TOTAL/MEAN/MAX/MIN into one newline-joined blob per `<td>`, with no per-row `<tr>` -- so the "text" table has the exact same row-identification ambiguity a human (or a VLM reading pixels) would have reading a cramped printed table. Giving the model text didn't help because the *extraction*, not the modality, lost the row structure. |
+| 3a | pymupdf bbox + text | "3.3 nF" | 22 uF | **wrong**. The correct block (`[bbox 519,1230,589,1247] "100 k⏎22 …F"`) sits at the same y-range as the `VOS` pin label, so the bbox proximity needed to answer this is present in the prompt -- the model didn't use it, and may also have been thrown by pymupdf mangling "µF" to "…F" (a real encoding bug in the extraction, not a model problem) and picking the nearest *cleanly-formatted* number instead. |
+
+**Takeaway:** "give the model text instead of pixels" only pays off when the text extraction
+itself preserves the structure that matters (1b). When the extraction is lossy in the same way
+the visual layout is ambiguous (8a's merged table rows) or spatial reasoning isn't actually used
+by the model despite being available (3a), reformatting as text doesn't help -- and can introduce
+*new* failure modes (encoding corruption). This matches the existing README note that
+PaddleOCR-VL's low score was "partly an artifact of the harness": extraction quality, not
+modality, is turning out to be the recurring bottleneck. It also surfaces a concrete pipeline gap
+worth fixing before `embedding-search`/`retrieval-eval`: pymupdf's table block builder needs
+proper per-row `<tr>` reconstruction (not newline-stacked cells) and correct Unicode handling
+(µ), or any text-based reader will inherit the same errors a pixel-based one makes.
+
+Also notable: VL timed out on *every single page* of both additional docs tried (12 pages, all at
+exactly the 180s cap) -- not an occasional outlier as the top-level README describes ("selten...
+meist nicht reproduzierbar"), but a total failure for these two documents specifically (a
+multi-net schematic+graph page and a dense numeric table report). Worth a closer look before
+relying on VL coverage for routing decisions.
+
+### Follow-up A2: is it the extraction or the local model's reasoning?
+
+Follow-up A left 8a and 3a wrong, and both looked like they could be explained by lossy
+extraction (pymupdf's merged table rows for 8a, pymupdf's "uF"->"...F" mangling for 3a) rather
+than the local model's reasoning. `run_gemini_extract_then_local_qa.py` tests this directly: ask
+Gemini 4 Argon to **transcribe** (not answer) the table/schematic into clean text, then feed that
+clean text -- no image -- to the same local Qwen2.5-VL-7B used throughout. If the local model
+gets it right now, extraction was the bottleneck; if not, the local model's own text reasoning is
+the limit. Cost: $0.029 total for both extractions.
+
+| Q | Clean (Gemini) extraction | Local model's answer on the clean text | Verdict |
+|---|---|---|---|
+| 3a | `capacitor: 22 uF -- connected to/near pin: VOS, SW` (correct unit, explicit pin pairing) | "22 uF" | **correct** -- confirms extraction (not reasoning) was the bottleneck for this one. Fixing pymupdf's unit-mangling and adding explicit label-to-value pairing would likely fix this class on real data too. |
+| 8a | A fully clean, properly row-separated Markdown table, explicit `MAX` row: `\| MAX \| 749 \| 221 \| 221 \| 5730 \| ...`| "1166 cubic feet per second" | **still wrong** -- and tellingly, 1166 is the **MEAN** row for JAN, not MAX. The model progressed from "grabs a random daily value" (Follow-up A, pymupdf source) to "grabs the wrong *summary* row" (clean source) -- but a perfectly clean, explicitly labeled table still isn't enough. This one is a genuine local-model text-reasoning limit, not an extraction artifact. |
+
+**Takeaway:** the two trap questions split cleanly into different root causes once extraction
+quality is controlled for. This matters for where to invest: 3a's failure mode (lossy/garbled
+extraction) is a pipeline problem worth fixing in `pymupdf`'s adapter (Unicode handling, explicit
+label-value pairing for schematics). 8a's failure mode (confusing adjacent summary-row labels in
+a dense table even when the text is unambiguous) is a 7B-model reasoning ceiling that better
+extraction cannot buy back -- that's either a job for a bigger/better local model, a verification
+step (e.g. asking the model to quote the exact row label it used), or routing this kind of
+question to a stronger backend.
+
+Raw output: `raw_gemini_extract_then_qwen7b.json`.
+
+## Follow-up C: can a local LLM write document summaries and keywords?
+
+**Question:** for the embedding-search / retrieval-eval roadmap, could a local text LLM generate
+doc-level summaries and keywords as extra retrieval metadata? `run_summary_keywords.py`, same
+model (Qwen2.5-VL-7B, text-only), fed the concatenated VL-extracted markdown of a few pages per
+document, for the 5 docs where VL output already exists, asked for a 2-3 sentence summary plus
+8-12 keywords.
+
+| Doc | Pages used | Input size | Summary quality | Keyword count | Keyword quality |
+|---|---|---|---|---|---|
+| ds-lm317 | 1-4 | 7.8k chars | accurate, on-topic | ~55 (asked for 8-12) | mostly on-topic but way over length, some filler |
+| ds-ne555 | 1-3 | 6.0k chars | accurate, on-topic | ~24 | good, mostly specific terms |
+| bs-dec-08-... | 1, 4 | 5.1k chars | accurate, on-topic | ~20 | good, specific part/drawing names |
+| gd1-001028 | 1 only | **125 chars** | accurate for what little text exists | **~90, degenerate repetition** | breaks down into a runaway loop ("agricultural policy X" repeated dozens of times with X cycling through near-synonyms) |
+| ntrs-19760010918 | 1, 10 | 1.6k chars | accurate **but scoped to page 10 only** (page 1 has no VL result) -- describes the doc as "a wiring diagram" when it's actually a NASA technical report that happens to contain one | 15 | reasonable, but narrow for the same reason |
+
+**Takeaway:** when there's enough real content, the 7B model writes genuinely good, accurate
+summaries and mostly-sensible keywords -- promising for metadata enrichment. But two failure
+modes showed up that any production use needs to guard against:
+
+1. **Instruction-following on count collapses under both too-much and too-little input.**
+   With plenty of input (ds-lm317) the model way overshoots the requested keyword count instead
+   of stopping. With almost no input (gd1-001028's 125-char cover page) it doesn't say "not
+   enough information" -- it fills the token budget with repetitive, increasingly generic
+   hallucinated keywords. Needs a minimum-input-length gate and/or a hard keyword-count cap with
+   post-hoc truncation/dedup, not just a prompt instruction.
+2. **Missing pages silently narrow the summary's scope with no error signal.** `ntrs-19760010918`
+   only had VL output for 1 of its pages in this sample set; the model summarized confidently as
+   if that page were the whole document. For retrieval metadata this is dangerous -- an
+   authoritative-sounding but incomplete summary is worse than no summary, because nothing flags
+   it as partial. Any doc-level summary step needs to know (and probably state) its own page
+   coverage.
+
+Raw outputs: `raw_qwen7b_structured_text.json`, `summaries_qwen7b.json`.
 
 ### PaddleOCR-VL's low score is partly an artifact of this harness
 

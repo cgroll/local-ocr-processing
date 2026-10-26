@@ -85,6 +85,16 @@ def make_pdf(path):
         doc.save(path)
 
 
+def test_micro_sign_mangling_is_fixed_but_real_ellipses_are_not():
+    fix = pm_adapter._fix_micro_sign_mangling
+    assert fix("0.1 …F") == "0.1 µF"
+    assert fix("22…H") == "22µH"  # no space between digit and glyph
+    assert fix("0.1 …F,") == "0.1 µF,"  # unit letter followed by punctuation, not another letter
+    assert fix("100 k\r 22 …F") == "100 k\r 22 µF"  # two values in one cell
+    assert fix("three dots… then more text") == "three dots… then more text"  # no digit before
+    assert fix("Section 3.2…see below") == "Section 3.2…see below"  # "s" continues into "see"
+
+
 @pytest.fixture
 def native_page(tmp_path):
     pdf = tmp_path / "n.pdf"

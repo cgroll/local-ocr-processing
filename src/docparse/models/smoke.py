@@ -67,6 +67,11 @@ def infer(key: str, handle, sample: Sample, params: dict) -> str:
     if key == "embedding":
         vec = handle.encode("Smoke test", prompt_name="Document")
         return f"vector of {vec.shape[-1]} dims"
+    if key == "describe":
+        from PIL import Image
+        image = Image.fromarray(sample.image[:, :, ::-1])  # BGR -> RGB
+        text = handle.describe(image, "In one sentence, describe what this image shows.")
+        return f"{len(text)} chars of description"
     raise KeyError(key)
 
 

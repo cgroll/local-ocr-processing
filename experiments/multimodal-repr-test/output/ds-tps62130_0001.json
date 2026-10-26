@@ -1,0 +1,107 @@
+{
+  "doc": "ds-tps62130",
+  "page": "0001",
+  "page_png": "data/pages/ds-tps62130/0001.png",
+  "text_source": "pymupdf",
+  "narrative_text": "TPS6213x 3-V to17-V, 3-A Step-Down Converter In 3-mm \u00d7 3-mm QFN Package\n\n1 Features\n\n\u2022\nDCS-Control\u2122 topology\n\u2022\nInput voltage range: 3 V to 17 V\n\u2022\nUp to 3-A output current\n\u2022\nAdjustable output voltage from 0.9 V to 6 V\n\u2022\nPin-selectable output voltage (nominal, + 5%)\n\u2022\nProgrammable soft start and tracking\n\u2022\nSeamless power save mode transition\n\u2022\nQuiescent current of 17 \u00b5A (typical)\n\u2022\nSelectable operating frequency\n\u2022\nPower-good output\n\u2022\n100% duty cycle mode\n\u2022\nShort circuit protection\n\u2022\nOvertemperature protection\n\u2022\nPin-to-pin compatible with the TPS62140 and \nTPS62150\n\u2022\nAvailable in a 3-mm \u00d7 3-mm, QFN-16 package\n\u2022\nUse the TPS82130 for faster designs\n\n2 Applications\n\n\u2022\nStandard 12-V rail supplies\n\u2022\nPOL supply from single or multiple Li-ion battery\n\u2022\nSolid-state drives\n\u2022\nEmbedded systems\n\u2022\nLDO replacement\n\u2022\nMobile PCs, tablets, modems, cameras\n\u2022\nServer, microserver\n\u2022\nData terminal, point of sales (ePOS)\n\n3 Description\n\nThe TPS6213x family are easy-to-use synchronous \nstep \ndown \nDC-DC \nconverters \noptimized \nfor \napplications with high power density. A high switching \nfrequency of typically 2.5 MHz allows the use of small \ninductors and provides fast transient response as well \nas high output voltage accuracy by use of the DCS-\nControl topology.\n\nWith their wide operating input voltage range of 3 V \nto 17 V, the devices are ideally suited for systems \npowered from either a Li-Ion or other batteries as \nwell as from 12-V intermediate power rails. They \nsupport up to 3-A continuous output current at output \nvoltages between 0.9 V and 6 V (with 100% duty \ncycle mode). The output voltage start-up ramp is \ncontrolled by the soft-start pin, which allows operation \nas either a stand-alone power supply or in tracking \nconfigurations. Power sequencing is also possible by \nconfiguring the Enable and open-drain Power Good \npins.\n\nIn power save mode, the devices draw quiescent \ncurrent of approximately 17 \u03bcA from VIN. Power save \nmode, entered automatically and seamlessly if the \nload is small, maintains high efficiency over the entire \nload range. In shutdown mode, the device is turned \noff and shutdown current consumption is less than 2 \n\u03bcA.\n\nThe device, available in adjustable and fixed output \nvoltage versions, is packaged in a 16-pin VQFN \npackage measuring 3 mm \u00d7 3 mm (RGT).\n\nDevice Information\n\n(1)\nFor all available packages, see the orderable addendum at \nthe end of the data sheet.\n\nPVIN\n\nAVIN\n\nEN\n\nSS/TR\n\nDEF\n\nFSW\n\nSW\n\nVOS\n\nPG\n\nFB\n\nAGND\n\nPGND\n\nTPS62131\n0.1 \u2026F\n\n3.3 nF\n\n10 \u2026F\n\n(3 .. 17) V\n\n100 k\r\n22 \u2026F",
+  "visual_entries": [
+    {
+      "type": "figure",
+      "label": "header_image",
+      "bbox": [
+        321.0,
+        13.0,
+        449.0,
+        54.0
+      ],
+      "position": 0,
+      "crop_path": "crops/ds-tps62130_0001_figure_0.png",
+      "description": "This is a simple icon representing the concept of ordering and quality control.",
+      "content_text": null
+    },
+    {
+      "type": "figure",
+      "label": "header_image",
+      "bbox": [
+        475.0,
+        13.0,
+        642.0,
+        57.0
+      ],
+      "position": 1,
+      "crop_path": "crops/ds-tps62130_0001_figure_1.png",
+      "description": "This is a red square icon representing \"Technical documentation\" on a page.",
+      "content_text": null
+    },
+    {
+      "type": "figure",
+      "label": "header_image",
+      "bbox": [
+        833.0,
+        13.0,
+        955.0,
+        54.0
+      ],
+      "position": 2,
+      "crop_path": "crops/ds-tps62130_0001_figure_2.png",
+      "description": "This figure represents a simple icon indicating \"Support & training\" services.",
+      "content_text": null
+    },
+    {
+      "type": "figure",
+      "label": "header_image",
+      "bbox": [
+        665.0,
+        14.0,
+        807.0,
+        54.0
+      ],
+      "position": 3,
+      "crop_path": "crops/ds-tps62130_0001_figure_3.png",
+      "description": "This figure is a symbol indicating the design and development phase in a process flowchart.",
+      "content_text": null
+    },
+    {
+      "type": "table",
+      "label": "table",
+      "bbox": [
+        654.0,
+        1063.0,
+        1156.0,
+        1123.0
+      ],
+      "position": 38,
+      "crop_path": "crops/ds-tps62130_0001_table_38.png",
+      "description": "The table outlines specifications for a semiconductor package, detailing part numbers, package types, and body sizes for different components.",
+      "content_text": "<table><tr><td>PARTNUMBER</td><td>PACKAGE(1)</td><td>BODYSIZE(NOM)</td></tr><tr><td>TPS6213x</td><td>VQFN(16)</td><td>300mm\u00d7300mm\n. .</td></tr></table>"
+    },
+    {
+      "type": "chart",
+      "label": "chart",
+      "bbox": [
+        691.0,
+        1187.0,
+        1114.0,
+        1473.0
+      ],
+      "position": 39,
+      "crop_path": "crops/ds-tps62130_0001_chart_39.png",
+      "description": "This is a line graph showing the efficiency of a power supply as a function of output current for different input voltage levels.",
+      "content_text": null
+    },
+    {
+      "type": "figure",
+      "label": "image",
+      "bbox": [
+        104.0,
+        1190.0,
+        648.0,
+        1346.0
+      ],
+      "position": 40,
+      "crop_path": "crops/ds-tps62130_0001_figure_40.png",
+      "description": "This is a schematic circuit diagram with an integrated circuit (IC) and passive components, illustrating the connections for a switching regulator.",
+      "content_text": null
+    }
+  ]
+}
