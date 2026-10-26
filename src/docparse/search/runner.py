@@ -2,9 +2,17 @@
 design.md "Reproduzierbare, inkrementelle Ablage"). `--force` rebuilds the whole index.
 `run_documents` is a separate, second pass: one `document_summary` + `document_fulltext`
 embedding per document that has a Markdown digest (`docparse.digest`), appended to the same
-index -- see `document_embed.py`."""
+index -- see `document_embed.py`.
+
+`run_documents_cloud` is a third, independent pass for the parallel cloud-model summary
+(`docparse.digest.cloud_summary`, see `openspec/changes/cloud-document-summary/`): one
+`document_summary_cloud` embedding per document that already has an `ok` cloud summary. It never
+generates a cloud summary itself (that is `docparse.digest cloud-summary run`, a paid API call,
+not something to trigger implicitly from an embedding pass) and never touches the
+`document_summary`/`document_fulltext` entries `run_documents` produces."""
 from pathlib import Path
 
+from ..digest.cloud_summary import cloud_summary_path, read_cloud_summary
 from ..digest.document import DIGEST_SUBDIR
 from ..digest.summary import generate_summary, read_summary, summary_path, write_summary
 from ..enrich.format import ENRICH_SUBDIR
@@ -75,4 +83,28 @@ def run_documents(
         index.save(results_dir)
         embedded += 1
         log(f"search   {doc_id:<35} document-level: {len(items)} embeddings")
+    return index, embedded, skipped
+
+
+def run_documents_cloud(
+    manager: ModelManager, index: EmbeddingIndex, force: bool = False,
+    results_dir: Path = RESULTS_DIR, log=print,
+) -> tuple[EmbeddingIndex, int, int]:
+    """Returns (index, documents embedded this run, documents already done and skipped). Only
+    considers documents with an existing `<doc>.cloud_summary.json` -- generating one is a
+    separate, explicit step (`docparse.digest cloud-summary run`), not triggered here."""
+    done_docs = set() if force else index.doc_ids_with_kind("document_summary_cloud")
+    embedded = skipped = 0
+    for path in sorted((results_dir / DIGEST_SUBDIR).glob("*.cloud_summary.json")):
+        doc_id = path.stem.removesuffix(".cloud_summary")
+        if doc_id in done_docs:
+            skipped += 1
+            continue
+        cloud_summary = read_cloud_summary(cloud_summary_path(doc_id, results_dir))
+        items, vectors = DE.embed_document_cloud_summary(manager, cloud_summary)
+        if items:
+            index = index.add(items, vectors)
+        index.save(results_dir)
+        embedded += 1
+        log(f"search   {doc_id:<35} document-level (cloud): {len(items)} embeddings")
     return index, embedded, skipped

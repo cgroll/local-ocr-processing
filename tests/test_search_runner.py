@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from docparse.digest.cloud_summary import CloudDocumentSummary, cloud_summary_path, write_cloud_summary
 from docparse.digest.summary import summary_path, write_summary, DocumentSummary
 from docparse.enrich.format import PageEnrichment, write_result as write_enrichment
 from docparse.search import runner as R
@@ -136,3 +137,64 @@ def test_run_documents_force_regenerates_summary_and_embeddings(tmp_path):
     index, embedded, skipped = R.run_documents(manager, index, force=True, results_dir=results_dir, log=lambda *a: None)
     assert embedded == 1 and skipped == 0
     assert manager.describe.calls == 2
+
+
+# --- run_documents_cloud: third, independent pass for the parallel cloud summary --------------
+
+def test_run_documents_cloud_embeds_documents_with_an_ok_cloud_summary(tmp_path):
+    results_dir = tmp_path / "results"
+    _setup_digest(results_dir, "d1")
+    write_cloud_summary(CloudDocumentSummary("d1", "Cloud Title", "Cloud summary.", status="ok"), results_dir)
+    manager = FakeManager()
+
+    index, embedded, skipped = R.run_documents_cloud(manager, R.EmbeddingIndex(), results_dir=results_dir, log=lambda *a: None)
+    assert embedded == 1 and skipped == 0
+    assert any(i.kind == "document_summary_cloud" and i.doc_id == "d1" for i in index.items)
+
+
+def test_run_documents_cloud_coexists_with_local_document_summary(tmp_path):
+    results_dir = tmp_path / "results"
+    _setup_digest(results_dir, "d1")
+    write_cloud_summary(CloudDocumentSummary("d1", "Cloud Title", "Cloud summary.", status="ok"), results_dir)
+    manager = FakeManager()
+
+    index, _, _ = R.run_documents(manager, R.EmbeddingIndex(), results_dir=results_dir, log=lambda *a: None)
+    index, _, _ = R.run_documents_cloud(manager, index, results_dir=results_dir, log=lambda *a: None)
+    kinds = {i.kind for i in index.items if i.doc_id == "d1"}
+    assert {"document_summary", "document_fulltext", "document_summary_cloud"} <= kinds
+
+
+def test_run_documents_cloud_skips_already_embedded_documents(tmp_path):
+    results_dir = tmp_path / "results"
+    _setup_digest(results_dir, "d1")
+    write_cloud_summary(CloudDocumentSummary("d1", "Cloud Title", "Cloud summary.", status="ok"), results_dir)
+    manager = FakeManager()
+    index, _, _ = R.run_documents_cloud(manager, R.EmbeddingIndex(), results_dir=results_dir, log=lambda *a: None)
+
+    _setup_digest(results_dir, "d2")
+    write_cloud_summary(CloudDocumentSummary("d2", "Cloud Title 2", "Cloud summary 2.", status="ok"), results_dir)
+    index, embedded, skipped = R.run_documents_cloud(manager, index, results_dir=results_dir, log=lambda *a: None)
+    assert embedded == 1 and skipped == 1  # only d2 is new; d1 was already done
+
+
+def test_run_documents_cloud_without_new_summaries_leaves_index_unchanged(tmp_path):
+    results_dir = tmp_path / "results"
+    _setup_digest(results_dir, "d1")
+    write_cloud_summary(CloudDocumentSummary("d1", "Cloud Title", "Cloud summary.", status="ok"), results_dir)
+    manager = FakeManager()
+    index, _, _ = R.run_documents_cloud(manager, R.EmbeddingIndex(), results_dir=results_dir, log=lambda *a: None)
+    before = len(index.items)
+
+    index, embedded, skipped = R.run_documents_cloud(manager, index, results_dir=results_dir, log=lambda *a: None)
+    assert embedded == 0 and skipped == 1
+    assert len(index.items) == before
+
+
+def test_run_documents_cloud_ignores_documents_without_a_cloud_summary(tmp_path):
+    results_dir = tmp_path / "results"
+    _setup_digest(results_dir, "d1")  # no cloud summary written for d1
+    manager = FakeManager()
+
+    index, embedded, skipped = R.run_documents_cloud(manager, R.EmbeddingIndex(), results_dir=results_dir, log=lambda *a: None)
+    assert embedded == 0 and skipped == 0
+    assert index.items == []

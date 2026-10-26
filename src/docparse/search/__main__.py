@@ -25,6 +25,11 @@ def cmd_run(args) -> int:
         index, doc_embedded, doc_skipped = runner.run_documents(
             manager, index, force=args.force, results_dir=args.results_dir,
         )
+        # Additive third pass: embeds whatever cloud summaries already exist
+        # (`docparse.digest cloud-summary run`, a separate, paid step). Never generates one.
+        index, cloud_embedded, cloud_skipped = runner.run_documents_cloud(
+            manager, index, force=args.force, results_dir=args.results_dir,
+        )
     finally:
         manager.unload_all()
     by_kind: dict[str, int] = {}
@@ -32,6 +37,7 @@ def cmd_run(args) -> int:
         by_kind[i.kind] = by_kind.get(i.kind, 0) + 1
     print(f"\nembedded {embedded} pages, skipped {skipped} (already done)")
     print(f"embedded {doc_embedded} documents, skipped {doc_skipped} (already done)")
+    print(f"embedded {cloud_embedded} cloud summaries, skipped {cloud_skipped} (already done)")
     print(f"index: {len(index.items)} vectors, dim {index.dim}")
     for kind, n in sorted(by_kind.items()):
         print(f"  {kind:<16} {n}")

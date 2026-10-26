@@ -15,9 +15,12 @@ SEARCH_SUBDIR = "search"
 # "page_text"/"page_image": one per page. "visual_image"/"visual_desc"/"visual_content": one per
 # enriched visual block (content only for tables with a content_text). "document_summary"/
 # "document_fulltext": one per document (page=0 sentinel, see document_embed.py), not per page.
+# "document_summary_cloud": the same page=0 sentinel, but from a cloud flagship model's summary
+# (docparse.digest.cloud_summary) instead of the local `describe` model -- additive, parallel
+# comparison data, see openspec/changes/cloud-document-summary/proposal.md.
 EMBEDDING_KINDS = (
     "page_text", "page_image", "visual_image", "visual_desc", "visual_content",
-    "document_summary", "document_fulltext",
+    "document_summary", "document_fulltext", "document_summary_cloud",
 )
 
 
@@ -57,6 +60,13 @@ class EmbeddingIndex:
 
     def doc_pages(self) -> set[tuple[str, int]]:
         return {(i.doc_id, i.page) for i in self.items}
+
+    def doc_ids_with_kind(self, kind: str) -> set[str]:
+        """Document ids that already have an embedding of the given `kind` -- used for the
+        resumable per-kind skip logic of document-level passes like `run_documents_cloud`,
+        where several kinds (document_summary, document_fulltext, document_summary_cloud) share
+        the same page=0 sentinel and so can't be told apart by `doc_pages()` alone."""
+        return {i.doc_id for i in self.items if i.kind == kind}
 
     def add(self, new_items: list[EmbeddingItem], new_vectors: np.ndarray) -> "EmbeddingIndex":
         """Returns a new index with `new_items`/`new_vectors` appended (rows renumbered)."""

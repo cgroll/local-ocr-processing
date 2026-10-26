@@ -12,9 +12,16 @@ ran, 21,339 tokens OOM'd while building the attention mask (tried to allocate 5.
 A document above the limit gets a `document_fulltext` embedding of its *beginning* only, not the
 whole document -- `document_summary` (always computed from the unclipped title+summary) remains
 the primary whole-document representation.
+
+`embed_document_cloud_summary` is a third, independent function: it embeds the parallel
+cloud-model summary (`docparse.digest.cloud_summary`, see
+`openspec/changes/cloud-document-summary/`) as its own `document_summary_cloud` kind, additive
+to -- and never replacing -- the `document_summary` embedding above (same page=0 sentinel, but a
+distinct `kind` so the two can be told apart and compared later in `retrieval-eval`).
 """
 import numpy as np
 
+from ..digest.cloud_summary import CloudDocumentSummary
 from ..digest.summary import DocumentSummary
 from ..models.lifecycle import ModelManager
 from .format import EmbeddingItem
@@ -54,3 +61,21 @@ def embed_document(
         for row, (k, kind) in enumerate(zip(keys, kinds))
     ]
     return items, matrix
+
+
+def embed_document_cloud_summary(
+    manager: ModelManager, cloud_summary: CloudDocumentSummary,
+) -> tuple[list[EmbeddingItem], np.ndarray]:
+    """Embeds the cloud-model title+summary as a `document_summary_cloud` item. No embedding is
+    produced for a missing/`error` cloud summary -- the caller (the search runner) simply has
+    nothing to add for that document this run, rather than erroring."""
+    summary_text = f"{cloud_summary.title}\n\n{cloud_summary.summary}".strip()
+    if not summary_text or cloud_summary.status != "ok":
+        return [], np.zeros((0, 0), dtype=np.float32)
+    vector = _encode_text(manager, summary_text)
+    matrix = vector.reshape(1, -1).astype(np.float32)
+    item = EmbeddingItem(
+        f"{cloud_summary.doc_id}/DOCUMENT/SUMMARY_CLOUD", cloud_summary.doc_id,
+        DOCUMENT_PAGE_SENTINEL, "document_summary_cloud", 0,
+    )
+    return [item], matrix
