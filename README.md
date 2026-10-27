@@ -215,6 +215,46 @@ uv sync
 
 Entwicklungsrechner: RTX 3070 Laptop (8 GB VRAM). VL-1.6 braucht ~5 GB, daneben keine weiteren GPU-Prozesse laufen lassen.
 
+## Quickstart: neuer Rechner / neuer Dokumentensatz
+
+### Auf einem neuen Rechner
+
+```bash
+git clone https://github.com/cgroll/local-ocr-processing.git
+cd local-ocr-processing
+uv sync                                    # lädt u. a. mehrere GB CUDA-Wheels (paddlepaddle-gpu), dauert
+uv run pytest                              # Sanity-Check, läuft ohne GPU durch
+uv run python -m docparse.models smoke     # GPU-Check: jedes Modell einzeln laden/entladen, Zeiten + VRAM-Spitze
+```
+
+Bei abweichender GPU: `models.toml` (`budget.total_mb`) auf das tatsächliche VRAM-Budget anpassen, danach `uv run python -m docparse.models check <keys>` nutzen, um zu prüfen, ob eine Modellkombination hineinpasst, bevor man sie gemeinsam lädt (siehe oben "Modelle").
+
+### Mit einem neuen Dokumentensatz ausprobieren
+
+1. **Dokumente ins Manifest aufnehmen** -- entweder per Kandidatensuche (siehe oben "Datensatz": `docparse.dataset candidates` + `add`) oder von Hand in `datasets/manifest.csv` ergänzen (Pflichtfelder: `id`, `url`, `group`, `rights`, `rights_source`, `tags`).
+2. **Validieren und laden:**
+   ```bash
+   uv run python -m docparse.dataset validate
+   uv run python -m docparse.dataset download
+   ```
+3. **Volle Pipeline, der Reihe nach** (jeder Schritt ist fortsetzbar/inkrementell, vorhandene Ergebnisse werden übersprungen):
+   ```bash
+   uv run python -m docparse.parse run --engines pymupdf,layout,ocr
+   uv run python -m docparse.parse run --engines vl          # optional, deutlich langsamer, siehe oben "Parsing"
+   uv run python -m docparse.enrich run
+   uv run python -m docparse.digest run
+   uv run python -m docparse.search run
+   uv run python -m docparse.viewer build
+   ```
+4. **Stichprobe:** `data/viewer/index.html` im Browser öffnen, und/oder `uv run python -m docparse.search query "<Begriff>"`.
+
+Alle Zwischenergebnisse landen unter `data/` (nicht im Git) -- ein neuer Dokumentensatz kollidiert nicht mit einem bestehenden, solange die `id`-Spalte im Manifest eindeutig ist.
+
+### Optional, braucht eigene Cloud-Zugänge (nicht im Repo enthalten)
+
+- `uv run python -m docparse.digest cloud-summary` -- Gemini-4-Argon-Summaries, braucht ein eigenes GCP-Projekt mit Vertex-AI-Zugriff (`GCP_PROJECT`/`GCP_LOCATION` in `src/docparse/digest/cloud_summary.py` anpassen, Kosten siehe oben "Suche").
+- `experiments/agentic-retrieval-eval/` -- braucht Docker und ein eigenes Claude-Konto, siehe die README in diesem Ordner.
+
 ## Struktur (geplant)
 
 ```
