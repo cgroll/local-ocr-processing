@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import pytest
 
 from docparse.models import Registry
@@ -17,9 +19,18 @@ class FakeLoader:
         self.unloads += 1
 
 
-def manager(free_mb=lambda: 8000):
-    loaders = {k: FakeLoader() for k in Registry.load(None).keys()}
-    return ModelManager(Registry.load(None), loaders, free_mb), loaders
+def _gpu_registry():
+    """Registry with the accelerated models pinned to CUDA 'gpu', so the real-memory guard applies
+    regardless of the host platform (on Apple Silicon the defaults would be 'mlx')."""
+    base = Registry.load(None)
+    specs = {k: replace(s, device="gpu" if s.device in {"gpu", "mlx"} else s.device) for k, s in base._specs.items()}
+    return Registry(specs, base.budget)
+
+
+def manager(free_mb=lambda: 8000, registry=None):
+    registry = registry or _gpu_registry()
+    loaders = {k: FakeLoader() for k in registry.keys()}
+    return ModelManager(registry, loaders, free_mb), loaders
 
 
 def test_load_unload_cycle():
@@ -55,6 +66,29 @@ def test_foreign_process_memory_is_reported():
 def test_unknown_gpu_reading_does_not_block():
     m, _ = manager(free_mb=lambda: None)
     m.load("vl")
+
+
+def test_mlx_device_skips_real_memory_check():
+    """On Apple Silicon (device 'mlx') there is no dedicated-VRAM reading; the real-memory guard is
+    skipped and loading is allowed as long as the budget fits, even if free_mb reports a low value."""
+    base = Registry.load(None)
+    specs = {k: replace(s, device="mlx" if s.device in {"gpu", "mlx"} else s.device) for k, s in base._specs.items()}
+    reg = Registry(specs, base.budget)
+    called = []
+    m, loaders = manager(free_mb=lambda: called.append(True) or 10, registry=reg)
+    m.load("vl")  # vl needs 5500 MB; free_mb would say 10, but mlx skips that check
+    assert loaders["vl"].loads == 1
+    assert called == []  # the real-memory reader was never consulted for an mlx device
+
+
+def test_mlx_device_still_honours_budget():
+    """The budget-based fit check stays active for mlx devices (only the real reading is skipped)."""
+    base = Registry.load(None)
+    specs = {k: replace(s, device="mlx" if s.device in {"gpu", "mlx"} else s.device) for k, s in base._specs.items()}
+    m, loaders = manager(registry=Registry(specs, base.budget))
+    m.load("vl")
+    with pytest.raises(ModelLoadError, match="MB needed, 7680 MB usable"):
+        m.load("describe")  # vl (5500) + describe (3500) exceed the 7680 MB budget
 
 
 def test_context_unloads_on_exception():

@@ -215,6 +215,24 @@ uv sync
 
 Entwicklungsrechner: RTX 3070 Laptop (8 GB VRAM). VL-1.6 braucht ~5 GB, daneben keine weiteren GPU-Prozesse laufen lassen.
 
+### Plattformen: NVIDIA/CUDA und Apple Silicon
+
+Die Pipeline läuft auf zwei Backends; `uv sync` löst plattformabhängig das passende auf (ein gemeinsamer `uv.lock`):
+
+- **Linux/Windows + NVIDIA:** `paddlepaddle-gpu` (CUDA-Wheels), `vl`/`embedding`/`describe` über CUDA (PaddleOCR-VL, SentenceTransformer, Qwen2.5-VL 4-bit via bitsandbytes). Standard-Backend `cuda`.
+- **macOS (Apple Silicon):** CPU-`paddlepaddle` für `layout`/`ocr` (kein Metal-Backend, als Detektoren schnell genug), `mlx-vlm` für `vl`/`embedding`/`describe` auf der M-GPU. Standard-Backend `mlx`. VL wird aus Layout-Regionen + element-weiser Recognition zusammengesetzt (PaddleOCR-VL hat über MLX keine seitenweite Pipeline).
+
+Die Registry wählt Gerät und Backend automatisch nach Plattform; beides ist in `models.toml` überschreibbar (`[models.<key>] device = ...`, `[models.<key>.params] backend = ...`). Für Apple Silicon ein größeres Budget setzen, z. B. `[budget] total_mb = 24576`.
+
+**MLX-Modelle laden (macOS):** `mlx_vlm.load` zieht Gewichte sonst über die HF-Xet-CDN, die hinter manchen Firmen-Proxys (Zscaler) mit 403 blockiert ist. Deshalb werden die MLX-Gewichte von ModelScope nach `models/<repo>` geladen und von dort gelesen (die Loader suchen zuerst dort, siehe `src/docparse/models/mlx_backends.py: resolve_model`, Pfad via `DOCPARSE_MLX_MODELS_DIR` überschreibbar):
+
+```bash
+uv run python scripts/get_mlx_models.py            # vl + embedding + describe (~8 GB)
+uv run python scripts/get_mlx_models.py embedding   # nur eines (vl | embedding | describe)
+```
+
+Hinter einem TLS-MITM-Proxy brauchen `uv lock`/`uv sync` zusätzlich `--system-certs` (liest die CA aus dem macOS-Schlüsselbund).
+
 ## Quickstart: neuer Rechner / neuer Dokumentensatz
 
 ### Auf einem neuen Rechner
@@ -222,12 +240,13 @@ Entwicklungsrechner: RTX 3070 Laptop (8 GB VRAM). VL-1.6 braucht ~5 GB, daneben 
 ```bash
 git clone https://github.com/cgroll/local-ocr-processing.git
 cd local-ocr-processing
-uv sync                                    # lädt u. a. mehrere GB CUDA-Wheels (paddlepaddle-gpu), dauert
+uv sync                                    # lädt u. a. mehrere GB Modell-Wheels, dauert (CUDA bzw. MLX je Plattform)
+uv run python scripts/get_mlx_models.py    # nur macOS: MLX-Gewichte nach models/ (siehe "Plattformen" oben)
 uv run pytest                              # Sanity-Check, läuft ohne GPU durch
-uv run python -m docparse.models smoke     # GPU-Check: jedes Modell einzeln laden/entladen, Zeiten + VRAM-Spitze
+uv run python -m docparse.models smoke     # Beschleuniger-Check: jedes Modell einzeln laden/entladen, Zeiten + Speicher
 ```
 
-Bei abweichender GPU: `models.toml` (`budget.total_mb`) auf das tatsächliche VRAM-Budget anpassen, danach `uv run python -m docparse.models check <keys>` nutzen, um zu prüfen, ob eine Modellkombination hineinpasst, bevor man sie gemeinsam lädt (siehe oben "Modelle").
+Bei abweichender GPU/Speicher: `models.toml` (`budget.total_mb`) auf das tatsächliche Budget anpassen (Apple Silicon: Unified Memory, z. B. 24576), danach `uv run python -m docparse.models check <keys>` nutzen, um zu prüfen, ob eine Modellkombination hineinpasst, bevor man sie gemeinsam lädt (siehe oben "Modelle").
 
 ### Mit einem neuen Dokumentensatz ausprobieren
 

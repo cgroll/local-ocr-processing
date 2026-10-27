@@ -21,18 +21,34 @@ class PyMuPDFLoader(_Base):
 
 class OcrLoader(_Base):
     def load(self, spec: ModelSpec):
+        from .platform_setup import ensure_paddle_downloads
+        ensure_paddle_downloads()
         from paddleocr import PaddleOCR
         return PaddleOCR(lang=spec.params["lang"], ocr_version=spec.params["ocr_version"])
 
 
 class LayoutLoader(_Base):
     def load(self, spec: ModelSpec):
+        from .platform_setup import ensure_paddle_downloads
+        ensure_paddle_downloads()
         from paddleocr import LayoutDetection
         return LayoutDetection(model_name=spec.params["model_name"])
 
 
 class VlLoader(_Base):
     def load(self, spec: ModelSpec):
+        if spec.params.get("backend") == "mlx":
+            # MLX path: PaddleOCR-VL has no page-level pipeline here, so pair it with a CPU
+            # PP-DocLayout detector and compose per-region (see mlx_backends.MlxVlHandle).
+            from .platform_setup import ensure_paddle_downloads
+            ensure_paddle_downloads()
+            from paddleocr import LayoutDetection
+
+            from .mlx_backends import load_mlx_vl
+
+            detector = LayoutDetection(model_name="PP-DocLayoutV3")
+            return load_mlx_vl(spec.params["mlx_model_id"], detector, spec.params["max_new_tokens"])
+
         from paddleocr import PaddleOCRVL
 
         if spec.params["vision_bf16"]:
@@ -47,6 +63,10 @@ class VlLoader(_Base):
 
 class EmbeddingLoader(_Base):
     def load(self, spec: ModelSpec):
+        if spec.params.get("backend") == "mlx":
+            from .mlx_backends import load_mlx_embedding
+            return load_mlx_embedding(spec.params["mlx_model_id"], spec.params["dim"])
+
         import torch
         from sentence_transformers import SentenceTransformer
 
@@ -89,6 +109,10 @@ class DescribeHandle:
 
 class DescribeLoader(_Base):
     def load(self, spec: ModelSpec):
+        if spec.params.get("backend") == "mlx":
+            from .mlx_backends import load_mlx_describe
+            return load_mlx_describe(spec.params["mlx_model_id"], spec.params["max_new_tokens"])
+
         import torch
         from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration
 

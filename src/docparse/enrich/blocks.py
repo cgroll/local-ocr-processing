@@ -10,6 +10,11 @@ from ..parse.format import PageResult, RESULTS_DIR, read_result
 from ..parse.format import result_path as engine_result_path
 
 VISUAL_TYPES = ("figure", "chart", "table")
+# Types excluded from the narrative text blob and the text-source decision. `cell` is pymupdf's
+# per-cell table text (see parse/adapters/pymupdf.py): it is for display/overlay only -- its content
+# is already carried by the `table` block, so including it here would duplicate the whole table into
+# the narrative text and the search corpus.
+NON_NARRATIVE_TYPES = VISUAL_TYPES + ("cell",)
 # Separates real figures/charts/tables from small decorative icons (e.g. the four TI
 # "ordering/docs/support/design" marketing icons observed on ds-tps62130 p1, each
 # 5000-7350 px^2) from genuine content (that page's table/chart/schematic are 30000+ px^2).
@@ -33,7 +38,7 @@ def choose_text_source(doc_id: str, page: int, root: Path = RESULTS_DIR) -> tupl
     """`pymupdf` if it has any non-visual text, else `ocr` as a fallback for pure scans, else
     ("none", None) when neither engine produced a usable result."""
     pymupdf_result = _read_ok("pymupdf", doc_id, page, root)
-    if pymupdf_result and any(b.text for b in pymupdf_result.blocks if b.type not in VISUAL_TYPES):
+    if pymupdf_result and any(b.text for b in pymupdf_result.blocks if b.type not in NON_NARRATIVE_TYPES):
         return "pymupdf", pymupdf_result
     ocr_result = _read_ok("ocr", doc_id, page, root)
     if ocr_result is not None:
@@ -110,7 +115,7 @@ def reading_order(blocks: list, page_width: float, page_height: float) -> list:
 def narrative_text(source: PageResult) -> str:
     """Non-visual blocks of the chosen text source, in column-aware reading order, joined as one
     text blob."""
-    candidates = [b for b in source.blocks if b.type not in VISUAL_TYPES]
+    candidates = [b for b in source.blocks if b.type not in NON_NARRATIVE_TYPES]
     blocks = reading_order(candidates, source.width, source.height)
     parts = [b.markdown or b.text for b in blocks if (b.markdown or b.text)]
     return "\n\n".join(parts)

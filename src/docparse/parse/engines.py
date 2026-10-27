@@ -43,6 +43,10 @@ def run_ocr(handle, job: PageJob, params: dict) -> list[Block]:
 
 
 def run_vl(handle, job: PageJob, params: dict) -> list[Block]:
+    if params.get("backend") == "mlx":
+        # MLX path: the handle bundles layout detection + per-region recognition and returns the
+        # same raw block dicts the adapter consumes (see models/mlx_backends.py: MlxVlHandle).
+        return vl.to_blocks(handle.parse_page(job.rendered.image))
     res = list(handle.predict(job.rendered.image, max_new_tokens=params["max_new_tokens"], **NO_PREPROCESSING))[0]
     raw = [
         {"label": b.label, "bbox": b.bbox, "content": b.content, "polygon_points": b.polygon_points}

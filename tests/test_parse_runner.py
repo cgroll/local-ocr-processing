@@ -172,3 +172,26 @@ def test_worker_timeout_error_and_restart(tmp_path):
         assert ex.starts == 3
     finally:
         ex.close()
+
+
+# ---- run_vl backend dispatch (MLX path calls handle.parse_page, CUDA path calls predict)
+
+def test_run_vl_mlx_backend_uses_parse_page():
+    """On the MLX backend run_vl must use handle.parse_page (layout+recognition composition), not the
+    Paddle handle.predict page pipeline. Verifies the one backend-specific seam in the runner."""
+    from docparse.parse.engines import PageJob, run_vl
+    from docparse.parse.render import RenderedPage
+    import numpy as np
+    import pymupdf
+
+    class FakeMlxVl:
+        def parse_page(self, image):
+            return [{"label": "text", "bbox": [0, 0, 10, 10], "content": "hi", "polygon_points": None}]
+
+        def predict(self, *a, **k):  # must NOT be called on the mlx path
+            raise AssertionError("predict() called on the MLX backend")
+
+    rendered = RenderedPage(np.zeros((20, 20, 3), dtype=np.uint8), 20, 20, 150, pymupdf.Matrix(1, 1))
+    job = PageJob("d", None, 1, rendered)
+    blocks = run_vl(FakeMlxVl(), job, {"backend": "mlx", "max_new_tokens": 100})
+    assert len(blocks) == 1 and blocks[0].engine == "vl" and blocks[0].text == "hi"

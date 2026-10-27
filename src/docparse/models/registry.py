@@ -1,4 +1,5 @@
 """Model registry: the single source for which models exist, their pins and VRAM cost."""
+import sys
 import tomllib
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -7,6 +8,20 @@ from typing import Any
 DEFAULT_CONFIG = Path("models.toml")
 DEFAULT_TOTAL_MB = 8192
 DEFAULT_RESERVE_MB = 512
+
+
+def _is_apple_silicon() -> bool:
+    return sys.platform == "darwin"
+
+
+def default_backend() -> str:
+    """The inference backend for this platform: MLX on Apple Silicon, CUDA elsewhere."""
+    return "mlx" if _is_apple_silicon() else "cuda"
+
+
+def default_accel_device() -> str:
+    """The accelerator device name for this platform ('mlx' on Apple Silicon, 'gpu' = CUDA elsewhere)."""
+    return "mlx" if _is_apple_silicon() else "gpu"
 
 
 class RegistryError(ValueError):
@@ -45,34 +60,46 @@ class Fit:
 
 
 def default_specs() -> dict[str, ModelSpec]:
+    # The accelerated VLM/embedding models run on CUDA ("gpu") on NVIDIA and on MLX ("mlx") on
+    # Apple Silicon. The device drives the memory watchdog (real VRAM reading only for "gpu"); the
+    # backend picks the loader code path (CUDA vs MLX) for the three models that have both.
+    # layout/ocr use the same paddleocr API on either platform, but on Apple Silicon paddlepaddle
+    # has no Metal backend, so they run on CPU there (device "cpu") -- fast enough for detectors.
+    accel = default_accel_device()
+    backend = default_backend()
+    paddle_device = "cpu" if _is_apple_silicon() else "gpu"
     specs = [
         ModelSpec("pymupdf", "native text layer, images, vector graphics", "pymupdf", "cpu", 0),
         ModelSpec(
-            "layout", "layout blocks with type, box and reading order", "PP-DocLayoutV3", "gpu", 750,
+            "layout", "layout blocks with type, box and reading order", "PP-DocLayoutV3", paddle_device, 750,
             {"model_name": "PP-DocLayoutV3"},
         ),
         ModelSpec(
-            "ocr", "text line detection and recognition", "PP-OCRv6", "gpu", 1450,
+            "ocr", "text line detection and recognition", "PP-OCRv6", paddle_device, 1450,
             {"lang": "de", "ocr_version": "PP-OCRv6"},
         ),
         # Includes its own PP-DocLayoutV3 instance, so `vl` and `layout` are not loaded together.
         ModelSpec(
-            "vl", "tables, formulas and charts as markdown/html", "PaddleOCR-VL-1.6", "gpu", 5500,
-            {"max_new_tokens": 2048, "timeout_s": 180, "markdown_ignore_labels": [], "vision_bf16": True},
+            "vl", "tables, formulas and charts as markdown/html", "PaddleOCR-VL-1.6", accel, 5500,
+            {"backend": backend, "max_new_tokens": 2048, "timeout_s": 180, "markdown_ignore_labels": [], "vision_bf16": True,
+             "mlx_model_id": "mlx-community/PaddleOCR-VL-bfloat16"},
         ),
         ModelSpec(
-            "embedding", "text and image embeddings in one 768-dim space", "google/embeddinggemma-2", "gpu", 1100,
-            {"model_id": "google/embeddinggemma-2", "dim": 768, "audio_encoder": False},
+            "embedding", "text and image embeddings in one 768-dim space", "google/embeddinggemma-2", accel, 1100,
+            {"backend": backend, "model_id": "google/embeddinggemma-2", "dim": 768, "audio_encoder": False,
+             "mlx_model_id": "mlx-community/embeddinggemma-2-bf16"},
         ),
         # Separate from `vl`: `vl` (PaddleOCR-VL) times out on exactly the pages that most need a
         # description (dense schematics/graphs, see experiments/vlm-qa-test/README.md). 3B, not
         # 7B: the 7B variant measured ~7.8 GB VRAM in that experiment (an informal harness, not
         # this registry's smoke test), leaving almost no margin in an 8 GB budget; 3B had
         # comparable QA accuracy there. vram_mb below is measured with this project's own
-        # `python -m docparse.models smoke describe` (3500 MB peak over baseline).
+        # `python -m docparse.models smoke describe` (3500 MB peak over baseline). On Apple Silicon
+        # bitsandbytes 4-bit is unavailable; the MLX backend loads an MLX-ported Qwen2.5-VL instead.
         ModelSpec(
-            "describe", "short topic-level descriptions for figure/chart/table crops", "Qwen2.5-VL-3B-Instruct", "gpu", 3500,
-            {"model_id": "Qwen/Qwen2.5-VL-3B-Instruct", "max_new_tokens": 100, "quantization": "4bit"},
+            "describe", "short topic-level descriptions for figure/chart/table crops", "Qwen2.5-VL-3B-Instruct", accel, 3500,
+            {"backend": backend, "model_id": "Qwen/Qwen2.5-VL-3B-Instruct", "max_new_tokens": 100, "quantization": "4bit",
+             "mlx_model_id": "mlx-community/Qwen2.5-VL-3B-Instruct-4bit"},
         ),
     ]
     return {s.key: s for s in specs}
@@ -125,9 +152,11 @@ def _apply_budget(raw: dict, budget: Budget, config) -> Budget:
 
 
 def _apply_override(spec: ModelSpec, override: dict, config) -> ModelSpec:
-    unknown_sections = set(override) - {"params"}
+    unknown_sections = set(override) - {"params", "device"}
     if unknown_sections:
-        raise RegistryError(f"{config}: [{spec.key}] only 'params' can be overridden, got '{sorted(unknown_sections)[0]}'")
+        raise RegistryError(
+            f"{config}: [{spec.key}] only 'params' and 'device' can be overridden, got '{sorted(unknown_sections)[0]}'"
+        )
     params = dict(spec.params)
     for name, value in override.get("params", {}).items():
         if name not in params:
@@ -135,4 +164,5 @@ def _apply_override(spec: ModelSpec, override: dict, config) -> ModelSpec:
                 f"{config}: unknown parameter '{name}' for model '{spec.key}', valid: {', '.join(params) or 'none'}"
             )
         params[name] = value
-    return replace(spec, params=params)
+    device = override.get("device", spec.device)
+    return replace(spec, params=params, device=device)

@@ -40,6 +40,11 @@ def to_blocks(page: pymupdf.Page, to_pixels: pymupdf.Matrix) -> list[Block]:
             type="table", label="table", bbox=rect_to_pixels(table.bbox, to_pixels), engine="pymupdf",
             html=_rows_to_html(rows), text="\n".join("\t".join(c or "" for c in r) for r in rows),
         ))
+        # Also emit each non-empty cell as its own fine-grained `cell` block, so the text layer has
+        # the table's content at cell level (not just one table-wide blob). These carry text for
+        # display/overlay only; downstream text consumers (narrative, search, fragments) treat `cell`
+        # like a visual block and skip it, since the `table` block above already holds that text.
+        blocks.extend(_table_cell_blocks(table, to_pixels))
 
     for b in page.get_text("dict")["blocks"]:
         if b["type"] != 0:
@@ -68,6 +73,26 @@ def to_blocks(page: pymupdf.Page, to_pixels: pymupdf.Matrix) -> list[Block]:
             b.order = len(visible)
             visible.append(b)
     return visible
+
+
+def _table_cell_blocks(table, to_pixels: pymupdf.Matrix) -> list[Block]:
+    """One `cell` block per non-empty table cell, with the cell's own box. `table.extract()` is the
+    text grid aligned to `table.rows[*].cells` (each cell a (x0,y0,x1,y1) tuple in points, or None
+    for a merged/absent cell)."""
+    grid = table.extract()
+    out: list[Block] = []
+    for row, texts in zip(table.rows, grid):
+        for cell, text in zip(row.cells, texts):
+            if not cell or not text:
+                continue
+            fixed = _fix_micro_sign_mangling(text).strip()
+            if not fixed:
+                continue
+            out.append(Block(
+                type="cell", label="table_cell", bbox=rect_to_pixels(pymupdf.Rect(cell), to_pixels),
+                engine="pymupdf", text=fixed,
+            ))
+    return out
 
 
 def _rows_to_html(rows: list[list[str | None]]) -> str:

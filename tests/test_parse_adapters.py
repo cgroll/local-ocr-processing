@@ -118,6 +118,12 @@ def test_pymupdf_adapter_native(native_page):
     x0, y0, x1, y1 = table.bbox
     assert 80 <= x0 < x1 <= 440 and 300 <= y0 < y1 <= 480  # inside the ruled grid (2 px per point)
     assert not any("c11" in t.text for t in by_type.get("text", []))  # table cells are not repeated as text
+    # each non-empty cell is also emitted as its own fine-grained `cell` block with its own box
+    cells = by_type["cell"]
+    c11 = next(c for c in cells if c.text == "c11")
+    assert c11.engine == "pymupdf" and c11.label == "table_cell"
+    cx0, cy0, cx1, cy1 = c11.bbox
+    assert x0 <= cx0 < cx1 <= x1 and y0 <= cy0 < cy1 <= y1  # the cell sits inside the table box
     (img,) = by_type["image"]
     assert img.bbox == pytest.approx([440, 80, 560, 200], abs=2)
     assert any(abs((d.bbox[0] + d.bbox[2]) / 2 - 200) < 6 for d in by_type["drawing"])  # the circle

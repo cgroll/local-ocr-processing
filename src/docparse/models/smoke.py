@@ -62,6 +62,9 @@ def infer(key: str, handle, sample: Sample, params: dict) -> str:
         res = handle.predict(sample.image)
         return f"{len(res[0]['boxes'])} layout blocks"
     if key == "vl":
+        if params.get("backend") == "mlx":
+            raw = handle.parse_page(sample.image)
+            return f"{len(raw)} regions, {sum(len(b['content']) for b in raw)} chars recognised"
         res = handle.predict(sample.image, max_new_tokens=params["max_new_tokens"])
         return f"{len(res[0].markdown['markdown_texts'])} chars of markdown"
     if key == "embedding":

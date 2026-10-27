@@ -50,9 +50,24 @@ class PeakSampler:
 
 
 def free_gpu_memory() -> None:
-    """Collect garbage and return cached blocks of the frameworks that are loaded to the driver."""
+    """Collect garbage and return cached blocks of the frameworks that are loaded to the driver.
+
+    CUDA cache clearing is a no-op (and errors on some builds) without a CUDA device -- e.g. the
+    CPU paddlepaddle / MLX stack on Apple Silicon -- so each call is guarded by a compiled-with-CUDA
+    check. MLX frees its own buffers once the handle's references are dropped; gc.collect() is enough.
+    """
     gc.collect()
-    if "paddle" in sys.modules:
-        sys.modules["paddle"].device.cuda.empty_cache()
-    if "torch" in sys.modules:
-        sys.modules["torch"].cuda.empty_cache()
+    paddle = sys.modules.get("paddle")
+    if paddle is not None:
+        try:
+            if paddle.device.is_compiled_with_cuda():
+                paddle.device.cuda.empty_cache()
+        except Exception:
+            pass
+    torch = sys.modules.get("torch")
+    if torch is not None:
+        try:
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:
+            pass

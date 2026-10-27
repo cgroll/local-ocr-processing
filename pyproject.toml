@@ -10,14 +10,26 @@ dependencies = [
     "pandas",
     "pyarrow",
     "httpx>=0.28.1",
-    "paddlepaddle-gpu==3.3.1",
     "paddleocr[doc-parser]>=3.7",
     "sentence-transformers[image]>=6.1",
     "transformers>=5.20.2",
     "accelerate>=1.15.0",
-    "bitsandbytes>=0.50.2",
     "google-genai>=2.33.0",
     "markdown>=3.11.2",
+    # --- CUDA backend (Linux/Windows): paddlepaddle-gpu has no macOS wheels, and
+    #     bitsandbytes 4-bit quantization is CUDA-only. ---
+    "paddlepaddle-gpu==3.3.1 ; sys_platform != 'darwin'",
+    "bitsandbytes>=0.50.2 ; sys_platform != 'darwin'",
+    # --- Apple Silicon backend (macOS): CPU paddlepaddle drives layout/ocr,
+    #     mlx-vlm runs PaddleOCR-VL and EmbeddingGemma 2 on the M-series GPU;
+    #     modelscope mirrors the weights. See ~/repos/EEP for the reference setup. ---
+    "paddlepaddle>=3.2.1 ; sys_platform == 'darwin'",
+    "mlx>=0.32.4 ; sys_platform == 'darwin'",
+    "mlx-vlm>=0.7.9 ; sys_platform == 'darwin'",
+    "modelscope>=1.30 ; sys_platform == 'darwin'",
+    # Make stdlib/requests TLS read the macOS keychain, so Paddle's model downloader works behind a
+    # corporate TLS-inspection proxy (Zscaler) whose CA is not in certifi. See ~/repos/EEP.
+    "truststore>=0.10 ; sys_platform == 'darwin'",
 ]
 
 [tool.uv.sources]

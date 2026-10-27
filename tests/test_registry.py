@@ -1,6 +1,7 @@
 import pytest
 
 from docparse.models import Registry, RegistryError
+from docparse.models.registry import default_backend, default_specs
 
 KEYS = ["pymupdf", "layout", "ocr", "vl", "embedding", "describe"]
 
@@ -9,7 +10,7 @@ def test_all_components_with_required_fields():
     reg = Registry.load(None)
     assert reg.keys() == KEYS
     for spec in reg.specs():
-        assert spec.task and spec.name and spec.device in {"cpu", "gpu"} and spec.vram_mb >= 0
+        assert spec.task and spec.name and spec.device in {"cpu", "gpu", "mlx", "mps"} and spec.vram_mb >= 0
 
 
 def test_pymupdf_is_cpu_with_zero_vram():
@@ -78,3 +79,39 @@ def test_describe_is_separate_from_vl_and_has_a_model_id():
     assert params["model_id"] == "Qwen/Qwen2.5-VL-3B-Instruct"
     assert params["max_new_tokens"] > 0
     assert Registry.load(None).get("describe").name != Registry.load(None).get("vl").name
+
+
+def test_default_backend_follows_platform(monkeypatch):
+    monkeypatch.setattr("docparse.models.registry.sys.platform", "darwin")
+    assert default_backend() == "mlx"
+    for key in ("vl", "embedding", "describe"):
+        assert default_specs()[key].params["backend"] == "mlx"
+        assert default_specs()[key].device == "mlx"
+    monkeypatch.setattr("docparse.models.registry.sys.platform", "linux")
+    assert default_backend() == "cuda"
+    for key in ("vl", "embedding", "describe"):
+        assert default_specs()[key].params["backend"] == "cuda"
+        assert default_specs()[key].device == "gpu"
+
+
+def test_backend_override(tmp_path):
+    cfg = tmp_path / "models.toml"
+    cfg.write_text("[models.vl.params]\nbackend = \"cuda\"\n")
+    reg = Registry.load(cfg)
+    assert reg.get("vl").params["backend"] == "cuda"
+    assert reg.get("embedding") == Registry.load(None).get("embedding")
+
+
+def test_device_override(tmp_path):
+    cfg = tmp_path / "models.toml"
+    cfg.write_text("[models.embedding]\ndevice = \"cpu\"\n")
+    assert Registry.load(cfg).get("embedding").device == "cpu"
+
+
+def test_platform_budget_override_changes_fit(tmp_path):
+    cfg = tmp_path / "models.toml"
+    cfg.write_text("[budget]\ntotal_mb = 24576\nreserve_mb = 1024\n")
+    reg = Registry.load(cfg)
+    assert reg.budget.total_mb == 24576
+    # the full set does not fit at 8 GB but does at 24 GB unified memory
+    assert reg.fits(reg.keys()).ok

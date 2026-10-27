@@ -96,18 +96,37 @@ def test_markdown_html_no_text_source_shows_note(tmp_path):
 # --- visual_blocks: image gallery payload for the Markdown tab (viewer-markdown-figures) -----
 
 def test_page_data_includes_visual_blocks_table_and_figure(tmp_path):
-    put(tmp_path, "pymupdf", "d1", 1, blocks=[blk("pymupdf", type="title", text="T", order=0)])
+    # pymupdf/ocr text blocks become the "found texts" fragment pool (geometry overlap).
+    put(tmp_path, "pymupdf", "d1", 1, blocks=[
+        blk("pymupdf", type="title", bbox=[100, 100, 180, 120], text="T", order=0),  # far from both blocks
+        blk("pymupdf", type="text", bbox=[1, 1, 9, 9], text="inside table", order=1),  # overlaps the table
+    ])
+    put(tmp_path, "ocr", "d1", 1, blocks=[
+        blk("ocr", type="line", bbox=[22, 22, 38, 58], text="inside figure", order=0),  # overlaps the figure
+    ])
     write_enrichment(PageEnrichment("d1", 1, "pymupdf", visual_blocks=[
         VisualBlock(type="table", label="table", bbox=[0, 0, 10, 10], position=0,
-                    crop_path="x.png", content_text="<table><tr><td>v</td></tr></table>", content_source="pymupdf"),
+                    crop_path="x.png", content_text="<table><tr><td>v</td></tr></table>", content_source="vl"),
         VisualBlock(type="figure", label="image", bbox=[20, 20, 40, 60], position=1,
                     crop_path="y.png", description="A schematic diagram."),
     ]), tmp_path)
     data = page_data(doc(), 1, tmp_path)
     assert data["visual_blocks"] == [
-        {"type": "table", "label": "table", "bbox": [0, 0, 10, 10], "description": None, "status": "ok"},
-        {"type": "figure", "label": "image", "bbox": [20, 20, 40, 60], "description": "A schematic diagram.", "status": "ok"},
+        {"type": "table", "label": "table", "bbox": [0, 0, 10, 10], "description": None, "status": "ok",
+         "fragments": ["inside table"], "html": "<table><tr><td>v</td></tr></table>"},
+        {"type": "figure", "label": "image", "bbox": [20, 20, 40, 60], "description": "A schematic diagram.",
+         "status": "ok", "fragments": ["inside figure"]},
     ]
+
+
+def test_visual_block_table_html_is_sanitized(tmp_path):
+    put(tmp_path, "pymupdf", "d1", 1, blocks=[blk("pymupdf", type="title", text="T", order=0)])
+    write_enrichment(PageEnrichment("d1", 1, "pymupdf", visual_blocks=[
+        VisualBlock(type="table", label="table", bbox=[0, 0, 10, 10], position=0, crop_path="x.png",
+                    content_text='<table><tr><td onclick="x()">a<script>1</script></td></tr></table>', content_source="vl"),
+    ]), tmp_path)
+    vb = page_data(doc(), 1, tmp_path)["visual_blocks"][0]
+    assert vb["html"] == "<table><tr><td>a</td></tr></table>"
 
 
 def test_visual_blocks_payload_empty_without_enrichment(tmp_path):
