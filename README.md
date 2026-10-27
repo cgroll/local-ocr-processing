@@ -121,7 +121,14 @@ uv run python -m docparse.viewer build                     # alle Dokumente mit 
 uv run python -m docparse.viewer build --docs ds-lm317     # nur ausgewählte Dokumente
 ```
 
-Das Kommando nennt den Pfad der `index.html`. Direkt aus dem Dateisystem öffnen oder lokal ausliefern (`python -m http.server` im Ordner `data/`).
+Das Kommando nennt den Pfad der `index.html`. Zum Ansehen einen lokalen Server im Ordner `data/` starten (nicht aus `data/viewer/`, weil der Viewer die Seitenbilder aus dem benachbarten `data/pages/` verlinkt):
+
+```bash
+uv run python -m http.server 8777 --bind 127.0.0.1 --directory data
+# dann im Browser: http://127.0.0.1:8777/viewer/index.html
+```
+
+Alternativ die `index.html` direkt aus dem Dateisystem öffnen (ohne Server); je nach Browser werden die Seitenbilder dann aber evtl. nicht geladen, deshalb ist der lokale Server der zuverlässige Weg.
 
 **Bedienung:**
 - *Index:* Abdeckung je Engine (ok / Fehler / fehlend), Filter nach Gruppe, Tag und Freitext.
