@@ -3,7 +3,7 @@ import json
 from docparse.dataset.manifest import Entry
 from docparse.enrich.format import PageEnrichment, VisualBlock, write_result as write_enrichment
 from docparse.parse.format import Block, PageResult, result_path, write_result
-from docparse.viewer.data import ENGINES, embed_json, index_data, markdown_html, page_data, page_numbers
+from docparse.viewer.data import ENGINES, embed_json, index_data, markdown_html, page_data, page_numbers, _visual_blocks_payload
 
 
 def doc(id="d1", **kw):
@@ -91,6 +91,27 @@ def test_markdown_html_no_text_source_shows_note(tmp_path):
     write_enrichment(PageEnrichment("d1", 1, "none"), tmp_path)
     html = markdown_html("d1", 1, tmp_path)
     assert "Keine Textquelle" in html
+
+
+# --- visual_blocks: image gallery payload for the Markdown tab (viewer-markdown-figures) -----
+
+def test_page_data_includes_visual_blocks_table_and_figure(tmp_path):
+    put(tmp_path, "pymupdf", "d1", 1, blocks=[blk("pymupdf", type="title", text="T", order=0)])
+    write_enrichment(PageEnrichment("d1", 1, "pymupdf", visual_blocks=[
+        VisualBlock(type="table", label="table", bbox=[0, 0, 10, 10], position=0,
+                    crop_path="x.png", content_text="<table><tr><td>v</td></tr></table>", content_source="pymupdf"),
+        VisualBlock(type="figure", label="image", bbox=[20, 20, 40, 60], position=1,
+                    crop_path="y.png", description="A schematic diagram."),
+    ]), tmp_path)
+    data = page_data(doc(), 1, tmp_path)
+    assert data["visual_blocks"] == [
+        {"type": "table", "label": "table", "bbox": [0, 0, 10, 10], "description": None, "status": "ok"},
+        {"type": "figure", "label": "image", "bbox": [20, 20, 40, 60], "description": "A schematic diagram.", "status": "ok"},
+    ]
+
+
+def test_visual_blocks_payload_empty_without_enrichment(tmp_path):
+    assert _visual_blocks_payload("d1", 1, tmp_path) == []
 
 
 def test_index_counts_half_filled(tmp_path):

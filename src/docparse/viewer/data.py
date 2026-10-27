@@ -81,6 +81,21 @@ def markdown_html(doc_id: str, page: int, root: Path = RESULTS_DIR) -> str:
     return sanitize_markdown_html(html)
 
 
+def _visual_blocks_payload(doc_id: str, page: int, root: Path) -> list[dict]:
+    """Raw enrichment visual blocks (type/label/bbox/description/status) for the viewer's
+    Markdown-tab image gallery (viewer-markdown-figures) -- a second, separate read of the
+    enrichment file rather than reworking `_page_markdown`/`markdown_html`, see design.md
+    Decision 3. Empty list if the page has no enrichment at all."""
+    enrich_path = enrich_result_path(doc_id, page, root)
+    if not enrich_path.exists():
+        return []
+    enrichment = read_enrichment(enrich_path)
+    return [
+        {"type": vb.type, "label": vb.label, "bbox": vb.bbox, "description": vb.description, "status": vb.status}
+        for vb in enrichment.visual_blocks
+    ]
+
+
 def page_data(entry: Entry, page: int, results_dir: Path = RESULTS_DIR) -> dict:
     """All engine results of one page; failed and absent results are marked, tables are sanitized."""
     engines = {e: _load_engine(e, entry.id, page, results_dir) for e in ENGINES}
@@ -89,6 +104,7 @@ def page_data(entry: Entry, page: int, results_dir: Path = RESULTS_DIR) -> dict:
         "doc": entry.id, "title": entry.title or entry.id, "page": page,
         "size": size, "engines": engines,
         "markdown_html": markdown_html(entry.id, page, results_dir),
+        "visual_blocks": _visual_blocks_payload(entry.id, page, results_dir),
     }
 
 

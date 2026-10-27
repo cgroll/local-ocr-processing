@@ -7,6 +7,10 @@
   var TEXT_TYPES = ["text", "title", "header", "footer", "caption", "list", "line"];
   var IMAGE_TYPES = ["figure", "image", "drawing", "chart"];
   var STORE_KEY = "docparse-viewer";
+  // Same wording digest/markdown.py's VISUAL_HEADINGS uses, so the gallery heading matches the
+  // text heading already visible above it in the Markdown column.
+  var VISUAL_HEADINGS = { table: "Tabelle", chart: "Diagramm", figure: "Abbildung" };
+  var GALLERY_THUMB_W = 260; // px, independent of the Original column's current zoom
 
   var app = document.getElementById("app");
   var data = JSON.parse(document.getElementById("page-data").textContent);
@@ -283,7 +287,39 @@
     var body = el("div", "markdown-body");
     body.innerHTML = data.markdown_html; // sanitized server-side, see viewer/sanitize.py
     col.appendChild(body);
+
+    var visuals = (data.visual_blocks || []).filter(function (vb) {
+      return vb.status === "ok" && (vb.type === "figure" || vb.type === "chart");
+    });
+    if (visuals.length) {
+      var gallery = el("div", "vb-gallery");
+      gallery.appendChild(el("h3", "", "Erkannte Abbildungen/Diagramme"));
+      visuals.forEach(function (vb) { gallery.appendChild(visualBlockPreview(vb)); });
+      col.appendChild(gallery);
+    }
     return col;
+  }
+
+  // Freestanding thumbnail (own scale factor, not tied to the Original/Rekonstruktion columns'
+  // --scale) -- same CSS-crop-of-the-full-page-image technique as blockElement()'s ".fig" case,
+  // built with safe DOM APIs only (no innerHTML -- data.markdown_html is the only sanitized-HTML
+  // insertion point in this view, see viewer/sanitize.py).
+  function visualBlockPreview(vb) {
+    var r = bboxSize(vb);
+    var k = r.w > 0 ? GALLERY_THUMB_W / r.w : 1;
+    var item = el("div", "vb-item");
+    var thumb = el("div", "vb-thumb");
+    thumb.style.width = px(GALLERY_THUMB_W);
+    thumb.style.height = px(r.h * k);
+    thumb.style.backgroundImage = 'url("' + imageHref + '")';
+    thumb.style.backgroundPosition = px(-r.x * k) + " " + px(-r.y * k);
+    thumb.style.backgroundSize = px(pageSize[0] * k) + " " + px(pageSize[1] * k);
+    item.appendChild(thumb);
+    var meta = el("div", "vb-meta");
+    meta.appendChild(el("div", "vb-heading", (VISUAL_HEADINGS[vb.type] || vb.type) + ": " + vb.label));
+    if (vb.description) meta.appendChild(el("p", "", vb.description));
+    item.appendChild(meta);
+    return item;
   }
 
   // ---- reconstruction of one block ----

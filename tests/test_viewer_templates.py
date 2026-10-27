@@ -38,6 +38,16 @@ def test_page_shell_embeds_markdown_html_and_stays_script_free():
     assert "Some text." in html
 
 
+def test_page_shell_embeds_visual_blocks_and_stays_script_free():
+    data = {
+        "doc": "d1", "title": "d1", "page": 1, "size": [10, 10], "engines": {},
+        "visual_blocks": [{"type": "figure", "label": "image", "bbox": [1, 2, 3, 4], "description": "A diagram.", "status": "ok"}],
+    }
+    html = page_html(data, "../../pages/d1/0001.png", Nav("../index.html"))
+    assert external(html) == [] and inline_scripts(html) == []
+    assert "A diagram." in html and '"type": "figure"' in html
+
+
 def test_index_shell():
     e = Entry(id="d1", title="T&C", group="datasheet", tags="table;schematic", kind="native", pages="5")
     counts = {x: {"ok": 1, "error": 0, "missing": 2} for x in ENGINES}
