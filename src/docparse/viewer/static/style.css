@@ -66,6 +66,9 @@ main { padding: 1rem; }
 .box > span { position: absolute; left: 0; top: 0; transform: translateY(-100%); font-size: calc(10px * var(--inv)); line-height: 1.2; padding: 0 calc(3px * var(--inv)); background: var(--c); color: #fff; white-space: nowrap; pointer-events: none; }
 .box[data-selected], .blk[data-selected] { outline: calc(3px * var(--inv)) solid var(--sel); outline-offset: 0; z-index: 5; }
 .box[data-selected] { background: color-mix(in srgb, var(--sel) 25%, transparent); }
+/* Overlay of layout elements that have a linked Markdown section: outline only, colour set inline */
+.lnk-box { position: absolute; border: calc(2px * var(--inv)) solid var(--sel); background: transparent; cursor: pointer; }
+.lnk-box[data-selected] { outline: calc(3px * var(--inv)) solid var(--sel); outline-offset: 0; z-index: 5; }
 
 /* reconstruction */
 .blk { position: absolute; overflow: hidden; cursor: pointer; }
@@ -87,6 +90,9 @@ main { padding: 1rem; }
 .markdown-body blockquote { border-left: 3px solid var(--line); padding-left: .8em; color: var(--muted); }
 .markdown-body pre { background: #f6f3ff; padding: .6em; overflow: auto; }
 .markdown-body code { font-family: ui-monospace, monospace; }
+/* Markdown sections (one <div data-section> per section); linked ones highlighted on selection */
+.markdown-body [data-section] { border-radius: 2px; transition: background-color .15s; }
+.markdown-body [data-section].md-hl { background: color-mix(in srgb, var(--sel) 22%, transparent); box-shadow: -4px 0 0 var(--sel); }
 
 /* figure/chart preview gallery below the markdown text (viewer-markdown-figures) */
 .vb-gallery { max-width: 52rem; margin: 1rem auto 0; padding: 0 1.5rem; }

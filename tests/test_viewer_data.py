@@ -113,7 +113,7 @@ def test_page_data_includes_visual_blocks_table_and_figure(tmp_path):
     data = page_data(doc(), 1, tmp_path)
     assert data["visual_blocks"] == [
         {"type": "table", "label": "table", "bbox": [0, 0, 10, 10], "description": None, "status": "ok",
-         "fragments": ["inside table"], "html": "<table><tr><td>v</td></tr></table>"},
+         "fragments": [], "html": "<table><tr><td>v</td></tr></table>"},
         {"type": "figure", "label": "image", "bbox": [20, 20, 40, 60], "description": "A schematic diagram.",
          "status": "ok", "fragments": ["inside figure"]},
     ]
@@ -146,3 +146,92 @@ def test_index_counts_half_filled(tmp_path):
     assert c["vl"] == {"ok": 1, "error": 1, "missing": 2}
     assert c["ocr"] == {"ok": 0, "error": 0, "missing": 4}
     assert set(c) == set(ENGINES)
+
+
+# --- section_links (viewer-layout-markdown-link, Decision 3) ----------------------------
+
+from docparse.viewer.data import LINK_OVERLAP_RATIO, section_links
+
+
+def test_section_links_fully_inside_is_linked():
+    layout = {"layout:0": [0.0, 0.0, 100.0, 100.0]}
+    sections = [[[10.0, 10.0, 50.0, 50.0]]]  # entirely inside
+    assert section_links(layout, sections) == {"layout:0": [0]}
+
+
+def test_section_links_half_inside_is_linked_at_threshold():
+    layout = {"layout:0": [0.0, 0.0, 100.0, 100.0]}
+    # 40 x 20 box with 20 x 20 inside -> own-area ratio 0.5, exactly the threshold
+    assert LINK_OVERLAP_RATIO == 0.5
+    assert section_links(layout, [[[80.0, 0.0, 120.0, 20.0]]]) == {"layout:0": [0]}
+
+
+def test_section_links_mostly_outside_is_not_linked():
+    layout = {"layout:0": [0.0, 0.0, 100.0, 100.0]}
+    # 40 x 20 box with only 10 x 20 inside -> ratio 0.25
+    assert section_links(layout, [[[90.0, 0.0, 130.0, 20.0]]]) == {}
+
+
+def test_section_links_outside_is_not_linked():
+    assert section_links({"layout:0": [0.0, 0.0, 10.0, 10.0]}, [[[50.0, 50.0, 60.0, 60.0]]]) == {}
+
+
+def test_section_links_neighbour_box_does_not_pull_in_a_section():
+    layout = {"layout:0": [0.0, 0.0, 100.0, 100.0], "layout:1": [100.0, 0.0, 200.0, 100.0]}
+    sections = [[[20.0, 20.0, 80.0, 80.0]], [[120.0, 20.0, 180.0, 80.0]]]
+    assert section_links(layout, sections) == {"layout:0": [0], "layout:1": [1]}
+
+
+def test_section_links_one_matching_source_box_is_enough():
+    layout = {"layout:0": [0.0, 0.0, 100.0, 100.0]}
+    # a section built from a caption outside the box and a fragment inside it is linked
+    sections = [[[300.0, 300.0, 400.0, 320.0], [10.0, 10.0, 40.0, 40.0]]]
+    assert section_links(layout, sections) == {"layout:0": [0]}
+
+
+def test_section_links_one_section_can_link_several_layout_boxes_and_vice_versa():
+    layout = {"layout:0": [0.0, 0.0, 100.0, 100.0], "layout:1": [0.0, 90.0, 100.0, 200.0]}
+    # section 0 spans both boxes (half of it in layout:0, most of it in layout:1); section 1 only in layout:1
+    sections = [[[10.0, 60.0, 90.0, 140.0]], [[10.0, 150.0, 90.0, 190.0]]]
+    assert section_links(layout, sections) == {"layout:0": [0], "layout:1": [0, 1]}
+
+
+def test_section_links_without_sections_or_layout_is_empty():
+    assert section_links({}, [[[0.0, 0.0, 1.0, 1.0]]]) == {}
+    assert section_links({"layout:0": [0.0, 0.0, 1.0, 1.0]}, []) == {}
+
+
+# --- markdown_sections and links in page_data (viewer-layout-markdown-link) ---------------
+
+def test_markdown_sections_match_data_section_markers(tmp_path):
+    put(tmp_path, "pymupdf", "d1", 1, blocks=[
+        blk("pymupdf", type="title", text="Head", bbox=[0, 0, 50, 10], order=0),
+        blk("pymupdf", type="text", text="Body", bbox=[0, 20, 50, 30], order=1),
+    ])
+    write_enrichment(PageEnrichment("d1", 1, "pymupdf"), tmp_path)
+    data = page_data(doc(), 1, tmp_path)
+    ids = [s["id"] for s in data["markdown_sections"]]
+    assert ids == list(range(len(ids))) and len(ids) == 2
+    assert data["markdown_html"].count("data-section=") == len(ids)
+    assert '<div data-section="0"><h3>Head</h3></div>' in data["markdown_html"]
+    assert data["markdown_sections"][0]["bboxes"] == [[0, 0, 50, 10]]
+
+
+def test_layout_box_links_to_the_section_it_covers(tmp_path):
+    put(tmp_path, "pymupdf", "d1", 1, blocks=[
+        blk("pymupdf", type="text", text="Above", bbox=[0, 0, 50, 10], order=0),
+        blk("pymupdf", type="text", text="Inside", bbox=[0, 100, 50, 120], order=1),
+    ])
+    put(tmp_path, "layout", "d1", 1, blocks=[blk("layout", type="text", bbox=[-5, 95, 60, 125])])
+    write_enrichment(PageEnrichment("d1", 1, "pymupdf"), tmp_path)
+    data = page_data(doc(), 1, tmp_path)
+    inside = next(i for i, s in enumerate(data["markdown_sections"]) if s["bboxes"] == [[0, 100, 50, 120]])
+    assert data["links"] == {"layout:0": [inside]}
+
+
+def test_no_enrichment_gives_note_section_without_boxes_or_links(tmp_path):
+    put(tmp_path, "layout", "d1", 1, blocks=[blk("layout", type="figure", bbox=[0, 0, 10, 10])])
+    data = page_data(doc(), 1, tmp_path)
+    assert data["markdown_sections"] == [{"id": 0, "bboxes": []}]
+    assert data["links"] == {}
+    assert "Keine Anreicherung" in data["markdown_html"]

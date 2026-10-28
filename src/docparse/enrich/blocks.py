@@ -112,11 +112,94 @@ def reading_order(blocks: list, page_width: float, page_height: float) -> list:
     return ordered
 
 
-def narrative_text(source: PageResult) -> str:
-    """Non-visual blocks of the chosen text source, in column-aware reading order, joined as one
-    text blob."""
+def _inside(inner: list[float], outer: list[float]) -> float:
+    """Fraction of `inner`'s area that lies inside `outer`."""
+    inter = max(0.0, min(inner[2], outer[2]) - max(inner[0], outer[0])) * max(0.0, min(inner[3], outer[3]) - max(inner[1], outer[1]))
+    area = max(0.0, inner[2] - inner[0]) * max(0.0, inner[3] - inner[1])
+    return inter / area if area > 0 else 0.0
+
+
+def unclaimed_tables(source: PageResult, visual_bboxes: list[list[float]]) -> list:
+    """`table` blocks of the text source that no visual block (layout figure/chart/table) covers.
+    pymupdf's table finder also fires on ruled text (tables of contents, revision lists) that the
+    layout model sees as plain text; such a table is not described as a visual block, so its text
+    must stay in the narrative or it is lost for the digest and the search corpus."""
+    return [b for b in source.blocks if b.type == "table" and (b.text or b.html)
+            and not any(_inside(b.bbox, v) >= 0.5 for v in visual_bboxes)]
+
+
+def insert_by_position(entries: list[tuple], extras: list[tuple]) -> list[tuple]:
+    """`entries`/`extras` are (kind, payload, bbox) tuples; `entries` is in reading order. Each extra
+    (taken top-to-bottom, left-to-right) goes right after the nearest entry above it -- the one with
+    the greatest top edge at or above the extra's own, later list position winning ties. Entries
+    count only if they share horizontal extent with it (so in multi-column text it stays in its own
+    column), except earlier extras, which always count so a grid of figures keeps its order. With
+    nothing above, it goes before the nearest sharing entry below, else to the end. The list order
+    itself is not trusted for position: engines can list a footer first."""
+    def h_overlap(a, b):
+        return min(a[2], b[2]) - max(a[0], b[0])
+
+    placed = {id(e) for e in extras}
+    entries = list(entries)
+    for extra in sorted(extras, key=lambda e: (e[2][1], e[2][0])):
+        box = extra[2]
+        sharing = [(j, e) for j, e in enumerate(entries)
+                   if (id(e) in placed or h_overlap(e[2], box) > 0)]
+        above = [(e[2][1], j) for j, e in sharing if e[2][1] <= box[1]]
+        if above:
+            at = max(above)[1] + 1
+        else:
+            below = [(e[2][1], j) for j, e in sharing]
+            at = min(below, key=lambda t: (t[0], t[1]))[1] if below else len(entries)
+        entries.insert(at, extra)
+    return entries
+
+
+def layout_order(blocks: list, layout: PageResult) -> list | None:
+    """`blocks` (text-source blocks) in the layout model's reading order, or None if the layout has
+    no ordered regions. Each block goes to the ordered layout region it lies in most (>= half of its
+    own area); inside a region blocks follow top-to-bottom, left-to-right. Blocks no ordered region
+    claims (headers, footers, stray text -- layout gives those no order) are placed by position
+    among the rest."""
+    regions = sorted((r for r in layout.blocks if r.order is not None), key=lambda r: r.order)
+    if not regions:
+        return None
+    groups: list[list] = [[] for _ in regions]
+    loose = []
+    for b in blocks:
+        best, best_ratio = -1, 0.5
+        for i, r in enumerate(regions):
+            ratio = _inside(b.bbox, r.bbox)
+            if ratio >= best_ratio and (best < 0 or ratio > best_ratio):
+                best, best_ratio = i, ratio
+        (groups[best] if best >= 0 else loose).append(b)
+    ordered = [b for g in groups for b in sorted(g, key=lambda b: (b.bbox[1], b.bbox[0]))]
+    merged = insert_by_position([("n", b, b.bbox) for b in ordered], [("n", b, b.bbox) for b in loose])
+    return [payload for _, payload, _ in merged]
+
+
+def narrative_blocks(source: PageResult, visual_bboxes: list[list[float]], layout: PageResult | None = None) -> list:
+    """Blocks of the chosen text source that make up the running text, in reading order: everything
+    but visual blocks and `cell`s, plus pymupdf tables that no visual block covers. The order comes
+    from the layout model when it has one for the page, else from the column heuristic."""
     candidates = [b for b in source.blocks if b.type not in NON_NARRATIVE_TYPES]
-    blocks = reading_order(candidates, source.width, source.height)
+    candidates += unclaimed_tables(source, visual_bboxes)
+    ordered = layout_order(candidates, layout) if layout is not None else None
+    if ordered is None:
+        plain = [b for b in candidates if b.type != "table"]
+        ordered = reading_order(plain, source.width, source.height)
+        merged = insert_by_position(
+            [("n", b, b.bbox) for b in ordered], [("n", b, b.bbox) for b in candidates if b.type == "table"],
+        )
+        ordered = [payload for _, payload, _ in merged]
+    return ordered
+
+
+def narrative_text(
+    source: PageResult, visual_bboxes: list[list[float]] | None = None, layout: PageResult | None = None,
+) -> str:
+    """Running text of the chosen text source (see `narrative_blocks`), joined as one text blob."""
+    blocks = narrative_blocks(source, visual_bboxes or [], layout)
     parts = [b.markdown or b.text for b in blocks if (b.markdown or b.text)]
     return "\n\n".join(parts)
 

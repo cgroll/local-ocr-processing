@@ -19,6 +19,8 @@ def render_narrative_block(block: Block) -> str:
     text = (block.text or block.markdown or "").strip()
     if not text:
         return ""
+    if block.type == "table":  # a pymupdf table no visual block covers, see enrich/blocks.py
+        return (html_table_to_markdown(block.html) if block.html else "") or text
     if block.type == "title":
         return f"### {text}"
     if block.type == "caption":
@@ -148,16 +150,14 @@ def _own_overlap_ratio(target_bbox: list[float], own_bbox: list[float]) -> float
     return inter / own_area if own_area > 0 else 0.0
 
 
-def assign_fragments(
+def assign_fragment_boxes(
     target_bboxes: list[list[float]], candidates: list[Block], min_overlap_ratio: float = 0.3,
-) -> list[list[str]]:
-    """Exclusive version of `overlapping_fragments` over several visual blocks at once: each candidate
-    text is assigned to AT MOST ONE target -- the one whose box it sits in most (highest own-area
-    overlap ratio, provided that ratio clears `min_overlap_ratio`). Returns one fragment list per
-    target, aligned to `target_bboxes`, each deduplicated and in reading order. This prevents the
-    same found text from showing up under two overlapping components. On a tie the earliest target
-    in the list wins (stable). Geometry only, no claim of semantic membership."""
-    buckets: list[list[tuple[float, float, str]]] = [[] for _ in target_bboxes]
+) -> list[list[tuple[str, list[float]]]]:
+    """Exclusive assignment of found texts to visual blocks, keeping each fragment's own box (for the
+    viewer's section-to-layout links). One list per target, aligned to `target_bboxes`, deduplicated
+    by text (the first occurrence's box is kept) and in reading order. Rule and tie-break: see
+    `assign_fragments`."""
+    buckets: list[list[tuple[float, float, str, list[float]]]] = [[] for _ in target_bboxes]
     seen: list[set[str]] = [set() for _ in target_bboxes]
     for b in candidates:
         text = (b.text or "").strip()
@@ -173,5 +173,17 @@ def assign_fragments(
         x0, y0, x1, y1 = b.bbox
         if text not in seen[best_idx]:
             seen[best_idx].add(text)
-            buckets[best_idx].append((y0, x0, text))
-    return [[t for _, _, t in sorted(bucket)] for bucket in buckets]
+            buckets[best_idx].append((y0, x0, text, list(b.bbox)))
+    return [[(t, box) for _, _, t, box in sorted(bucket, key=lambda e: e[:3])] for bucket in buckets]
+
+
+def assign_fragments(
+    target_bboxes: list[list[float]], candidates: list[Block], min_overlap_ratio: float = 0.3,
+) -> list[list[str]]:
+    """Exclusive version of `overlapping_fragments` over several visual blocks at once: each candidate
+    text is assigned to AT MOST ONE target -- the one whose box it sits in most (highest own-area
+    overlap ratio, provided that ratio clears `min_overlap_ratio`). Returns one fragment list per
+    target, aligned to `target_bboxes`, each deduplicated and in reading order. This prevents the
+    same found text from showing up under two overlapping components. On a tie the earliest target
+    in the list wins (stable). Geometry only, no claim of semantic membership."""
+    return [[t for t, _ in frags] for frags in assign_fragment_boxes(target_bboxes, candidates, min_overlap_ratio)]

@@ -13,13 +13,22 @@ TABLE_TAGS = {"table", "thead", "tbody", "tr", "td", "th"}
 # case in VLM-description/narrative text, and skipping them avoids href/src validation entirely.
 MARKDOWN_TAGS = TABLE_TAGS | {
     "h1", "h2", "h3", "h4", "h5", "h6", "p", "ul", "ol", "li",
-    "strong", "em", "code", "pre", "blockquote",
+    "strong", "em", "code", "pre", "blockquote", "div",
 }
 ALLOWED_TAGS = TABLE_TAGS  # backward-compatible alias; sanitize_table's allow-list
 VOID_TAGS = {"br"}
 DROP_CONTENT = {"script", "style", "template", "noscript"}
 SPAN_ATTRS = {"rowspan", "colspan"}
 MAX_SPAN = 1000
+# Markdown sections of a page (viewer-layout-markdown-link): `<div data-section="<index>">`, the only
+# attribute the Markdown view keeps. The index is a plain non-negative integer, bounded.
+SECTION_TAG = "div"
+SECTION_ATTR = "data-section"
+MAX_SECTION_INDEX = 100_000
+
+
+def _is_plain_int(value: str | None, lo: int, hi: int) -> bool:
+    return bool(value) and value.isascii() and value.isdigit() and lo <= int(value) <= hi
 
 
 class _Sanitizer(HTMLParser):
@@ -40,7 +49,8 @@ class _Sanitizer(HTMLParser):
         elif tag in self.allowed_tags:
             kept = "".join(
                 f' {k}="{v}"' for k, v in attrs
-                if k in SPAN_ATTRS and v and v.isascii() and v.isdigit() and 0 < int(v) <= MAX_SPAN
+                if (tag in TABLE_TAGS and k in SPAN_ATTRS and _is_plain_int(v, 1, MAX_SPAN))
+                or (tag == SECTION_TAG and k == SECTION_ATTR and _is_plain_int(v, 0, MAX_SECTION_INDEX))
             )
             self.out.append(f"<{tag}{kept}>")
             self.open.append(tag)

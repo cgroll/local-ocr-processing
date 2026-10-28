@@ -25,6 +25,9 @@
   // text heading already visible above it in the Markdown column.
   var VISUAL_HEADINGS = { table: "Tabelle", chart: "Diagramm", figure: "Abbildung" };
   var GALLERY_THUMB_W = 260; // px, independent of the Original column's current zoom
+  // Overlay colours: linked layout elements (in the order of data.links) take these in turn, and a
+  // Markdown section takes the colour of the first layout element linking to it.
+  var LINK_COLORS = ["#e6194b", "#3cb44b", "#4363d8", "#f58231", "#911eb4", "#42d4f4", "#f032e6", "#9a6324"];
 
   var app = document.getElementById("app");
   var data = JSON.parse(document.getElementById("page-data").textContent);
@@ -37,7 +40,7 @@
     try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return memory; }
   }
   function savePrefs() {
-    var prefs = { mode: state.mode, engineA: state.engineA, engineB: state.engineB };
+    var prefs = { mode: state.mode, engineA: state.engineA, engineB: state.engineB, overlay: state.overlay };
     memory = prefs;
     try { localStorage.setItem(STORE_KEY, JSON.stringify(prefs)); } catch (e) { /* no storage: keep in memory */ }
   }
@@ -49,15 +52,18 @@
   }
 
   var prefs = loadPrefs();
+  // Right column: "markdown" (default) or an engine. Older saved modes ("markdown") fall back to single.
   var state = {
     mode: prefs.mode === "compare" ? "compare" : "single",
-    engineA: ENGINES.indexOf(prefs.engineA) >= 0 ? prefs.engineA : firstOk(["vl", "pymupdf", "ocr", "layout"]),
+    engineA: prefs.engineA === "markdown" || ENGINES.indexOf(prefs.engineA) >= 0 ? prefs.engineA : "markdown",
     engineB: ENGINES.indexOf(prefs.engineB) >= 0 ? prefs.engineB : firstOk(["ocr", "layout", "pymupdf", "vl"]),
+    overlay: prefs.overlay === true,  // Verknüpfungen anzeigen (only with the Markdown column)
     layers: {},   // layer key -> bool
     hidden: {},   // layer key -> {type: true}
     selected: null,
   };
   LAYERS.forEach(function (l) { state.layers[l.key] = false; state.hidden[l.key] = {}; });
+  var sectionEls = {};  // Markdown section id -> element, rebuilt with each render
 
   // ---- helpers ----
   function el(tag, cls, text) {
@@ -105,14 +111,11 @@
     renderToolbar();
     stage.textContent = "";
     if (state.mode === "compare") {
-      stage.appendChild(reconColumn("engineA"));
-      stage.appendChild(reconColumn("engineB"));
-    } else if (state.mode === "markdown") {
-      stage.appendChild(originalColumn());
-      stage.appendChild(markdownColumn());
+      stage.appendChild(reconColumn("engineA", false));
+      stage.appendChild(reconColumn("engineB", false));
     } else {
       stage.appendChild(originalColumn());
-      stage.appendChild(reconColumn("engineA"));
+      stage.appendChild(reconColumn("engineA", true));
     }
     applyScale();
     applySelection();
@@ -144,22 +147,26 @@
       render();
     });
     mode.appendChild(btn);
-
-    var mdBtn = el("button", "", state.mode === "markdown" ? "Markdown ausblenden" : "Markdown anzeigen");
-    mdBtn.type = "button";
-    mdBtn.addEventListener("click", function () {
-      state.mode = state.mode === "markdown" ? "single" : "markdown";
-      savePrefs();
-      render();
-    });
-    mode.appendChild(mdBtn);
     toolbar.appendChild(mode);
 
-    if (state.mode === "single" || state.mode === "markdown") {
+    if (state.mode === "single") {
       var layers = el("div", "group");
       layers.appendChild(el("span", "", "Ebenen:"));
       LAYERS.forEach(function (l) { layers.appendChild(layerControl(l)); });
       toolbar.appendChild(layers);
+    }
+
+    if (markdownShown()) {
+      var links = el("div", "group");
+      var linkLabel = el("label");
+      var linkBox = el("input");
+      linkBox.type = "checkbox";
+      linkBox.checked = state.overlay;
+      linkBox.addEventListener("change", function () { state.overlay = linkBox.checked; savePrefs(); render(); });
+      linkLabel.appendChild(linkBox);
+      linkLabel.appendChild(document.createTextNode(" Verknüpfungen anzeigen"));
+      links.appendChild(linkLabel);
+      toolbar.appendChild(links);
     }
 
     if (pages.length > 1) {
@@ -263,26 +270,68 @@
         v.page.appendChild(box);
       });
     });
+    if (overlayOn()) {
+      // Overlay: every layout element that has a linked Markdown section, in its link colour.
+      Object.keys(data.links).forEach(function (lid) {
+        var b = findBlock(lid);
+        if (!b) return;
+        var r = bboxSize(b);
+        var box = el("div", "lnk-box");
+        box.dataset.id = lid;
+        box.style.left = px(r.x); box.style.top = px(r.y);
+        box.style.width = px(r.w); box.style.height = px(r.h);
+        box.style.borderColor = linkColour(lid);
+        v.page.appendChild(box);
+      });
+    }
     col.appendChild(v.wrap);
     return col;
   }
 
-  function reconColumn(key) {
+  // Markdown view and its links (single mode only).
+  function markdownShown() { return state.mode === "single" && state.engineA === "markdown"; }
+  function overlayOn() { return markdownShown() && state.overlay; }
+  function linkColour(layoutId) {
+    return LINK_COLORS[Object.keys(data.links).indexOf(layoutId) % LINK_COLORS.length];
+  }
+  // section id -> colour of the first layout element linking to it
+  function sectionColours() {
+    var out = {};
+    Object.keys(data.links).forEach(function (lid) {
+      data.links[lid].forEach(function (i) { if (!(i in out)) out[i] = linkColour(lid); });
+    });
+    return out;
+  }
+  // Engine behind a right column in compare mode, where a stored "markdown" choice has no meaning.
+  function engineChoice(key) {
+    if (ENGINES.indexOf(state[key]) >= 0) return state[key];
+    return key === "engineA" ? firstOk(["vl", "pymupdf", "ocr", "layout"]) : firstOk(["ocr", "layout", "pymupdf", "vl"]);
+  }
+
+  // The right column: a reconstruction of one engine, or the Markdown view. Compare mode has no
+  // Markdown option: two flowing texts would not line up box by box.
+  function reconColumn(key, withMarkdown) {
     var col = el("div", "col");
     var head = el("div", "col-head");
     head.appendChild(el("span", "", "Rekonstruktion"));
+    var choice = withMarkdown ? state[key] : engineChoice(key);
     var sel = el("select");
-    ENGINES.forEach(function (e) {
-      var o = el("option", "", e + (engineOk(e) ? "" : " (" + (data.engines[e].state === "missing" ? "nicht verarbeitet" : "Fehler") + ")"));
+    (withMarkdown ? ["markdown"].concat(ENGINES) : ENGINES).forEach(function (e) {
+      var label = e === "markdown" ? "Markdown" : e + (engineOk(e) ? "" : " (" + (data.engines[e].state === "missing" ? "nicht verarbeitet" : "Fehler") + ")");
+      var o = el("option", "", label);
       o.value = e;
-      if (e === state[key]) o.selected = true;
+      if (e === choice) o.selected = true;
       sel.appendChild(o);
     });
     sel.addEventListener("change", function () { state[key] = sel.value; savePrefs(); render(); });
     head.appendChild(sel);
     col.appendChild(head);
 
-    var engine = state[key];
+    if (choice === "markdown") {
+      col.appendChild(markdownBody());
+      return col;
+    }
+    var engine = choice;
     if (!engineOk(engine)) {
       var n = el("div", "notice" + (data.engines[engine].state === "error" ? " err" : ""), engine + ": " + statusText(engine));
       col.appendChild(n);
@@ -300,14 +349,23 @@
     return col;
   }
 
-  function markdownColumn() {
-    var col = el("div", "col");
-    var head = el("div", "col-head");
-    head.appendChild(el("span", "", "Markdown"));
-    col.appendChild(head);
+  // Markdown body below the column head: the flowing text (sanitized server-side, see
+  // viewer/sanitize.py), with each section indexed in sectionEls, then the figure/table gallery.
+  function markdownBody() {
+    var wrap = el("div", "md");
     var body = el("div", "markdown-body");
-    body.innerHTML = data.markdown_html; // sanitized server-side, see viewer/sanitize.py
-    col.appendChild(body);
+    body.innerHTML = data.markdown_html;
+    sectionEls = {};
+    body.querySelectorAll("[data-section]").forEach(function (n) { sectionEls[n.getAttribute("data-section")] = n; });
+    if (overlayOn()) {
+      var colours = sectionColours();
+      Object.keys(colours).forEach(function (i) {
+        if (!sectionEls[i]) return;
+        sectionEls[i].style.outline = "2px solid " + colours[i];
+        sectionEls[i].style.outlineOffset = "2px";
+      });
+    }
+    wrap.appendChild(body);
 
     var visuals = (data.visual_blocks || []).filter(function (vb) {
       return vb.status === "ok" && (vb.type === "figure" || vb.type === "chart" || vb.type === "table");
@@ -316,9 +374,9 @@
       var gallery = el("div", "vb-gallery");
       gallery.appendChild(el("h3", "", "Erkannte Abbildungen/Diagramme/Tabellen"));
       visuals.forEach(function (vb) { gallery.appendChild(visualBlockPreview(vb)); });
-      col.appendChild(gallery);
+      wrap.appendChild(gallery);
     }
-    return col;
+    return wrap;
   }
 
   // Freestanding thumbnail (own scale factor, not tied to the Original/Rekonstruktion columns'
@@ -415,9 +473,12 @@
   }
 
   // ---- selection and inspector ----
+  // A selected layout element highlights its linked Markdown sections; the first one is brought into view.
   function select(id) {
     state.selected = id;
     applySelection();
+    var linked = id && data.links[id] ? data.links[id] : [];
+    if (linked.length && sectionEls[linked[0]]) sectionEls[linked[0]].scrollIntoView({ block: "center" });
   }
 
   function applySelection() {
@@ -425,6 +486,9 @@
     if (state.selected) {
       app.querySelectorAll('[data-id="' + state.selected + '"]').forEach(function (n) { n.setAttribute("data-selected", ""); });
     }
+    Object.keys(sectionEls).forEach(function (i) { sectionEls[i].classList.remove("md-hl"); });
+    var linked = state.selected && data.links[state.selected] ? data.links[state.selected] : [];
+    linked.forEach(function (i) { if (sectionEls[i]) sectionEls[i].classList.add("md-hl"); });
     renderInspector();
   }
 

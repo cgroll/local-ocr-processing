@@ -82,7 +82,7 @@ def enrich_page(
         visual_blocks.append(vb)
 
     result = PageEnrichment(
-        doc.doc_id, page, text_source, narrative_text=B.narrative_text(source_result),
+        doc.doc_id, page, text_source, narrative_text=B.narrative_text(source_result, [c.bbox for c in candidates], layout_result),
         visual_blocks=visual_blocks, seconds=round(time.perf_counter() - t0, 2),
     )
     return result, block_errors

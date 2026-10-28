@@ -6,7 +6,8 @@ from pathlib import Path
 import markdown
 
 from ..dataset.manifest import Entry
-from ..digest.page import render_page
+from ..digest import markdown as M
+from ..digest.page import Section, render_page_sections
 from ..enrich.blocks import choose_text_source
 from ..enrich.format import read_result as read_enrichment
 from ..enrich.format import result_path as enrich_result_path
@@ -56,29 +57,40 @@ def _load_engine(engine: str, doc_id: str, page: int, results_dir: Path) -> dict
     }
 
 
-def _page_markdown(doc_id: str, page: int, root: Path) -> str:
-    """Same text as `document-digest` would render for this page -- see `digest/page.py:
-    render_page`. Deliberately not `write_digest`/`render_document`: those join a whole
-    document's pages, which would be wasted work for rendering a single page here."""
-    heading = f"## Seite {page}"
+def _page_sections(doc_id: str, page: int, root: Path) -> list[Section]:
+    """Sections of the page's Markdown below its heading -- same text as `document-digest` would
+    render for this page, see `digest/page.py:render_page_sections`. Deliberately not `write_digest`/
+    `render_document`: those join a whole document's pages, which would be wasted work here."""
     enrich_path = enrich_result_path(doc_id, page, root)
     if not enrich_path.exists():
-        return f"{heading}\n\n{NO_ENRICHMENT_NOTE}"
+        return [Section(NO_ENRICHMENT_NOTE)]
     enrichment = read_enrichment(enrich_path)
     _, source = choose_text_source(doc_id, page, root)
-    text = render_page(enrichment, source, root)
-    if text.strip() == heading:
-        text = f"{text}\n\n{NO_TEXT_SOURCE_NOTE}"
-    return text
+    return render_page_sections(enrichment, source, root) or [Section(NO_TEXT_SOURCE_NOTE)]
+
+
+def _markdown_parts(doc_id: str, page: int, root: Path) -> tuple[str, list[dict]]:
+    """Sanitized HTML of the page heading, and one entry per section: `id` (its index), `html` wrapped
+    in `<div data-section="<id>">` and `bboxes` (the page boxes it was built from). Same fixed
+    text-source choice as production (`choose_text_source`), no per-engine selection like the
+    Original/Rekonstruktion columns."""
+    heading = sanitize_markdown_html(markdown.markdown(f"## Seite {page}", extensions=["tables"]))
+    sections = []
+    for i, section in enumerate(_page_sections(doc_id, page, root)):
+        html = markdown.markdown(section.text, extensions=["tables"])
+        sections.append({
+            "id": i,
+            "html": sanitize_markdown_html(f'<div data-section="{i}">{html}</div>'),
+            "bboxes": section.bboxes,
+        })
+    return heading, sections
 
 
 def markdown_html(doc_id: str, page: int, root: Path = RESULTS_DIR) -> str:
-    """Flowing Markdown representation of one page, rendered to sanitized HTML for the viewer's
-    Markdown tab -- same fixed text-source choice as production (`choose_text_source`), no
-    per-engine selection like the Original/Rekonstruktion columns."""
-    text = _page_markdown(doc_id, page, root)
-    html = markdown.markdown(text, extensions=["tables"])
-    return sanitize_markdown_html(html)
+    """Flowing Markdown representation of one page as sanitized HTML for the viewer's Markdown
+    column: the heading, then every section in its `<div data-section>` wrapper."""
+    heading, sections = _markdown_parts(doc_id, page, root)
+    return heading + "".join(s["html"] for s in sections)
 
 
 def _visual_blocks_payload(doc_id: str, page: int, root: Path) -> list[dict]:
@@ -120,18 +132,41 @@ def _visual_blocks_payload(doc_id: str, page: int, root: Path) -> list[dict]:
         }
         if vb.type == "table" and vb.content_text and "<table" in vb.content_text:
             item["html"] = sanitize_table(vb.content_text)
+            item["fragments"] = []  # the recognised table already carries its text
         payload.append(item)
     return payload
+
+
+# A Markdown section counts as linked to a layout box when this share of one of its source boxes
+# lies inside the layout box (own-area ratio, same measure as the digest's fragment assignment).
+LINK_OVERLAP_RATIO = 0.5
+
+
+def section_links(layout_boxes: dict[str, list[float]], sections: list[list[list[float]]]) -> dict[str, list[int]]:
+    """Layout element id -> indices of the Markdown sections it is linked to. `sections[i]` lists the
+    page boxes section `i` was built from. Geometry only, no claim of semantic membership. Layout
+    ids without any linked section are left out."""
+    links: dict[str, list[int]] = {}
+    for layout_id, box in layout_boxes.items():
+        hits = [i for i, source_boxes in enumerate(sections)
+                if any(M._own_overlap_ratio(box, sb) >= LINK_OVERLAP_RATIO for sb in source_boxes)]
+        if hits:
+            links[layout_id] = hits
+    return links
 
 
 def page_data(entry: Entry, page: int, results_dir: Path = RESULTS_DIR) -> dict:
     """All engine results of one page; failed and absent results are marked, tables are sanitized."""
     engines = {e: _load_engine(e, entry.id, page, results_dir) for e in ENGINES}
     size = next((r["size"] for r in engines.values() if r["state"] == "ok"), None)
+    heading, sections = _markdown_parts(entry.id, page, results_dir)
+    layout_boxes = {b["id"]: b["bbox"] for b in engines["layout"].get("blocks", [])}
     return {
         "doc": entry.id, "title": entry.title or entry.id, "page": page,
         "size": size, "engines": engines,
-        "markdown_html": markdown_html(entry.id, page, results_dir),
+        "markdown_html": heading + "".join(s["html"] for s in sections),
+        "markdown_sections": [{"id": s["id"], "bboxes": s["bboxes"]} for s in sections],
+        "links": section_links(layout_boxes, [s["bboxes"] for s in sections]),
         "visual_blocks": _visual_blocks_payload(entry.id, page, results_dir),
     }
 

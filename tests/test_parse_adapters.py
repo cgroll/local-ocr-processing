@@ -182,3 +182,23 @@ def test_pymupdf_adapter_on_rotated_page(tmp_path):
     assert 0 <= b.bbox[0] < b.bbox[2] <= 200 and 0 <= b.bbox[1] < b.bbox[3] <= 300
     # the text sits left of x=100 and above y=150 on the unrotated page; after a 90 degree turn it is in the upper right
     assert b.bbox[0] > 100 and b.bbox[3] < 150
+
+
+def test_table_grid_prefers_clipped_page_text_over_extract_when_only_spacing_differs():
+    """`table.extract()` can drop word gaps ("Thisisthe") and move a "." to its own line; the clipped
+    page text has the right spacing. Different characters (neighbour glyph in the clip) keep extract()."""
+    from docparse.parse.adapters.pymupdf import _table_grid
+
+    class Row:
+        cells = [(0, 0, 10, 10), (10, 0, 20, 10)]
+
+    class Table:
+        rows = [Row()]
+        def extract(self):
+            return [["Thisisthe regulator Asuitable\n.", "abc"]]
+
+    class Page:
+        def get_text(self, _mode, clip):
+            return {0: "This is the regulator. A suitable\n", 10: "abc X"}[int(clip.x0)]
+
+    assert _table_grid(Page(), Table()) == [["This is the regulator. A suitable", "abc"]]
