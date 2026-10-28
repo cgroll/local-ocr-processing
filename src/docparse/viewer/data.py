@@ -82,18 +82,46 @@ def markdown_html(doc_id: str, page: int, root: Path = RESULTS_DIR) -> str:
 
 
 def _visual_blocks_payload(doc_id: str, page: int, root: Path) -> list[dict]:
-    """Raw enrichment visual blocks (type/label/bbox/description/status) for the viewer's
-    Markdown-tab image gallery (viewer-markdown-figures) -- a second, separate read of the
-    enrichment file rather than reworking `_page_markdown`/`markdown_html`, see design.md
-    Decision 3. Empty list if the page has no enrichment at all."""
+    """Enrichment visual blocks for the viewer's Markdown-tab gallery -- figures, charts AND tables.
+    Each carries its description, the raw text fragments whose boxes overlap the block (same
+    geometry heuristic and pymupdf+ocr candidate pool the digest uses, see digest/page.py), and,
+    for tables, the recognised table HTML (sanitised like any other table HTML in the viewer).
+    A second, separate read of the enrichment file rather than reworking the markdown path, see
+    design.md Decision 3. Empty list if the page has no enrichment at all."""
+    from ..digest.markdown import assign_fragments
+    from ..enrich.blocks import read_ok
+
     enrich_path = enrich_result_path(doc_id, page, root)
     if not enrich_path.exists():
         return []
     enrichment = read_enrichment(enrich_path)
-    return [
-        {"type": vb.type, "label": vb.label, "bbox": vb.bbox, "description": vb.description, "status": vb.status}
-        for vb in enrichment.visual_blocks
-    ]
+
+    pymupdf_result = read_ok("pymupdf", doc_id, page, root)
+    ocr_result = read_ok("ocr", doc_id, page, root)
+    # Exclude pymupdf `cell` blocks (the table's own per-cell text) from the fragment pool, so a
+    # table's "found texts" is not just its own content duplicated. See digest/page.py.
+    candidates = [b for b in ((pymupdf_result.blocks if pymupdf_result else [])
+                              + (ocr_result.blocks if ocr_result else [])) if b.type != "cell"]
+
+    # Each found text is assigned to at most one block (the one it sits in most), same as the digest,
+    # so the viewer gallery never shows the same fragment under two overlapping components. Only
+    # `ok` blocks take part (a failed block, which the gallery hides, must not steal fragments from a
+    # valid neighbour); non-ok blocks get an empty list.
+    ok_idx = [i for i, vb in enumerate(enrichment.visual_blocks) if vb.status == "ok"]
+    ok_fragments = assign_fragments([enrichment.visual_blocks[i].bbox for i in ok_idx], candidates)
+    fragments_by_i = dict(zip(ok_idx, ok_fragments))
+
+    payload = []
+    for i, vb in enumerate(enrichment.visual_blocks):
+        item = {
+            "type": vb.type, "label": vb.label, "bbox": vb.bbox,
+            "description": vb.description, "status": vb.status,
+            "fragments": fragments_by_i.get(i, []),
+        }
+        if vb.type == "table" and vb.content_text and "<table" in vb.content_text:
+            item["html"] = sanitize_table(vb.content_text)
+        payload.append(item)
+    return payload
 
 
 def page_data(entry: Entry, page: int, results_dir: Path = RESULTS_DIR) -> dict:

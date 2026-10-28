@@ -99,6 +99,68 @@ def test_empty_text_blocks_are_ignored():
     assert M.overlapping_fragments(target, candidates) == []
 
 
+def test_enclosing_text_blob_is_not_attached_to_a_small_figure():
+    """A small figure fully contained in one big text block (e.g. a native PDF reporting a whole
+    table as a single text blob) must NOT inherit that blob's text: only a tiny fraction of the
+    blob's own box is inside the figure. Regression for the smaller-box ratio (ratio was 1.0)."""
+    figure = [819.0, 848.0, 1003.0, 1099.0]
+    candidates = [_engine_block("text", "whole table as one blob", [132.0, 352.0, 1194.0, 1129.0])]
+    assert M.overlapping_fragments(figure, candidates) == []
+
+
+def test_small_label_inside_figure_is_still_kept():
+    """The flip side: a genuine small label whose box lies inside the figure is still collected."""
+    figure = [819.0, 848.0, 1003.0, 1099.0]
+    candidates = [_engine_block("line", "B1", [899.0, 1064.0, 913.0, 1078.0])]
+    assert M.overlapping_fragments(figure, candidates) == ["B1"]
+
+
+# --- assign_fragments (exclusive, one text -> at most one component) --------------
+
+def test_assign_fragments_is_exclusive_across_overlapping_targets():
+    """A text that geometrically falls into two overlapping components is assigned only to the one it
+    sits in most, not to both."""
+    a = [0.0, 0.0, 100.0, 100.0]
+    b = [50.0, 0.0, 200.0, 100.0]  # overlaps `a` in x 50..100
+    # a label almost entirely inside `a` (only a sliver reaches into the overlap zone)
+    label = _engine_block("text", "VOS", [10.0, 10.0, 55.0, 30.0])
+    out = M.assign_fragments([a, b], [label])
+    assert out == [["VOS"], []]
+
+
+def test_assign_fragments_picks_the_higher_overlap_target():
+    a = [0.0, 0.0, 100.0, 100.0]
+    b = [60.0, 0.0, 160.0, 100.0]
+    # label box x 70..130 (own width 60): 30 wide inside `a` (70..100, ratio 0.5), 60 wide inside
+    # `b` (70..130, ratio 1.0) -> assigned to b
+    label = _engine_block("text", "x", [70.0, 10.0, 130.0, 30.0])
+    assert M.assign_fragments([a, b], [label]) == [[], ["x"]]
+
+
+def test_assign_fragments_tie_breaks_to_first_target():
+    # identical boxes -> identical overlap ratios; the earlier target wins
+    a = [0.0, 0.0, 100.0, 100.0]
+    b = [0.0, 0.0, 100.0, 100.0]
+    label = _engine_block("text", "tie", [10.0, 10.0, 40.0, 40.0])
+    assert M.assign_fragments([a, b], [label]) == [["tie"], []]
+
+
+def test_assign_fragments_respects_threshold():
+    a = [0.0, 0.0, 100.0, 100.0]
+    # only ~10% of the label's own box is inside `a` -> below the 0.3 threshold, dropped
+    label = _engine_block("text", "edge", [90.0, 90.0, 190.0, 190.0])
+    assert M.assign_fragments([a], [label]) == [[]]
+
+
+def test_assign_fragments_enclosing_blob_not_attached():
+    """Same regression as overlapping_fragments: a figure inside one giant text blob gets nothing."""
+    figure = [819.0, 848.0, 1003.0, 1099.0]
+    table = [100.0, 100.0, 1100.0, 1100.0]  # the big text blob, also a (table) target
+    blob = _engine_block("text", "whole table blob", [132.0, 352.0, 1194.0, 1129.0])
+    out = M.assign_fragments([figure, table], [blob])
+    assert out == [[], ["whole table blob"]]  # blob belongs to the table, not the figure
+
+
 # --- page.render_page -----------------------------------------------------------
 
 def test_render_page_includes_heading_description_table_and_fragments(tmp_path):

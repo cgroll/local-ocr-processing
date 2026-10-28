@@ -8,7 +8,7 @@ RESULTS_DIR = Path("data/results")
 
 BLOCK_TYPES = (
     "text", "title", "header", "footer", "table", "figure", "formula", "chart",
-    "list", "caption", "line", "image", "drawing", "other",
+    "list", "caption", "line", "cell", "image", "drawing", "other",
 )
 STATUSES = ("ok", "error")
 BOX_TOLERANCE_PX = 2.0
