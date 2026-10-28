@@ -34,12 +34,18 @@ def to_blocks(page: pymupdf.Page, to_pixels: pymupdf.Matrix) -> list[Block]:
     table_rects: list[pymupdf.Rect] = []
 
     for table in page.find_tables().tables:
-        rows = [[_fix_micro_sign_mangling(c) if c else c for c in row] for row in table.extract()]
+        grid = _table_grid(page, table)
+        rows = [[_fix_micro_sign_mangling(c) if c else c for c in row] for row in grid]
         table_rects.append(pymupdf.Rect(table.bbox))
         blocks.append(Block(
             type="table", label="table", bbox=rect_to_pixels(table.bbox, to_pixels), engine="pymupdf",
             html=_rows_to_html(rows), text="\n".join("\t".join(c or "" for c in r) for r in rows),
         ))
+        # Also emit each non-empty cell as its own fine-grained `cell` block, so the text layer has
+        # the table's content at cell level (not just one table-wide blob). These carry text for
+        # display/overlay only; downstream text consumers (narrative, search, fragments) treat `cell`
+        # like a visual block and skip it, since the `table` block above already holds that text.
+        blocks.extend(_table_cell_blocks(table, grid, to_pixels))
 
     for b in page.get_text("dict")["blocks"]:
         if b["type"] != 0:
@@ -68,6 +74,46 @@ def to_blocks(page: pymupdf.Page, to_pixels: pymupdf.Matrix) -> list[Block]:
             b.order = len(visible)
             visible.append(b)
     return visible
+
+
+def _table_grid(page: pymupdf.Page, table) -> list[list[str | None]]:
+    """`table.extract()`, but with each cell's text re-read through the page's normal text extraction
+    where that is the same characters apart from whitespace and order. `extract()` rebuilds cells from single chars
+    and guesses word gaps itself; on tightly set/justified text it drops the spaces ("Thisisthe...")
+    or adds stray ones ("-0 .5 V"), and can displace a trailing "." onto its own line. The clipped
+    page text has the correct spacing and order. If the two differ in anything but whitespace/order
+    (clip picked up a neighbour's glyph), `extract()` stays authoritative."""
+    grid = table.extract()
+    out: list[list[str | None]] = []
+    for row, texts in zip(table.rows, grid):
+        new_row = list(texts)
+        for i, (cell, text) in enumerate(zip(row.cells, texts)):
+            if not cell or not text:
+                continue
+            clipped = page.get_text("text", clip=pymupdf.Rect(cell)).strip()
+            if clipped and sorted("".join(clipped.split())) == sorted("".join(text.split())):
+                new_row[i] = clipped
+        out.append(new_row)
+    return out
+
+
+def _table_cell_blocks(table, grid: list[list[str | None]], to_pixels: pymupdf.Matrix) -> list[Block]:
+    """One `cell` block per non-empty table cell, with the cell's own box. `grid` is the text grid
+    aligned to `table.rows[*].cells` (each cell a (x0,y0,x1,y1) tuple in points, or None for a
+    merged/absent cell)."""
+    out: list[Block] = []
+    for row, texts in zip(table.rows, grid):
+        for cell, text in zip(row.cells, texts):
+            if not cell or not text:
+                continue
+            fixed = _fix_micro_sign_mangling(text).strip()
+            if not fixed:
+                continue
+            out.append(Block(
+                type="cell", label="table_cell", bbox=rect_to_pixels(pymupdf.Rect(cell), to_pixels),
+                engine="pymupdf", text=fixed,
+            ))
+    return out
 
 
 def _rows_to_html(rows: list[list[str | None]]) -> str:

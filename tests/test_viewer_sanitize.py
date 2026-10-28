@@ -96,3 +96,47 @@ def test_markdown_does_not_leak_table_only_sanitizer_difference():
     # dropped like any other disallowed-but-harmless tag (text content is kept, same as the
     # existing "stray tag" behavior covered by test_unclosed_and_stray_tags_balanced).
     assert sanitize_table("<h3>Title</h3><table><tr><td>x</td></tr></table>") == "Title<table><tr><td>x</td></tr></table>"
+
+
+# --- Markdown sections: <div data-section="n"> (viewer-layout-markdown-link) -------------
+
+def test_section_div_keeps_numeric_index():
+    assert sanitize_markdown_html('<div data-section="3"><p>x</p></div>') == '<div data-section="3"><p>x</p></div>'
+
+
+def test_section_index_zero_is_kept():
+    assert sanitize_markdown_html('<div data-section="0"></div>') == '<div data-section="0"></div>'
+
+
+@pytest.mark.parametrize("value", ['"x"', '"-1"', '"1.5"', '""', '"1e3"', '"١"', '"99999999"'])
+def test_section_index_must_be_plain_non_negative_integer(value):
+    out = sanitize_markdown_html(f"<div data-section={value}><p>x</p></div>")
+    assert "data-section" not in out
+    assert "<div>" in out and "<p>x</p>" in out
+
+
+def test_section_attribute_only_on_div():
+    out = sanitize_markdown_html('<p data-section="1">x</p>')
+    assert out == "<p>x</p>"
+
+
+def test_foreign_attributes_on_div_are_dropped():
+    out = sanitize_markdown_html('<div class="a" onclick="b()" data-section="2" style="c">t</div>')
+    assert out == '<div data-section="2">t</div>'
+
+
+def test_script_inside_section_is_dropped():
+    out = sanitize_markdown_html('<div data-section="1"><script>alert(1)</script><p>ok</p></div>')
+    assert "script" not in out and "alert" not in out
+    assert out == '<div data-section="1"><p>ok</p></div>'
+
+
+def test_table_sanitizer_does_not_keep_section_div():
+    assert sanitize_table('<div data-section="1"><table><tr><td>v</td></tr></table></div>') == \
+        "<table><tr><td>v</td></tr></table>"
+
+
+def test_rowspan_still_kept_on_table_cells_only():
+    out = sanitize_markdown_html('<table><tr><td rowspan="2">v</td></tr></table>')
+    assert '<td rowspan="2">v</td>' in out
+    assert "rowspan" not in sanitize_markdown_html('<div rowspan="2">v</div>')

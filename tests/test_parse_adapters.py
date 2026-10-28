@@ -118,6 +118,12 @@ def test_pymupdf_adapter_native(native_page):
     x0, y0, x1, y1 = table.bbox
     assert 80 <= x0 < x1 <= 440 and 300 <= y0 < y1 <= 480  # inside the ruled grid (2 px per point)
     assert not any("c11" in t.text for t in by_type.get("text", []))  # table cells are not repeated as text
+    # each non-empty cell is also emitted as its own fine-grained `cell` block with its own box
+    cells = by_type["cell"]
+    c11 = next(c for c in cells if c.text == "c11")
+    assert c11.engine == "pymupdf" and c11.label == "table_cell"
+    cx0, cy0, cx1, cy1 = c11.bbox
+    assert x0 <= cx0 < cx1 <= x1 and y0 <= cy0 < cy1 <= y1  # the cell sits inside the table box
     (img,) = by_type["image"]
     assert img.bbox == pytest.approx([440, 80, 560, 200], abs=2)
     assert any(abs((d.bbox[0] + d.bbox[2]) / 2 - 200) < 6 for d in by_type["drawing"])  # the circle
@@ -176,3 +182,23 @@ def test_pymupdf_adapter_on_rotated_page(tmp_path):
     assert 0 <= b.bbox[0] < b.bbox[2] <= 200 and 0 <= b.bbox[1] < b.bbox[3] <= 300
     # the text sits left of x=100 and above y=150 on the unrotated page; after a 90 degree turn it is in the upper right
     assert b.bbox[0] > 100 and b.bbox[3] < 150
+
+
+def test_table_grid_prefers_clipped_page_text_over_extract_when_only_spacing_differs():
+    """`table.extract()` can drop word gaps ("Thisisthe") and move a "." to its own line; the clipped
+    page text has the right spacing. Different characters (neighbour glyph in the clip) keep extract()."""
+    from docparse.parse.adapters.pymupdf import _table_grid
+
+    class Row:
+        cells = [(0, 0, 10, 10), (10, 0, 20, 10)]
+
+    class Table:
+        rows = [Row()]
+        def extract(self):
+            return [["Thisisthe regulator Asuitable\n.", "abc"]]
+
+    class Page:
+        def get_text(self, _mode, clip):
+            return {0: "This is the regulator. A suitable\n", 10: "abc X"}[int(clip.x0)]
+
+    assert _table_grid(Page(), Table()) == [["This is the regulator. A suitable", "abc"]]

@@ -19,6 +19,8 @@ def render_narrative_block(block: Block) -> str:
     text = (block.text or block.markdown or "").strip()
     if not text:
         return ""
+    if block.type == "table":  # a pymupdf table no visual block covers, see enrich/blocks.py
+        return (html_table_to_markdown(block.html) if block.html else "") or text
     if block.type == "title":
         return f"### {text}"
     if block.type == "caption":
@@ -110,13 +112,19 @@ def html_table_to_markdown(table_html: str) -> str:
 def overlapping_fragments(
     target_bbox: list[float], candidates: list[Block], min_overlap_ratio: float = 0.3,
 ) -> list[str]:
-    """Text of every block in `candidates` whose box overlaps `target_bbox` by at least
-    `min_overlap_ratio` of the *smaller* of the two boxes' area -- a block that mostly sits
-    inside the visual block counts even if it pokes out a little (see design.md "Rohtext-Liste:
-    Bbox-Overlap-Heuristik"). Deduplicated, reading order (top-to-bottom, left-to-right). This
-    is geometry only, no claim that a fragment semantically belongs to the block."""
+    """Text of every block in `candidates` at least `min_overlap_ratio` of whose *own* box lies
+    inside `target_bbox` -- i.e. the fragment sits (mostly) inside the visual block, even if it
+    pokes out a little. Deduplicated, reading order (top-to-bottom, left-to-right). Geometry only,
+    no claim that a fragment semantically belongs to the block.
+
+    The ratio is measured against the fragment's own area, NOT min(fragment, target): a visual block
+    that happens to sit entirely inside one big text block (e.g. a native PDF that reports a whole
+    table as a single text blob around a figure) would otherwise pull that blob's full text in --
+    the figure is fully covered, so a smaller-box ratio is always 1.0. Dividing by the fragment's
+    own area rejects such an enclosing block (only a tiny fraction of it is inside the figure) while
+    still keeping genuine small labels that lie within the block. See design.md "Rohtext-Liste:
+    Bbox-Overlap-Heuristik" and the risk noted there."""
     tx0, ty0, tx1, ty1 = target_bbox
-    target_area = max(0.0, tx1 - tx0) * max(0.0, ty1 - ty0)
     seen: set[str] = set()
     hits: list[tuple[float, float, str]] = []
     for b in candidates:
@@ -124,17 +132,58 @@ def overlapping_fragments(
         if not text:
             continue
         x0, y0, x1, y1 = b.bbox
-        ix0, iy0 = max(tx0, x0), max(ty0, y0)
-        ix1, iy1 = min(tx1, x1), min(ty1, y1)
-        inter = max(0.0, ix1 - ix0) * max(0.0, iy1 - iy0)
-        if inter <= 0:
-            continue
-        own_area = max(0.0, x1 - x0) * max(0.0, y1 - y0)
-        areas = [a for a in (target_area, own_area) if a > 0]
-        if not areas or inter / min(areas) < min_overlap_ratio:
+        if _own_overlap_ratio(target_bbox, b.bbox) < min_overlap_ratio:
             continue
         if text not in seen:
             seen.add(text)
             hits.append((y0, x0, text))
     hits.sort()
     return [t for _, _, t in hits]
+
+
+def _own_overlap_ratio(target_bbox: list[float], own_bbox: list[float]) -> float:
+    """Fraction of `own_bbox`'s area that lies inside `target_bbox` (0.0 if they do not overlap)."""
+    tx0, ty0, tx1, ty1 = target_bbox
+    x0, y0, x1, y1 = own_bbox
+    inter = max(0.0, min(tx1, x1) - max(tx0, x0)) * max(0.0, min(ty1, y1) - max(ty0, y0))
+    own_area = max(0.0, x1 - x0) * max(0.0, y1 - y0)
+    return inter / own_area if own_area > 0 else 0.0
+
+
+def assign_fragment_boxes(
+    target_bboxes: list[list[float]], candidates: list[Block], min_overlap_ratio: float = 0.3,
+) -> list[list[tuple[str, list[float]]]]:
+    """Exclusive assignment of found texts to visual blocks, keeping each fragment's own box (for the
+    viewer's section-to-layout links). One list per target, aligned to `target_bboxes`, deduplicated
+    by text (the first occurrence's box is kept) and in reading order. Rule and tie-break: see
+    `assign_fragments`."""
+    buckets: list[list[tuple[float, float, str, list[float]]]] = [[] for _ in target_bboxes]
+    seen: list[set[str]] = [set() for _ in target_bboxes]
+    for b in candidates:
+        text = (b.text or "").strip()
+        if not text:
+            continue
+        best_idx, best_ratio = -1, min_overlap_ratio
+        for i, target in enumerate(target_bboxes):
+            ratio = _own_overlap_ratio(target, b.bbox)
+            if ratio > best_ratio:  # strictly greater: first target keeps a tie
+                best_idx, best_ratio = i, ratio
+        if best_idx < 0:
+            continue
+        x0, y0, x1, y1 = b.bbox
+        if text not in seen[best_idx]:
+            seen[best_idx].add(text)
+            buckets[best_idx].append((y0, x0, text, list(b.bbox)))
+    return [[(t, box) for _, _, t, box in sorted(bucket, key=lambda e: e[:3])] for bucket in buckets]
+
+
+def assign_fragments(
+    target_bboxes: list[list[float]], candidates: list[Block], min_overlap_ratio: float = 0.3,
+) -> list[list[str]]:
+    """Exclusive version of `overlapping_fragments` over several visual blocks at once: each candidate
+    text is assigned to AT MOST ONE target -- the one whose box it sits in most (highest own-area
+    overlap ratio, provided that ratio clears `min_overlap_ratio`). Returns one fragment list per
+    target, aligned to `target_bboxes`, each deduplicated and in reading order. This prevents the
+    same found text from showing up under two overlapping components. On a tie the earliest target
+    in the list wins (stable). Geometry only, no claim of semantic membership."""
+    return [[t for t, _ in frags] for frags in assign_fragment_boxes(target_bboxes, candidates, min_overlap_ratio)]
