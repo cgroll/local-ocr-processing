@@ -34,6 +34,15 @@ from .document import DIGEST_SUBDIR
 
 MAX_NEW_TOKENS = 220
 MIN_OUTPUT_CHARS = 15
+# Same empirical cliff as document_embed.FULLTEXT_CHAR_LIMIT (forward-pass OOM on an 8 GB card
+# well before any model-specific context limit), but discovered independently here: this
+# project's own 73-document dataset tops out at 39,398 digest chars, so generate_summary() never
+# needed a cap. A consuming project (bezahlbarer-wohnraum) ran this over full, hundreds-of-pages
+# reports instead of 6-page samples -- digests up to ~1.97 MB -- and `search run` OOM'd inside
+# the describe model's forward pass (long-context float32 upcast) building a document summary.
+# Capped to the same 20,000 chars as the fulltext embedding: the summary covers the document's
+# beginning only, not the whole thing, which matches that already-documented trade-off.
+MAX_INPUT_CHARS = 20_000
 MAX_REPEATED_WORD_SHARE = 0.3  # a single word making up >30% of a >=20-word output is a loop
 _PROMPT_ECHO_MARKERS = ("ENDDOCUMENTCONTENT", "DOCUMENTCONTENT(AUTOMATICALLYEXTRACTED")
 # Catches character/pattern-level loops that the word-based check above misses because there's
@@ -128,7 +137,7 @@ def parse_title_summary(raw_output: str, fallback_title: str) -> tuple[str, str]
 
 def generate_summary(manager: ModelManager, doc_id: str, digest_text: str) -> DocumentSummary:
     handle = manager.load("describe")
-    prompt = PROMPT_TEMPLATE.format(content=digest_text)
+    prompt = PROMPT_TEMPLATE.format(content=digest_text[:MAX_INPUT_CHARS])
     raw = handle.generate_text(prompt, max_new_tokens=MAX_NEW_TOKENS)
     if is_degenerate(raw):
         return DocumentSummary(doc_id, doc_id, "", status="degenerate")
