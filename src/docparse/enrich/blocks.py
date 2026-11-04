@@ -1,7 +1,7 @@
 """Pure building blocks for page enrichment: text source choice, narrative text, visual-block
 selection (figure/chart/table crops) and the decorative-icon filter. No model calls here -- see
 `describe.py` for VLM descriptions."""
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from PIL import Image
@@ -192,7 +192,24 @@ def narrative_blocks(source: PageResult, visual_bboxes: list[list[float]], layou
             [("n", b, b.bbox) for b in ordered], [("n", b, b.bbox) for b in candidates if b.type == "table"],
         )
         ordered = [payload for _, payload, _ in merged]
-    return ordered
+    return _retype_titles(ordered, layout) if layout is not None else ordered
+
+
+TITLE_OVERLAP_MIN = 0.5
+RETYPABLE_TYPES = {"text", "line"}
+
+
+def _retype_titles(blocks: list, layout: PageResult) -> list:
+    """pymupdf/OCR blocks are all typed `text`/`line`; only the layout model knows which box is a
+    heading. A text block that lies (>= half of its area) inside a layout `title` box becomes a
+    `title` block, so the digest renders it as a `###` heading. Copies, never mutates the source."""
+    titles = [r.bbox for r in layout.blocks if r.type == "title"]
+    if not titles:
+        return blocks
+    return [
+        replace(b, type="title") if b.type in RETYPABLE_TYPES and any(_inside(b.bbox, t) >= TITLE_OVERLAP_MIN for t in titles) else b
+        for b in blocks
+    ]
 
 
 def narrative_text(

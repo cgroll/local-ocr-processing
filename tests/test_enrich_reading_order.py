@@ -60,3 +60,21 @@ def test_too_few_blocks_per_column_is_not_reordered():
 def test_zero_page_dimensions_fall_back_safely():
     interleaved, _, _ = _two_columns()
     assert reading_order(interleaved, 0, 0) == sorted(interleaved, key=lambda b: b.order)
+
+
+def test_text_block_inside_layout_title_becomes_title_and_source_is_untouched():
+    """pymupdf only emits `text`; the layout model's `title` boxes are the only heading signal.
+    Retyping makes the digest render `### Heading` (found: 0 headings in 21 real digests)."""
+    from docparse.enrich.blocks import narrative_blocks
+    from docparse.parse.format import PageResult
+
+    heading = Block(type="text", label="text", bbox=[100, 100, 600, 140], engine="pymupdf", text="2 Wohnungsmarkt")
+    body = Block(type="text", label="text", bbox=[100, 160, 600, 400], engine="pymupdf", text="Fließtext " * 20)
+    source = PageResult("d", 1, 150, 1275, 1650, "pymupdf", blocks=[heading, body])
+    layout = PageResult("d", 1, 150, 1275, 1650, "layout", blocks=[
+        Block(type="title", label="paragraph_title", bbox=[95, 95, 610, 145], engine="layout"),
+        Block(type="text", label="text", bbox=[95, 155, 610, 410], engine="layout"),
+    ])
+    out = narrative_blocks(source, [], layout)
+    assert [b.type for b in out] == ["title", "text"]
+    assert heading.type == "text"  # original block not mutated
