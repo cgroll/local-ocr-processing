@@ -214,6 +214,57 @@ Aktueller Gesamt-Index: 2385 Vektoren (405 Seiten-Bild, 399 Seiten-Text, 619 Blo
 | `drainage area gaging station` | **Echter Lückenfall:** Die Phrase steht wörtlich im narrativen Text von `gd1-001147` S. 1, aber dessen Seiten-Text-Embedding liegt in den Top-5 der Vektorsuche nicht vorne (Rang hinter mehreren unrelated Datenblatt-Tabellen). Genau die Art Fehltreffer, die `retrieval-eval` systematisch messen soll. |
 | `zzyxqwerty blorple nonsense term` | Keine Volltext-Treffer (korrekt), aber Vektorsuche liefert trotzdem "nächste" Treffer mit moderater Ähnlichkeit (~0.70) -- erwartetes Verhalten einer reinen Nearest-Neighbor-Suche ohne Schwellenwert, kein Bug. |
 
+## Einzel-PDF nach Markdown (`docparse.pdf_ingest`)
+
+Ein PDF rein, Markdown plus Medien raus -- ohne Manifest und ohne globalen Zustand unter `data/`. Gebaut für den Knowledge Hub (`kh-ingestion` startet den Befehl als Subprozess und übergibt nur Pfade), aber eigenständig nutzbar. Wiederverwendet werden die reinen Bausteine aus `parse` (Engines, Zwischenformat), `enrich.blocks` (Lesereihenfolge, Figur-Kandidaten) und `digest.markdown` (Tabellen); das VLM `describe` wird nicht gebraucht.
+
+```bash
+uv run python -m docparse.pdf_ingest --pdf datei.pdf --out ordner                 # alles, mit Layout-Modell
+uv run python -m docparse.pdf_ingest --pdf datei.pdf --out ordner --no-layout     # nur Textlayer (CPU)
+uv run python -m docparse.pdf_ingest --pdf datei.pdf --out ordner --stage extract # zwei Schritte, siehe unten
+uv run python -m docparse.pdf_ingest --pdf datei.pdf --out ordner --stage render --toc toc_raw.json
+```
+
+**Vertrag** (steht auch im Docstring von `pdf_ingest/__main__.py`):
+
+| Stufe | Tut | Schreibt |
+|---|---|---|
+| `extract` | Textlayer lesen, Überschriften aus Schriftgrößen, Scan-Seiten erkennen (< 20 Zeichen und ein Bild), Layout-Modell auf allen Seiten, OCR nur auf Scan-Seiten, ein Modell zur Zeit | `OUT/toc_candidates.json`, `OUT/_work/` |
+| `render` | Markdown zusammensetzen, Inhaltsverzeichnis wählen und prüfen | `OUT/document.md`, `OUT/media/*`, `OUT/run.json` |
+| `all` (Standard) | `extract` + `render` ohne `--toc` (Lesezeichen, sonst Überschriften) | alles |
+
+- `document.md`: optional `## Inhaltsverzeichnis` (+ `## Abbildungen`, `## Tabellen`), dann je PDF-Seite genau eine Zeile `## Seite N` (mit ` · gedruckt S. M`, wenn die gedruckte Seitenzahl sicher erkannt ist), darunter Überschriften als `###`..`#####`, Absätze als je eine Zeile, Bilder und Ausschnitte als `![..](media/..)`. Kopf- und Fußzeilen entfallen. Zusätzlich `media/cover.jpg` (Seite 1, 600 px breit, für Kachel-Vorschaubilder).
+- Inhaltsverzeichnis ab 10 Seiten, Rangfolge: PDF-Lesezeichen, gedrucktes Verzeichnis (von einem Modell aus `toc_candidates.json` gelesen, hier nur geprüft), erkannte Überschriften. Jeder Eintrag wird gegen den Text der Seite und ±2 Nachbarseiten geprüft, der Versatz gedruckt → PDF je Art und Abschnitt gemessen; unbestätigte Einträge tragen `?`, unter 50 % bestätigt wird die Stufe verworfen.
+- `--toc` Datei: `{"printed_toc": [Eintrag]|null, "toc_pages": [PDF-Seite]|null, "headings": [Eintrag]|null, "model": "..."}` mit `Eintrag = {number, title, printed_page (headings: pdf_page), level, kind: chapter|figure|table}`.
+- `run.json`: `pages`, `title`, `author`, `created`, `stage` (`text`|`layout`), `layout_error`, `ocr_pages`, `toc {source, entries, confirmed, model}`, `printed_pages`, `versions`, `seconds`.
+- Exit-Codes: 0 ok, 2 Eingabe abgelehnt (kein PDF, verschlüsselt, über 500 Seiten), 1 sonstiger Fehler. Fortschritt auf stderr (`progress ...`).
+- Fällt das Layout-Modell aus, entsteht trotzdem ein Ergebnis aus dem Textlayer (`stage: text`, `layout_error`). Ohne Layout gibt es eingebettete Rasterbilder statt Ausschnitten; mit Layout Ausschnitte für Abbildung, Diagramm und Tabelle (Tabellen zusätzlich als Markdown-Tabelle, wenn PyMuPDF ein Gitter findet).
+
+**Stichprobe an echten Dokumenten** (Layout an, RTX 3070, Seitenbild/Ausschnitt gegen das Markdown geprüft, soweit genannt):
+
+| Dokument | Seiten | Zeit | Beobachtung |
+|---|---|---|---|
+| `ds-lm317` (Datenblatt) | 45 | 49 s | Lesezeichen als Verzeichnis (64 Einträge, alle bestätigt). Überschriften, Listen (je Aufzählungspunkt eine Zeile), Abbildungsausschnitte mit Unterschrift und „Text im Bild“ (Bauteilwerte wie `R1 240 W`) sauber. Die Tabellen-Ausschnitte stimmen (S. 8 gegen das Bild verglichen); die Markdown-Tabelle daneben vertauscht bei verbundenen Zellen Werte (z. B. mehrere Werte in einer Zelle) -- deshalb steht der Ausschnitt immer dabei und unter der Tabelle ein Hinweis. |
+| `nist-nist-ir-6072` (Bericht, älterer Scan mit OCR-Textlayer) | 14 | 43 s | Seiten ohne Textlayer (3 von 14) per OCR. Der Textlayer des Scans hat uneinheitliche Schriftgrößen: früher wurde jede Zeile zur Überschrift, jetzt gelten Seiten mit mehr als 40 % „Überschriften“ als ungeprüft (keine Überschriften auf der Seite). |
+| `nist-nbs-tn-865` (Bericht, älterer Scan) | 78 | 135 s | Textlayer, 50 gedruckte Seitenzahlen erkannt. Ohne Lesezeichen und ohne Modell besteht das Verzeichnis aus erkannten Überschriften (79 Einträge) und enthält OCR-Rauschen; das ist der Fall, für den das Modell die Überschriften ordnet. |
+| `bs-pdp-8-memory-schematics-jun70` (Scans, Schaltpläne) | 20 | 88 s | Alle 20 Seiten per OCR (~4 s je Seite mit Layout). Text in Plänen ist als „Text im Bild“ gesammelt und verrauscht; Schaltpläne sind kein Ziel. Die Lesezeichen waren nur Dateinamen (`pdp8_mem0001_a`) und werden jetzt verworfen. |
+| `gd1-001147` (Pegelbericht, Zahlentabellen) | 4 | 16 s | Fließtext sauber, Tabelle als Ausschnitt plus Markdown mit zusammengezogenen Zeilen (mehrere Tage pro Zelle). Hier hilft nur das Bild oder die PDF-Seite. |
+
+Laufzeit mit Layout grob 1 s je Textseite und 4 s je OCR-Seite, VRAM-Spitze ~0,8 GB (Layout) bzw. ~1,4 GB (OCR), ein Modell zur Zeit. Bekannte Grenzen: Tabellenzellen mit verbundenen Zellen, Zeilen-OCR-Rauschen in Schaltplänen, Silbentrennung über Blockgrenzen (OCR-Textlayer mit einer Zeile je Block) bleibt getrennt.
+
+**Inhaltsverzeichnis, gemessen** an den 21 Dokumenten aus `~/research/bezahlbarer-wohnraum/kb` (dort von Hand/LLM geprüft: 11 mit Verzeichnis, 10 ohne; nur gelesen). Zugeordnet wird grob: Titelanfang (25 Zeichen) gleich und PDF-Seite ±1; das ist eine grobe Metrik, besonders wenn Lesezeichen anders benannt sind als das gedruckte Verzeichnis. Modell war der SDK-Standard (`claude-haiku-5-5`).
+
+| Weg | Dokumente | Ergebnis |
+|---|---|---|
+| Lesezeichen (kein Modell) | `bamf-migrationsbericht` (303 S.), `iab-regionale-beschaeftigung`, `oeko-diakonie-klimaneutraler-wohnraum`, `bbsr-nebenkosten-immobilienerwerb` | 90/90, 20/20, 25/25, 35/40 Referenzeinträge getroffen, alle Einträge bestätigt |
+| gedrucktes Verzeichnis (Claude liest, Code prüft) | `hbs-wohnversorgung-2021` (234 S., Verzeichnis über 9 Seiten mit Abbildungs- und Tabellenlisten), `nist-nbs-tn-865` (78 S., Scan mit OCR-Textlayer) | 75/75 Referenzeinträge, alle 75 bestätigt (0,12 $); 70 Einträge, 69 bestätigt (Verzeichnis liegt auf PDF-Seite 13–14, gedruckte Seite 1 = PDF-Seite 15) |
+| Überschriften (Rückfall) | `empirica`, `pestel-wohn-monitor`, `bmwsb-gebaeudetyp-e` u. a. | Referenzverzeichnisse nicht getroffen (0/11, 0/45, 4/26): Der Rückfall liefert Überschriften, kein Inhaltsverzeichnis. Beim grafischen Pestel-Bericht fand das Modell kein gedrucktes Verzeichnis. |
+| Dokumente ohne Verzeichnis laut Referenz | 10 | Das Modell erfand nie ein gedrucktes Verzeichnis (`printed_toc` kam dort nie vor). Bei `bbsr-reurbanisierung`, `bbsr-zurueck-in-die-stadt`, `destatis-waegungsschema` u. a. kamen die Einträge aus Lesezeichen. |
+
+Befunde, die zu Änderungen führten: (1) Das Modell ließ bei `hbs` die Kapitel 1–6 aus, weil die erste Verzeichnisseite nicht als Kandidat galt: jetzt kommen die zwei bis drei Seiten vor dem ersten Treffer dazu. (2) Text-Seiten mit allgemeinen Titeln (`Systems`, `Introduction`) galten bei der Prüfung als Verzeichnisseiten und löschten echte Fundstellen: jetzt nennt das Modell die Verzeichnisseiten (`toc_pages`). (3) Drei Lesezeichen bei 26 gedruckten Einträgen (`bmwsb-gebaeudetyp-e`) und Lesezeichen, die nur Dateinamen sind (`pdp8_mem0001_a`), zählen nicht als Verzeichnis. (4) Kosten je Aufruf: zuerst 0,09–0,11 $ (Text der ersten 15 Seiten), nach der Auswahl der Seiten, die wie eine Titelliste aussehen, 0,003–0,02 $ für die meisten Dokumente und 0,12–0,20 $ für den 234-Seiten-Bericht mit langem Verzeichnis.
+
+Tests: `tests/test_pdf_ingest_text.py`, `tests/test_pdf_ingest_stages.py` (synthetische PDFs, Attrappe-Engines, keine GPU).
+
 ## Setup
 
 ```bash
